@@ -18,6 +18,10 @@ class AddResourceButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final adaptiveTextColor = (backgroundColor == null || backgroundColor == AppColors.primary)
+        ? AppColors.textOnPrimary
+        : Colors.white;
+
     return FilledButton.icon(
       onPressed: onPressed,
       style: FilledButton.styleFrom(
@@ -28,11 +32,11 @@ class AddResourceButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppBorderRadius.md),
         ),
       ),
-      icon: Icon(icon, size: 16, color: Colors.white),
+      icon: Icon(icon, size: 16, color: adaptiveTextColor),
       label: Text(
         label,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: adaptiveTextColor,
           fontWeight: FontWeight.w400,
           fontSize: 13,
         ),

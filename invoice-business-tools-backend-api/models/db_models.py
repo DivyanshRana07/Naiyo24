@@ -21,6 +21,9 @@ class Invoice(Base):
     transaction_type = Column(String(50), nullable=False)
     invoice_type = Column(String(20), default="regular", nullable=False)  # regular or proforma
     notes = Column(String(500), nullable=True)
+    subtitle = Column(String(200), nullable=True)
+    logo = Column(String, nullable=True)
+    settings = Column(JSON, nullable=True)
 
     business_details = Column(JSON, nullable=False)
     customer_details = Column(JSON, nullable=False)
@@ -256,6 +259,10 @@ class Quotation(Base):
     valid_until = Column(Date, nullable=True)
     payment_terms = Column(String(150), nullable=True)
     currency = Column(String(20), default="INR")
+    
+    subtitle = Column(String(200), nullable=True)
+    logo = Column(String, nullable=True)
+    settings = Column(JSON, nullable=True)
 
     total = Column(Numeric(12, 2), nullable=False)
 

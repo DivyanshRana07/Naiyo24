@@ -1,6 +1,91 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:naiyo24_business_tool/models/invoice_model.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
+
+String _formatCurrency(double val, Map<String, dynamic>? settings) {
+  final formatSettings = settings?['format'] as Map<String, dynamic>?;
+  final symbol = formatSettings?['currencySymbol'] as String? ?? '₹';
+  final decimals = formatSettings?['decimals'] as int? ?? 2;
+  return '$symbol${val.toStringAsFixed(decimals)}';
+}
+
+class InvoiceHeader extends StatelessWidget {
+  const InvoiceHeader({super.key, required this.invoice});
+  final InvoiceModel invoice;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasLogo = invoice.logo != null && invoice.logo!.isNotEmpty;
+    ImageProvider? imageProvider;
+    if (hasLogo) {
+      try {
+        final pureBase64 = invoice.logo!.contains(',')
+            ? invoice.logo!.substring(invoice.logo!.indexOf(',') + 1)
+            : invoice.logo!;
+        imageProvider = MemoryImage(base64Decode(pureBase64));
+      } catch (_) {}
+    }
+
+    final hasSubtitle = invoice.subtitle != null && invoice.subtitle!.isNotEmpty;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  invoice.invoiceType == 'proforma' ? 'PROFORMA INVOICE' : 'TAX INVOICE',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  invoice.invoiceNo,
+                  style: AppTextStyles.h1.copyWith(fontSize: 24),
+                ),
+                if (hasSubtitle) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    invoice.subtitle!,
+                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                  ),
+                ],
+                if (invoice.settings?['gst']?['gstin'] != null &&
+                    invoice.settings?['gst']?['gstin'].toString().isNotEmpty == true) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'GSTIN: ${invoice.settings?['gst']?['gstin']}',
+                    style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (imageProvider != null) ...[
+            const SizedBox(width: AppSpacing.md),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 70, maxWidth: 120),
+              child: Image(image: imageProvider, fit: BoxFit.contain),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
 
 class LineItemsTable extends StatelessWidget {
   const LineItemsTable({super.key, required this.invoice});
@@ -31,74 +116,48 @@ class LineItemsTable extends StatelessWidget {
   }
 
   Widget _buildTable() {
+    final columnsSettings = invoice.settings?['columns'] as Map<String, dynamic>? ?? {
+      'hsn': true,
+      'discount': true,
+      'gst': true,
+      'unit': true,
+      'category': true,
+    };
+    final gstEnabled = invoice.settings?['gst']?['enabled'] as bool? ?? true;
+
+    final showHsn = columnsSettings['hsn'] ?? true;
+    final showDiscount = columnsSettings['discount'] ?? true;
+    final showGst = (columnsSettings['gst'] ?? true) && gstEnabled;
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 600),
-        child: Table(
-          columnWidths: const {
-            0: FlexColumnWidth(4),
-            1: FlexColumnWidth(1),
-            2: FlexColumnWidth(2),
-            3: FlexColumnWidth(2),
-            4: FlexColumnWidth(2),
-          },
-          children: [
-            TableRow(
-              decoration: BoxDecoration(color: AppColors.background),
-              children: [
-                _th('Item Description'),
-                _th('Qty'),
-                _th('Price'),
-                _th('GST %'),
-                _th('Total', align: TextAlign.right),
-              ],
-            ),
-            ...invoice.lineItems.map((item) {
-              return TableRow(
-                decoration: BoxDecoration(
-                  border: Border(bottom: BorderSide(color: AppColors.border)),
-                ),
-                children: [
-                  _td(item.name),
-                  _td(item.qty.toStringAsFixed(0)),
-                  _td('₹${item.rate.toStringAsFixed(2)}'),
-                  _td('${item.gstPercent.toStringAsFixed(0)}%'),
-                  _td('₹${item.totalAmount.toStringAsFixed(2)}',
-                      align: TextAlign.right, bold: true),
-                ],
-              );
-            }),
+        child: DataTable(
+          columnSpacing: 20,
+          headingRowColor: WidgetStateProperty.all(AppColors.background),
+          columns: [
+            const DataColumn(label: Text('Item Description')),
+            if (showHsn) const DataColumn(label: Text('HSN/SAC')),
+            const DataColumn(label: Text('Qty'), numeric: true),
+            const DataColumn(label: Text('Price'), numeric: true),
+            if (showDiscount) const DataColumn(label: Text('Discount'), numeric: true),
+            if (showGst) const DataColumn(label: Text('GST %'), numeric: true),
+            const DataColumn(label: Text('Total'), numeric: true),
           ],
+          rows: invoice.lineItems.map((item) {
+            return DataRow(cells: [
+              DataCell(Text(item.name)),
+              if (showHsn) DataCell(Text(item.code.isNotEmpty ? item.code : '-')),
+              DataCell(Text(item.qty.toStringAsFixed(0))),
+              DataCell(Text(_formatCurrency(item.rate, invoice.settings))),
+              if (showDiscount) DataCell(Text('${item.discountPercent}%')),
+              if (showGst) DataCell(Text('${item.gstPercent}%')),
+              DataCell(Text(_formatCurrency(item.totalAmount, invoice.settings),
+                  style: const TextStyle(fontWeight: FontWeight.bold))),
+            ]);
+          }).toList(),
         ),
-      ),
-    );
-  }
-
-  Widget _th(String text, {TextAlign align = TextAlign.left}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Text(
-        text,
-        style: AppTextStyles.caption.copyWith(
-          color: AppColors.textSecondary,
-          fontWeight: FontWeight.w400,
-        ),
-        textAlign: align,
-      ),
-    );
-  }
-
-  Widget _td(String text, {TextAlign align = TextAlign.left, bool bold = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Text(
-        text,
-        style: AppTextStyles.bodyMedium.copyWith(
-          color: AppColors.textPrimary,
-          fontWeight: bold ? FontWeight.w400 : FontWeight.w400,
-        ),
-        textAlign: align,
       ),
     );
   }
@@ -230,7 +289,7 @@ class CustomerCard extends StatelessWidget {
                 _row(Icons.phone_rounded, invoice.customerMobile),
                 if (invoice.customerAddress != null)
                   _row(Icons.location_on_rounded, invoice.customerAddress!),
-                if (invoice.customerGst != null)
+                if (invoice.customerGst != null && invoice.customerGst!.isNotEmpty)
                   _row(
                       Icons.business_rounded, 'GSTIN: ${invoice.customerGst!}'),
               ],
@@ -277,16 +336,17 @@ class FinancialSummary extends StatelessWidget {
               style: AppTextStyles.labelLarge
                   .copyWith(fontWeight: FontWeight.w400)),
           const SizedBox(height: AppSpacing.md),
-          _row('Sub Total', '₹${invoice.subTotal.toStringAsFixed(2)}'),
+          _row('Sub Total', _formatCurrency(invoice.subTotal, invoice.settings)),
           if (invoice.totalDiscount > 0)
-            _row('Discount', '- ₹${invoice.totalDiscount.toStringAsFixed(2)}',
+            _row('Discount', '- ${_formatCurrency(invoice.totalDiscount, invoice.settings)}',
                 color: AppColors.success),
-          _row('GST', '₹${invoice.totalGst.toStringAsFixed(2)}'),
+          if (invoice.settings?['gst']?['enabled'] != false)
+            _row('GST', _formatCurrency(invoice.totalGst, invoice.settings)),
           if (invoice.roundOff != 0)
             _row('Round Off',
-                '${invoice.roundOff >= 0 ? '+' : ''}₹${invoice.roundOff.toStringAsFixed(2)}'),
+                '${invoice.roundOff >= 0 ? '+' : ''}${_formatCurrency(invoice.roundOff, invoice.settings)}'),
           Divider(color: AppColors.border, height: AppSpacing.xl),
-          _row('Grand Total', '₹${invoice.grandTotal.toStringAsFixed(2)}',
+          _row('Grand Total', _formatCurrency(invoice.grandTotal, invoice.settings),
               bold: true, color: AppColors.primary),
         ],
       ),
@@ -304,7 +364,7 @@ class FinancialSummary extends StatelessWidget {
                   .copyWith(color: AppColors.textSecondary)),
           Text(value,
               style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: bold ? FontWeight.w400 : FontWeight.w400,
+                  fontWeight: bold ? FontWeight.bold : FontWeight.normal,
                   color: color ?? AppColors.textPrimary,
                   fontSize: bold ? 16 : 14)),
         ],
@@ -366,12 +426,12 @@ class PaymentPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          _amtRow('Invoice Amount', '₹${invoice.grandTotal.toStringAsFixed(2)}',
+          _amtRow('Invoice Amount', _formatCurrency(invoice.grandTotal, invoice.settings),
               AppColors.textPrimary),
-          _amtRow('Amount Paid', '₹${invoice.paidAmount.toStringAsFixed(2)}',
+          _amtRow('Amount Paid', _formatCurrency(invoice.paidAmount, invoice.settings),
               AppColors.success),
           Divider(color: AppColors.border, height: AppSpacing.lg),
-          _amtRow('Balance Due', '₹${invoice.dueAmount.toStringAsFixed(2)}',
+          _amtRow('Balance Due', _formatCurrency(invoice.dueAmount, invoice.settings),
               invoice.dueAmount > 0 ? AppColors.error : AppColors.success,
               bold: true),
         ],
@@ -390,7 +450,7 @@ class PaymentPanel extends StatelessWidget {
                   .copyWith(color: AppColors.textSecondary)),
           Text(value,
               style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: bold ? FontWeight.w400 : FontWeight.w400,
+                  fontWeight: bold ? FontWeight.bold : FontWeight.normal,
                   color: color,
                   fontSize: bold ? 15 : 14)),
         ],

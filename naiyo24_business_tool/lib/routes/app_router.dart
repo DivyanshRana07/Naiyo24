@@ -22,6 +22,8 @@ import 'package:naiyo24_business_tool/screens/quotations_screen.dart'
     deferred as quotations;
 import 'package:naiyo24_business_tool/screens/create_quotation_screen.dart'
     deferred as create_quotation_screen;
+import 'package:naiyo24_business_tool/screens/quotation_detail_screen.dart'
+    deferred as quotation_detail_screen;
 import 'package:naiyo24_business_tool/screens/items_screen.dart'
     deferred as items;
 import 'package:naiyo24_business_tool/screens/clients_screen.dart'
@@ -244,6 +246,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
               transitionsBuilder: _slideTransition,
             ),
+          ),
+          GoRoute(
+            path: ':id',
+            name: 'quotation-detail',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: DeferredWidget(
+                  load: quotation_detail_screen.loadLibrary,
+                  builder: (context) =>
+                      quotation_detail_screen.QuotationDetailScreen(quotationId: id),
+                ),
+                transitionsBuilder: _slideTransition,
+              );
+            },
           ),
         ],
       ),

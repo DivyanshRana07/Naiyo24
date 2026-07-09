@@ -168,7 +168,7 @@ class _ActivityCardState extends State<ActivityCard> {
           ),
           title: Text(
             widget.title,
-            style: AppTextStyles.labelLarge.copyWith(color: Colors.black87),
+            style: AppTextStyles.labelLarge.copyWith(color: AppColors.textPrimary),
           ),
           subtitle: Text(
             widget.subtitle,

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:typed_data';
@@ -41,4 +42,35 @@ void shareToWhatsApp({required String text}) {
   final encodedText = Uri.encodeComponent(text);
   final url = 'https://api.whatsapp.com/send?text=$encodedText';
   web.window.open(url, '_blank');
+}
+
+Future<String?> pickLogoImage() async {
+  final completer = Completer<String?>();
+  final input = web.document.createElement('input') as web.HTMLInputElement
+    ..type = 'file'
+    ..accept = 'image/*';
+
+  input.addEventListener('change', (web.Event event) {
+    final files = input.files;
+    if (files == null || files.length == 0) {
+      completer.complete(null);
+      return;
+    }
+    final file = files.item(0)!;
+    final reader = web.FileReader();
+    reader.readAsDataURL(file);
+    
+    reader.addEventListener('loadend', (web.Event ev) {
+      final result = reader.result;
+      if (result != null) {
+        // In package:web, result could be JSString, convert to Dart String
+        completer.complete(result.toString());
+      } else {
+        completer.complete(null);
+      }
+    }.toJS);
+  }.toJS);
+
+  input.click();
+  return completer.future;
 }

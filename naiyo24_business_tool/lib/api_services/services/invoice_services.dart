@@ -25,6 +25,7 @@ class InvoiceService {
   }
 
   Future<InvoiceModel> createInvoice({
+    String? invoiceNo,
     required Map<String, dynamic> businessDetails,
     required Map<String, dynamic> customerDetails,
     required List<Map<String, dynamic>> items,
@@ -35,12 +36,19 @@ class InvoiceService {
     double paidAmount = 0.0,
     double roundOff = 0.0,
     String status = 'due',
+    String? subtitle,
+    String? logo,
+    Map<String, dynamic>? settings,
   }) async {
     try {
       final payload = {
+        if (invoiceNo != null && invoiceNo.isNotEmpty) 'invoice_number': invoiceNo,
         'invoice_date': invoiceDate.toIso8601String().split('T').first,
         if (dueDate != null) 'due_date': dueDate.toIso8601String().split('T').first,
         'notes': notes,
+        'subtitle': subtitle,
+        'logo': logo,
+        'settings': settings,
         'business': businessDetails,
         'customer': customerDetails,
         'items': items,
@@ -166,6 +174,9 @@ class InvoiceService {
       roundOff: toDouble(json['round_off']),
       notes: json['notes'] as String?,
       status: InvoiceStatus.values.byName(json['status'] as String? ?? 'due'),
+      subtitle: json['subtitle'] as String?,
+      logo: json['logo'] as String?,
+      settings: json['settings'] as Map<String, dynamic>?,
     );
   }
 }

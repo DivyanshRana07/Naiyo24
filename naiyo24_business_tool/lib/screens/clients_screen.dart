@@ -109,10 +109,10 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.md)),
             ),
-            icon: const Icon(Icons.add, size: 18, color: Colors.white),
+            icon: Icon(Icons.add, size: 18, color: AppColors.textOnPrimary),
             label: Text('Add New Client',
                 style:
-                    AppTextStyles.labelLarge.copyWith(color: Colors.white)),
+                    AppTextStyles.labelLarge.copyWith(color: AppColors.textOnPrimary)),
           ),
         ],
       ),
@@ -189,7 +189,10 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
               onPressed: () => Navigator.pop(ctx),
               child: const Text('Cancel')),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.textOnPrimary,
+            ),
             onPressed: () {
               ref.read(customerNotifierProvider.notifier).deleteCustomer(c.id);
               Navigator.pop(ctx);

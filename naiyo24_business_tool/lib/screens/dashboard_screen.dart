@@ -44,11 +44,11 @@ class DashboardScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showChatSupportPopup(context),
         backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.chat_bubble_outline_rounded,
-            color: Colors.white),
-        label: const Text('Chat Support',
+        icon: Icon(Icons.chat_bubble_outline_rounded,
+            color: AppColors.textOnPrimary),
+        label: Text('Chat Support',
             style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.w400)),
+                color: AppColors.textOnPrimary, fontWeight: FontWeight.w400)),
       ),
       body: RefreshIndicator(
         onRefresh: () => ref.read(dashboardNotifierProvider.notifier).refresh(),
@@ -107,8 +107,8 @@ class _ProfileHeader extends StatelessWidget {
               backgroundColor: AppColors.primary,
               child: Text(
                 initial,
-                style: const TextStyle(
-                    color: Colors.white,
+                style: TextStyle(
+                    color: AppColors.textOnPrimary,
                     fontWeight: FontWeight.w400,
                     fontSize: 26),
               ),

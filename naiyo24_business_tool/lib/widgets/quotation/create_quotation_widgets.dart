@@ -71,10 +71,10 @@ class QuotationCustomerFormSection extends StatelessWidget {
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(AppBorderRadius.sm),
                 ),
-                child: const Center(
+                child: Center(
                   child: Text('A',
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold)),
+                          color: AppColors.textOnPrimary, fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -148,7 +148,7 @@ class QuotationCustomerFormSection extends StatelessWidget {
                   onPressed: () => context.push(AppRoutes.newClient),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.textOnPrimary,
                     minimumSize: const Size(200, 44),
                   ),
                   icon: const Icon(Icons.add_circle_outline, size: 18),

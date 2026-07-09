@@ -289,7 +289,7 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppBorderRadius.md),
         ),
-        backgroundColor: textPrimary,
+        backgroundColor: isDark ? const Color(0xFF2D3033) : const Color(0xFF1E2022),
         contentTextStyle: GoogleFonts.inter(
           color: Colors.white,
           fontSize: 14,
@@ -327,6 +327,27 @@ abstract final class AppTheme {
       iconTheme: IconThemeData(
         color: textSecondary,
         size: 20,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: background,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: isDark ? const Color(0xFF3A3F44) : const Color(0xFFE5E7EB),
+            width: 1,
+          ),
+        ),
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: textPrimary,
+        ),
+        contentTextStyle: GoogleFonts.inter(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: textSecondary,
+        ),
       ),
     );
   }

@@ -80,7 +80,7 @@ class VendorsScreen extends ConsumerWidget {
               label: const Text('Add New Vendor'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.textOnPrimary,
               padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.xl, vertical: AppSpacing.md),
               shape: RoundedRectangleBorder(

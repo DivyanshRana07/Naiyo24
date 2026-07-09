@@ -24,6 +24,15 @@ logs/
 *.log
 *.pid
 
+# SQLite development databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated status/documentation files
+SUCCESS.txt
+QUICK_START.md
+
 # Alembic generated versions can be tracked as needed.
 # Keep .env tracked in this repository as requested.
 !.env

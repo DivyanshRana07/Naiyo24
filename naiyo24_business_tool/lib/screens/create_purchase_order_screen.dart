@@ -132,7 +132,7 @@ class _CreatePurchaseOrderScreenState
     if (_selectedVendor == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: const Text('Please select a vendor'),
+            content: Text('Please select a vendor', style: TextStyle(color: AppColors.textOnPrimary)),
             backgroundColor: AppColors.error),
       );
       return;
@@ -140,7 +140,7 @@ class _CreatePurchaseOrderScreenState
     if (_titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: const Text('Please enter a title'),
+            content: Text('Please enter a title', style: TextStyle(color: AppColors.textOnPrimary)),
             backgroundColor: AppColors.error),
       );
       return;
@@ -156,7 +156,7 @@ class _CreatePurchaseOrderScreenState
       if (desc.isEmpty || qty <= 0 || price <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: const Text('Please fill all line items with valid values'),
+              content: Text('Please fill all line items with valid values', style: TextStyle(color: AppColors.textOnPrimary)),
               backgroundColor: AppColors.error),
         );
         return;
@@ -193,7 +193,7 @@ class _CreatePurchaseOrderScreenState
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Purchase Order ${_poNumberController.text} created successfully!'),
+          content: Text('Purchase Order ${_poNumberController.text} created successfully!', style: TextStyle(color: AppColors.textOnPrimary)),
           backgroundColor: AppColors.success,
         ),
       );
@@ -204,7 +204,7 @@ class _CreatePurchaseOrderScreenState
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to create purchase order: $error'),
+          content: Text('Failed to create purchase order: $error', style: TextStyle(color: AppColors.textOnPrimary)),
           backgroundColor: AppColors.error,
         ),
       );
@@ -446,10 +446,10 @@ class _CreatePurchaseOrderScreenState
                   child: _buildMetadataField(
                     label: 'Date *',
                     controller: _dateController,
-                    suffixIcon: const Icon(
+                    suffixIcon: Icon(
                       Icons.calendar_today_rounded,
                       size: 16,
-                      color: Colors.white,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ),
@@ -560,8 +560,8 @@ class _CreatePurchaseOrderScreenState
                 backgroundColor: AppColors.border,
                 child: Text(
                   email?.isNotEmpty == true ? email![0].toUpperCase() : 'N',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: AppColors.textOnPrimary,
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                   ),
@@ -905,7 +905,7 @@ class _CreatePurchaseOrderScreenState
                   onPressed: _savePO,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.textOnPrimary,
                     padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppBorderRadius.md),
@@ -949,7 +949,7 @@ class _CreatePurchaseOrderScreenState
                   onPressed: _savePO,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.textOnPrimary,
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.xl,
                       vertical: AppSpacing.md,

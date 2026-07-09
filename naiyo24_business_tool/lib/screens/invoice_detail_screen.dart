@@ -114,6 +114,8 @@ class InvoiceDetailScreen extends ConsumerWidget {
                   flex: 7,
                   child: Column(
                     children: [
+                      InvoiceHeader(invoice: invoice),
+                      const SizedBox(height: AppSpacing.lg),
                       InvoiceMeta(invoice: invoice),
                       const SizedBox(height: AppSpacing.lg),
                       CustomerCard(invoice: invoice),
@@ -137,6 +139,8 @@ class InvoiceDetailScreen extends ConsumerWidget {
             )
           : Column(
               children: [
+                InvoiceHeader(invoice: invoice),
+                const SizedBox(height: AppSpacing.lg),
                 InvoiceMeta(invoice: invoice),
                 const SizedBox(height: AppSpacing.lg),
                 CustomerCard(invoice: invoice),
@@ -169,7 +173,10 @@ class InvoiceDetailScreen extends ConsumerWidget {
           TextButton(
               onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.textOnPrimary,
+            ),
             onPressed: () {
               ref
                   .read(invoiceNotifierProvider.notifier)

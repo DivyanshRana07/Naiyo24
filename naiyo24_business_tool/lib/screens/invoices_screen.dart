@@ -110,10 +110,10 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.md)),
             ),
-            icon: const Icon(Icons.add_rounded, size: 18, color: Colors.white),
+            icon: Icon(Icons.add_rounded, size: 18, color: AppColors.textOnPrimary),
             label: Text('Create new invoice',
                 style:
-                    AppTextStyles.labelLarge.copyWith(color: Colors.white)),
+                    AppTextStyles.labelLarge.copyWith(color: AppColors.textOnPrimary)),
           ),
         ],
       ),
@@ -230,7 +230,10 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
               onPressed: () => Navigator.pop(ctx),
               child: const Text('Cancel')),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.textOnPrimary,
+            ),
             onPressed: () {
               ref.read(invoiceNotifierProvider.notifier).deleteInvoice(inv.id);
               Navigator.pop(ctx);

@@ -9,3 +9,5 @@ void downloadBytes(
     required String mimeType}) {}
 
 void shareToWhatsApp({required String text}) {}
+
+Future<String?> pickLogoImage() async => null;

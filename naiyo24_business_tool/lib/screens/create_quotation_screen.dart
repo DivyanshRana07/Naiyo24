@@ -1,8 +1,13 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+import 'package:naiyo24_business_tool/utils/export_helper.dart' as export_helper;
+import 'package:naiyo24_business_tool/utils/document_calculator.dart';
+import 'package:naiyo24_business_tool/widgets/common/document_settings_dialogs.dart';
 
 import 'package:naiyo24_business_tool/models/customer_model.dart';
 import 'package:naiyo24_business_tool/models/quotation_model.dart';
@@ -49,11 +54,45 @@ class _CreateQuotationScreenState extends ConsumerState<CreateQuotationScreen> {
   bool _isSavingAndSending = false;
   bool _hasChanges = false;
 
+  String? _subtitle;
+  bool _isEditingSubtitle = false;
+  String? _logoBase64;
+  late TextEditingController _subtitleCtrl;
+
+  Map<String, dynamic> _invoiceSettings = {
+    'gst': {
+      'enabled': true,
+      'defaultRate': 12.0,
+      'isInclusive': false,
+      'gstin': '',
+    },
+    'format': {
+      'currency': 'INR',
+      'currencySymbol': '₹',
+      'decimals': 2,
+      'indianFormat': true,
+    },
+    'columns': {
+      'hsn': true,
+      'discount': true,
+      'gst': true,
+      'unit': true,
+      'category': true,
+    }
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _subtitleCtrl = TextEditingController();
+  }
+
   @override
   void dispose() {
     _referenceController.dispose();
     _termsController.dispose();
     _notesController.dispose();
+    _subtitleCtrl.dispose();
     super.dispose();
   }
 
@@ -63,31 +102,10 @@ class _CreateQuotationScreenState extends ConsumerState<CreateQuotationScreen> {
     }
   }
 
-  double get _subTotal {
-    return _lineItems.fold(0.0, (sum, item) {
-      final itemTotal = item.qty * item.rate;
-      final discount = itemTotal * (item.discountPercent / 100);
-      return sum + (itemTotal - discount);
-    });
-  }
-
-  double get _totalDiscount {
-    return _lineItems.fold(0.0, (sum, item) {
-      final itemTotal = item.qty * item.rate;
-      return sum + (itemTotal * item.discountPercent / 100);
-    });
-  }
-
-  double get _totalGst {
-    return _lineItems.fold(0.0, (sum, item) {
-      final itemTotal = item.qty * item.rate;
-      final discount = itemTotal * (item.discountPercent / 100);
-      final taxableAmount = itemTotal - discount;
-      return sum + (taxableAmount * item.gstPercent / 100);
-    });
-  }
-
-  double get _grandTotal => _subTotal + _totalGst;
+  double get _subTotal => DocumentCalculator.getSubTotal(_lineItems, _invoiceSettings);
+  double get _totalDiscount => DocumentCalculator.getTotalDiscount(_lineItems);
+  double get _totalGst => DocumentCalculator.getTotalGst(_lineItems, _invoiceSettings);
+  double get _grandTotal => DocumentCalculator.getGrandTotal(_lineItems, _invoiceSettings);
 
   @override
   Widget build(BuildContext context) {
@@ -192,12 +210,33 @@ class _CreateQuotationScreenState extends ConsumerState<CreateQuotationScreen> {
                 },
               ),
               const SizedBox(height: AppSpacing.md),
-              _configButtons(),
+              DocumentSettingsButtons(
+                onConfigureGst: () => showGstConfigDialog(
+                  context: context,
+                  settings: _invoiceSettings,
+                  onSaved: (updated) => setState(() => _invoiceSettings = updated),
+                ),
+                onConfigureFormat: () => showFormatConfigDialog(
+                  context: context,
+                  settings: _invoiceSettings,
+                  onSaved: (updated) => setState(() => _invoiceSettings = updated),
+                ),
+                onConfigureColumns: () => showColumnsConfigDialog(
+                  context: context,
+                  settings: _invoiceSettings,
+                  onSaved: (updated) => setState(() => _invoiceSettings = updated),
+                ),
+              ),
               const SizedBox(height: AppSpacing.md),
               LineItemsFormSection(
                 lineItems: _lineItems,
                 onItemAdded: (item) {
-                  setState(() => _lineItems.add(item));
+                  final gstSettings = _invoiceSettings['gst'] as Map<String, dynamic>?;
+                  final defaultGstRate = gstSettings?['defaultRate'] as double? ?? 12.0;
+                  final updatedItem = item.copyWith(
+                    gstPercent: (item.gstPercent == 0.0 || item.gstPercent == 12.0) ? defaultGstRate : item.gstPercent,
+                  );
+                  setState(() => _lineItems.add(updatedItem));
                   _markChanged();
                 },
                 onItemChanged: (updated) {
@@ -215,6 +254,7 @@ class _CreateQuotationScreenState extends ConsumerState<CreateQuotationScreen> {
                   setState(() => _lineItems.clear());
                   _markChanged();
                 },
+                settings: _invoiceSettings,
               ),
               const SizedBox(height: AppSpacing.xl),
               TextInputSection(
@@ -292,93 +332,171 @@ class _CreateQuotationScreenState extends ConsumerState<CreateQuotationScreen> {
                 .copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: AppSpacing.sm),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.add, size: 16, color: AppColors.primary),
-              const SizedBox(width: 4),
-              Text(
-                'Add Subtitle',
-                style:
-                    AppTextStyles.bodyMedium.copyWith(color: AppColors.primary),
+          if (_isEditingSubtitle)
+            SizedBox(
+              width: 300,
+              child: TextFormField(
+                controller: _subtitleCtrl,
+                style: AppTextStyles.bodyMedium,
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                  hintText: 'e.g. Price Quotation, Estimate',
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.check, color: Colors.green, size: 18),
+                    onPressed: () {
+                      setState(() {
+                        _subtitle = _subtitleCtrl.text.trim();
+                        _isEditingSubtitle = false;
+                      });
+                    },
+                  ),
+                ),
+                onFieldSubmitted: (v) {
+                  setState(() {
+                    _subtitle = v.trim();
+                    _isEditingSubtitle = false;
+                  });
+                },
               ),
-            ],
-          ),
+            )
+          else
+            InkWell(
+              onTap: () {
+                setState(() {
+                  _subtitleCtrl.text = _subtitle ?? '';
+                  _isEditingSubtitle = true;
+                });
+              },
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: _subtitle == null || _subtitle!.isEmpty
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add, size: 16, color: AppColors.primary),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Add Subtitle',
+                            style: AppTextStyles.bodyMedium
+                                .copyWith(color: AppColors.primary),
+                          ),
+                        ],
+                      )
+                    : Text(
+                        _subtitle!,
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          color: AppColors.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+              ),
+            ),
         ],
       ),
     );
   }
 
+  Future<void> _pickLogo() async {
+    final base64 = await export_helper.pickLogoImage();
+    if (base64 != null) {
+      setState(() {
+        _logoBase64 = base64;
+      });
+    }
+  }
+
   Widget _businessLogoBlock() {
+    final hasLogo = _logoBase64 != null && _logoBase64!.isNotEmpty;
+    Uint8List? logoBytes;
+    if (hasLogo) {
+      try {
+        final commaIdx = _logoBase64!.indexOf(',');
+        final pureBase64 = commaIdx != -1
+            ? _logoBase64!.substring(commaIdx + 1)
+            : _logoBase64!;
+        logoBytes = base64Decode(pureBase64);
+      } catch (e) {
+        logoBytes = null;
+      }
+    }
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.xl, horizontal: AppSpacing.lg),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppBorderRadius.md),
         border: Border.all(color: AppColors.border),
       ),
-      child: Column(
-        children: [
-          Icon(Icons.image_outlined, size: 40, color: AppColors.textHint),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Add Business Logo',
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
-            ),
+      child: InkWell(
+        onTap: _pickLogo,
+        borderRadius: BorderRadius.circular(AppBorderRadius.md),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+              vertical: AppSpacing.xl, horizontal: AppSpacing.lg),
+          child: Column(
+            children: [
+              if (hasLogo && logoBytes != null) ...[
+                Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 120),
+                      child: Image.memory(
+                        logoBytes,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: CircleAvatar(
+                        radius: 14,
+                        backgroundColor: Colors.red.withValues(alpha: 0.8),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: const Icon(Icons.delete, size: 14, color: Colors.white),
+                          onPressed: () {
+                            setState(() {
+                              _logoBase64 = null;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Change Business Logo',
+                  style: AppTextStyles.caption.copyWith(color: AppColors.primary),
+                ),
+              ] else ...[
+                Icon(Icons.image_outlined, size: 40, color: AppColors.textHint),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Add Business Logo',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Resolution up to 1080×1080px.\nPNG or JPEG file.',
+                  style: AppTextStyles.caption.copyWith(color: AppColors.textHint),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ],
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Resolution up to 1080×1080px.\nPNG or JPEG file.',
-            style: AppTextStyles.caption.copyWith(color: AppColors.textHint),
-            textAlign: TextAlign.center,
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _configButtons() {
-    return Column(
-      children: [
-        _configBtn(Icons.percent_rounded, 'Configure GST'),
-        const SizedBox(height: AppSpacing.sm),
-        _configBtn(
-            Icons.format_list_numbered_rounded, 'Number and Currency Format'),
-        const SizedBox(height: AppSpacing.sm),
-        _configBtn(Icons.table_chart_outlined, 'Edit Columns/Formulas'),
-      ],
-    );
-  }
 
-  Widget _configBtn(IconData icon, String label) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: () {},
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(color: AppColors.border),
-          minimumSize: const Size(0, 48),
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppBorderRadius.md),
-          ),
-        ),
-        icon: Icon(icon, size: 18, color: AppColors.primary),
-        label: Text(
-          label,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
 
   Future<void> _saveQuotation({bool showSendDialog = false}) async {
     if (!_formKey.currentState!.validate()) {
@@ -468,6 +586,9 @@ class _CreateQuotationScreenState extends ConsumerState<CreateQuotationScreen> {
         terms: _termsController.text.isNotEmpty ? _termsController.text : null,
         notes: _notesController.text.isNotEmpty ? _notesController.text : null,
         reference: _referenceController.text.isNotEmpty ? _referenceController.text : null,
+        subtitle: _subtitle,
+        logo: _logoBase64,
+        settings: _invoiceSettings,
       );
 
       await Future.delayed(const Duration(milliseconds: 400));
@@ -484,6 +605,9 @@ class _CreateQuotationScreenState extends ConsumerState<CreateQuotationScreen> {
         'payment_terms': quotation.paymentTerms,
         'currency': 'INR', // Send just the currency code, not the full name
         'status': 'Draft', // Backend expects 'Draft' not 'draft'
+        'subtitle': quotation.subtitle,
+        'logo': quotation.logo,
+        'settings': quotation.settings,
         'items': quotation.lineItems.map((item) => {
           'name': item.name,
           'price': item.rate,

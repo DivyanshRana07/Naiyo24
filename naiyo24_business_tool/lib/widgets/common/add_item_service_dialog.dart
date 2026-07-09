@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:naiyo24_business_tool/models/line_item_model.dart';
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
+import 'package:naiyo24_business_tool/widgets/item/item_form.dart';
+import 'package:naiyo24_business_tool/widgets/item/service_form.dart';
 
 /// Reusable dialog to choose between creating a physical item or a service
 class AddItemServiceDialog {
-  static Future<void> show(BuildContext context) async {
+  static Future<void> show(BuildContext context, {void Function(InvoiceLineItem)? onItemCreated}) async {
     await showDialog(
       context: context,
       builder: (dialogContext) => Dialog(
@@ -40,7 +43,48 @@ class AddItemServiceDialog {
                     child: InkWell(
                       onTap: () {
                         Navigator.pop(dialogContext);
-                        context.push(AppRoutes.newItem);
+                        if (onItemCreated != null) {
+                          showDialog(
+                            context: context,
+                            builder: (formContext) => Dialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+                              ),
+                              child: SingleChildScrollView(
+                                child: Container(
+                                  padding: const EdgeInsets.all(24),
+                                  constraints: const BoxConstraints(maxWidth: 540),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Add New Item', style: AppTextStyles.h2),
+                                      const SizedBox(height: 16),
+                                      ItemForm(
+                                        onSaved: (item) {
+                                          final lineItem = InvoiceLineItem(
+                                            id: '${item.id}-${DateTime.now().millisecondsSinceEpoch}',
+                                            itemType: LineItemType.item,
+                                            itemId: item.id,
+                                            code: item.code,
+                                            name: item.name,
+                                            qty: 1,
+                                            rate: item.sellingPrice,
+                                            gstPercent: item.gstPercent,
+                                          );
+                                          onItemCreated(lineItem);
+                                        },
+                                        onCancel: () => Navigator.pop(formContext),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        } else {
+                          context.push(AppRoutes.newItem);
+                        }
                       },
                       borderRadius: BorderRadius.circular(12),
                       child: Container(
@@ -80,7 +124,48 @@ class AddItemServiceDialog {
                     child: InkWell(
                       onTap: () {
                         Navigator.pop(dialogContext);
-                        context.push(AppRoutes.newService);
+                        if (onItemCreated != null) {
+                          showDialog(
+                            context: context,
+                            builder: (formContext) => Dialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+                              ),
+                              child: SingleChildScrollView(
+                                child: Container(
+                                  padding: const EdgeInsets.all(24),
+                                  constraints: const BoxConstraints(maxWidth: 540),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Add New Service', style: AppTextStyles.h2),
+                                      const SizedBox(height: 16),
+                                      ServiceForm(
+                                        onSaved: (service) {
+                                          final lineItem = InvoiceLineItem(
+                                            id: '${service.id}-${DateTime.now().millisecondsSinceEpoch}',
+                                            itemType: LineItemType.service,
+                                            itemId: service.id,
+                                            code: service.code,
+                                            name: service.name,
+                                            qty: 1,
+                                            rate: service.sellingPrice,
+                                            gstPercent: service.gstPercent,
+                                          );
+                                          onItemCreated(lineItem);
+                                        },
+                                        onCancel: () => Navigator.pop(formContext),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        } else {
+                          context.push(AppRoutes.newService);
+                        }
                       },
                       borderRadius: BorderRadius.circular(12),
                       child: Container(

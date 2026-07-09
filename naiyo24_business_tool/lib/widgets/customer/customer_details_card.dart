@@ -24,7 +24,7 @@ class CustomerDetailsCard extends StatelessWidget {
             child: Text(
               customer.name[0].toUpperCase(),
               style:
-                  AppTextStyles.h2.copyWith(color: Colors.white, fontSize: 18),
+                  AppTextStyles.h2.copyWith(color: AppColors.textOnPrimary, fontSize: 18),
             ),
           ),
           const SizedBox(width: AppSpacing.md),

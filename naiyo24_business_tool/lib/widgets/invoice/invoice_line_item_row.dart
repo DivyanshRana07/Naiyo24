@@ -15,12 +15,16 @@ class LineItemRow extends StatefulWidget {
     required this.onChanged,
     required this.onDelete,
     required this.index,
+    this.onCopy,
+    this.settings,
   });
 
   final InvoiceLineItem item;
   final void Function(InvoiceLineItem updated) onChanged;
   final VoidCallback onDelete;
   final int index;
+  final VoidCallback? onCopy;
+  final Map<String, dynamic>? settings;
 
   @override
   State<LineItemRow> createState() => _LineItemRowState();
@@ -64,10 +68,35 @@ class _LineItemRowState extends State<LineItemRow> {
 
   @override
   Widget build(BuildContext context) {
-    final total = widget.item.totalAmount;
-    final cgst = widget.item.gstAmount / 2;
-    final sgst = widget.item.gstAmount / 2;
-    final amount = widget.item.rate * widget.item.qty;
+    final columns = widget.settings?['columns'] as Map<String, dynamic>?;
+    final gstEnabled = widget.settings?['gst']?['enabled'] as bool? ?? true;
+    final isInclusive = widget.settings?['gst']?['isInclusive'] as bool? ?? false;
+    final gstPercent = gstEnabled ? widget.item.gstPercent : 0.0;
+    
+    final double amount;
+    final double cgst;
+    final double sgst;
+    final double total;
+    
+    if (gstEnabled && isInclusive) {
+      final totalVal = widget.item.rate * widget.item.qty - widget.item.discountAmount;
+      final taxable = totalVal / (1 + gstPercent / 100);
+      final taxAmount = totalVal - taxable;
+      cgst = taxAmount / 2;
+      sgst = taxAmount / 2;
+      amount = taxable + widget.item.discountAmount;
+      total = totalVal;
+    } else {
+      amount = widget.item.rate * widget.item.qty;
+      final gstAmount = gstEnabled ? widget.item.gstAmount : 0.0;
+      cgst = gstAmount / 2;
+      sgst = gstAmount / 2;
+      total = amount - widget.item.discountAmount + gstAmount;
+    }
+
+    final showHsn = columns?['hsn'] ?? true;
+    final showGst = (columns?['gst'] ?? true) && gstEnabled;
+    final showDiscount = columns?['discount'] ?? true;
 
     return Container(
       color: AppColors.surface,
@@ -85,16 +114,18 @@ class _LineItemRowState extends State<LineItemRow> {
                   style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.w700),
                 ),
                 const Spacer(),
-                InkWell(
-                  onTap: () {},
-                  borderRadius: BorderRadius.circular(4),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Icon(Icons.copy_outlined,
-                        size: 16, color: AppColors.textSecondary),
+                if (widget.onCopy != null) ...[
+                  InkWell(
+                    onTap: widget.onCopy,
+                    borderRadius: BorderRadius.circular(4),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(Icons.copy_outlined,
+                          size: 16, color: AppColors.textSecondary),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
+                  const SizedBox(width: 8),
+                ],
                 InkWell(
                   onTap: widget.onDelete,
                   borderRadius: BorderRadius.circular(4),
@@ -113,31 +144,44 @@ class _LineItemRowState extends State<LineItemRow> {
             widget.item.name.isEmpty ? 'Item Name / SKU Id' : widget.item.name,
             dimValue: widget.item.name.isEmpty,
           ),
-          Divider(height: 1, thickness: 1, color: AppColors.border),
-          _labelRow(
-            'HSN/SAC',
-            widget.item.code.isEmpty ? '#' : widget.item.code,
-            trailing:
-                Icon(Icons.search, size: 16, color: AppColors.textHint),
-            dimValue: widget.item.code.isEmpty,
-          ),
-          Divider(height: 1, thickness: 1, color: AppColors.border),
-          _staticRow(
-              'GST Rate', '${widget.item.gstPercent.toStringAsFixed(0)}%'),
+          if (showHsn) ...[
+            Divider(height: 1, thickness: 1, color: AppColors.border),
+            _labelRow(
+              'HSN/SAC',
+              widget.item.code.isEmpty ? '#' : widget.item.code,
+              trailing:
+                  Icon(Icons.search, size: 16, color: AppColors.textHint),
+              dimValue: widget.item.code.isEmpty,
+            ),
+          ],
+          if (showGst) ...[
+            Divider(height: 1, thickness: 1, color: AppColors.border),
+            _gstDropdownRow(
+              'GST Rate',
+              gstPercent,
+              (newGst) {
+                widget.onChanged(widget.item.copyWith(gstPercent: newGst));
+              },
+            ),
+          ],
           Divider(height: 1, thickness: 1, color: AppColors.border),
           _inputRow('Quantity', _qtyCtrl),
           Divider(height: 1, thickness: 1, color: AppColors.border),
           _inputRow('Rate', _rateCtrl, prefix: '₹ '),
           Divider(height: 1, thickness: 1, color: AppColors.border),
           _staticRow('Amount', '₹${amount.toStringAsFixed(2)}'),
-          Divider(height: 1, thickness: 1, color: AppColors.border),
-          _staticRow('CGST', '₹${cgst.toStringAsFixed(2)}'),
-          Divider(height: 1, thickness: 1, color: AppColors.border),
-          _staticRow('SGST', '₹${sgst.toStringAsFixed(2)}'),
+          if (showGst) ...[
+            Divider(height: 1, thickness: 1, color: AppColors.border),
+            _staticRow('CGST', '₹${cgst.toStringAsFixed(2)}'),
+            Divider(height: 1, thickness: 1, color: AppColors.border),
+            _staticRow('SGST', '₹${sgst.toStringAsFixed(2)}'),
+          ],
           Divider(height: 1, thickness: 1, color: AppColors.border),
           _staticRow('Total', '₹${total.toStringAsFixed(2)}', bold: true),
-          Divider(height: 1, thickness: 1, color: AppColors.border),
-          _inputRow('Discount %', _discCtrl, suffix: '%'),
+          if (showDiscount) ...[
+            Divider(height: 1, thickness: 1, color: AppColors.border),
+            _inputRow('Discount %', _discCtrl, suffix: '%'),
+          ],
           const SizedBox(height: AppSpacing.sm),
         ],
       ),
@@ -228,6 +272,44 @@ class _LineItemRowState extends State<LineItemRow> {
       ),
     );
   }
+
+  Widget _gstDropdownRow(String label, double currentVal, ValueChanged<double> onGstChanged) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 8),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(label,
+                style: AppTextStyles.bodyMedium
+                    .copyWith(color: AppColors.textPrimary)),
+          ),
+          Expanded(
+            child: DropdownButtonFormField<double>(
+              value: currentVal,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                isDense: true,
+                border: OutlineInputBorder(),
+              ),
+              items: const [
+                DropdownMenuItem(value: 0.0, child: Text('0%')),
+                DropdownMenuItem(value: 5.0, child: Text('5%')),
+                DropdownMenuItem(value: 12.0, child: Text('12%')),
+                DropdownMenuItem(value: 18.0, child: Text('18%')),
+                DropdownMenuItem(value: 28.0, child: Text('28%')),
+              ],
+              onChanged: (val) {
+                if (val != null) {
+                  onGstChanged(val);
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ── LineItemsHeader ───────────────────────────────────────────────────────────
@@ -246,7 +328,7 @@ class LineItemsHeader extends StatelessWidget {
       child: Text(
         'Item',
         style: AppTextStyles.bodyMedium.copyWith(
-          color: Colors.white,
+          color: AppColors.textOnPrimary,
           fontWeight: FontWeight.w600,
         ),
       ),

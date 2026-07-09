@@ -199,14 +199,14 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen>
                                       BorderRadius.circular(AppBorderRadius.md),
                                 ),
                               ),
-                              icon: const Icon(Icons.add,
-                                  size: 18, color: Colors.white),
+                              icon: Icon(Icons.add,
+                                  size: 18, color: AppColors.textOnPrimary),
                               label: Text(
                                 _tabController.index == 0
                                     ? (isDesktop ? 'Add New Item' : 'Item')
                                     : (isDesktop ? 'Add New Service' : 'Service'),
                                 style: AppTextStyles.labelLarge
-                                    .copyWith(color: Colors.white),
+                                    .copyWith(color: AppColors.textOnPrimary),
                               ),
                             ),
                           ],

@@ -39,64 +39,61 @@ class CustomerAutocomplete extends ConsumerWidget {
         final boxWidth = isMobile ? screenWidth - 48 : 400.0;
         return Align(
           alignment: Alignment.topLeft,
-          child: UnconstrainedBox(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: boxWidth,
-              child: Material(
-                elevation: 6,
-                borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                color: AppColors.surface,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 220),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: options.length,
-                    itemBuilder: (ctx, i) {
-                      final c = options.elementAt(i);
-                      return InkWell(
-                        onTap: () => onSelected(c),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundColor:
-                                    AppColors.primary.withValues(alpha: 0.1),
-                                child: Text(
-                                  c.name[0].toUpperCase(),
-                                  style: AppTextStyles.caption.copyWith(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w400),
-                                ),
+          child: SizedBox(
+            width: boxWidth,
+            child: Material(
+              elevation: 6,
+              borderRadius: BorderRadius.circular(AppBorderRadius.md),
+              color: AppColors.surface,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 220),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: options.length,
+                  itemBuilder: (ctx, i) {
+                    final c = options.elementAt(i);
+                    return InkWell(
+                      onTap: () => onSelected(c),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundColor:
+                                  AppColors.primary.withValues(alpha: 0.1),
+                              child: Text(
+                                c.name[0].toUpperCase(),
+                                style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w400),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(c.name,
-                                        style: AppTextStyles.bodyMedium
-                                            .copyWith(
-                                                fontWeight: FontWeight.w400)),
-                                    Text(c.mobile,
-                                        style: AppTextStyles.caption.copyWith(
-                                            color: AppColors.textSecondary)),
-                                  ],
-                                ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(c.name,
+                                      style: AppTextStyles.bodyMedium
+                                          .copyWith(
+                                              fontWeight: FontWeight.w400)),
+                                  Text(c.mobile,
+                                      style: AppTextStyles.caption.copyWith(
+                                          color: AppColors.textSecondary)),
+                                ],
                               ),
-                              Text(c.code,
-                                  style: AppTextStyles.caption
-                                      .copyWith(color: AppColors.primary)),
-                            ],
-                          ),
+                            ),
+                            Text(c.code,
+                                style: AppTextStyles.caption
+                                    .copyWith(color: AppColors.primary)),
+                          ],
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -200,79 +197,76 @@ class _ItemSearchAutocompleteState
         final boxWidth = isMobile ? screenWidth - 48 : 480.0;
         return Align(
           alignment: Alignment.topLeft,
-          child: UnconstrainedBox(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: boxWidth,
-              child: Material(
-                elevation: 6,
-                borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                color: AppColors.surface,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 240),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: options.length,
-                    itemBuilder: (ctx, i) {
-                      final r = options.elementAt(i);
-                      final isItem = r.type == LineItemType.item;
-                      return InkWell(
-                        onTap: () => onSelected(r),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 10),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
+          child: SizedBox(
+            width: boxWidth,
+            child: Material(
+              elevation: 6,
+              borderRadius: BorderRadius.circular(AppBorderRadius.md),
+              color: AppColors.surface,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 240),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: options.length,
+                  itemBuilder: (ctx, i) {
+                    final r = options.elementAt(i);
+                    final isItem = r.type == LineItemType.item;
+                    return InkWell(
+                      onTap: () => onSelected(r),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isItem
+                                    ? AppColors.primary
+                                        .withValues(alpha: 0.08)
+                                    : const Color(0xFF0284C7)
+                                        .withValues(alpha: 0.08),
+                                borderRadius:
+                                    BorderRadius.circular(AppBorderRadius.xs),
+                              ),
+                              child: Text(
+                                r.typeLabel,
+                                style: AppTextStyles.caption.copyWith(
                                   color: isItem
                                       ? AppColors.primary
-                                          .withValues(alpha: 0.08)
-                                      : const Color(0xFF0284C7)
-                                          .withValues(alpha: 0.08),
-                                  borderRadius:
-                                      BorderRadius.circular(AppBorderRadius.xs),
-                                ),
-                                child: Text(
-                                  r.typeLabel,
-                                  style: AppTextStyles.caption.copyWith(
-                                    color: isItem
-                                        ? AppColors.primary
-                                        : const Color(0xFF0284C7),
-                                    fontWeight: FontWeight.w400,
-                                  ),
+                                      : const Color(0xFF0284C7),
+                                  fontWeight: FontWeight.w400,
                                 ),
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(r.name,
-                                        style: AppTextStyles.bodyMedium
-                                            .copyWith(
-                                                fontWeight: FontWeight.w400)),
-                                    Text(r.code,
-                                        style: AppTextStyles.caption.copyWith(
-                                            color: AppColors.textSecondary)),
-                                  ],
-                                ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(r.name,
+                                      style: AppTextStyles.bodyMedium
+                                          .copyWith(
+                                              fontWeight: FontWeight.w400)),
+                                  Text(r.code,
+                                      style: AppTextStyles.caption.copyWith(
+                                          color: AppColors.textSecondary)),
+                                ],
                               ),
-                              Text(
-                                '₹${r.price.toStringAsFixed(2)}',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                    fontWeight: FontWeight.w400,
-                                    color: AppColors.textPrimary),
-                              ),
-                            ],
-                          ),
+                            ),
+                            Text(
+                              '₹${r.price.toStringAsFixed(2)}',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.textPrimary),
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -344,67 +338,64 @@ class _ItemDropdownSelectorState extends ConsumerState<ItemDropdownSelector> {
         final boxWidth = isMobile ? screenWidth - 48 : 350.0;
         return Align(
           alignment: Alignment.topLeft,
-          child: UnconstrainedBox(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: boxWidth,
-              child: Material(
-                elevation: 6,
-                borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                color: AppColors.surface,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 220),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: options.length,
-                    itemBuilder: (ctx, i) {
-                      final item = options.elementAt(i);
-                      return InkWell(
-                        onTap: () => onSelected(item),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundColor:
-                                    AppColors.primary.withValues(alpha: 0.1),
-                                child: Text(
-                                  item.name[0].toUpperCase(),
-                                  style: AppTextStyles.caption.copyWith(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w400),
-                                ),
+          child: SizedBox(
+            width: boxWidth,
+            child: Material(
+              elevation: 6,
+              borderRadius: BorderRadius.circular(AppBorderRadius.md),
+              color: AppColors.surface,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 220),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: options.length,
+                  itemBuilder: (ctx, i) {
+                    final item = options.elementAt(i);
+                    return InkWell(
+                      onTap: () => onSelected(item),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundColor:
+                                  AppColors.primary.withValues(alpha: 0.1),
+                              child: Text(
+                                item.name[0].toUpperCase(),
+                                style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w400),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(item.name,
-                                        style: AppTextStyles.bodyMedium
-                                            .copyWith(
-                                                fontWeight: FontWeight.w400)),
-                                    Text(item.code,
-                                        style: AppTextStyles.caption.copyWith(
-                                            color: AppColors.textSecondary)),
-                                  ],
-                                ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(item.name,
+                                      style: AppTextStyles.bodyMedium
+                                          .copyWith(
+                                              fontWeight: FontWeight.w400)),
+                                  Text(item.code,
+                                      style: AppTextStyles.caption.copyWith(
+                                          color: AppColors.textSecondary)),
+                                ],
                               ),
-                              Text(
-                                '₹${item.sellingPrice.toStringAsFixed(2)}',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                    fontWeight: FontWeight.w400,
-                                    color: AppColors.textPrimary),
-                              ),
-                            ],
-                          ),
+                            ),
+                            Text(
+                              '₹${item.sellingPrice.toStringAsFixed(2)}',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.textPrimary),
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -477,67 +468,64 @@ class _ServiceDropdownSelectorState extends ConsumerState<ServiceDropdownSelecto
         final boxWidth = isMobile ? screenWidth - 48 : 350.0;
         return Align(
           alignment: Alignment.topLeft,
-          child: UnconstrainedBox(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: boxWidth,
-              child: Material(
-                elevation: 6,
-                borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                color: AppColors.surface,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 220),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: options.length,
-                    itemBuilder: (ctx, i) {
-                      final service = options.elementAt(i);
-                      return InkWell(
-                        onTap: () => onSelected(service),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundColor:
-                                    const Color(0xFF0284C7).withValues(alpha: 0.1),
-                                child: Text(
-                                  service.name[0].toUpperCase(),
-                                  style: AppTextStyles.caption.copyWith(
-                                      color: const Color(0xFF0284C7),
-                                      fontWeight: FontWeight.w400),
-                                ),
+          child: SizedBox(
+            width: boxWidth,
+            child: Material(
+              elevation: 6,
+              borderRadius: BorderRadius.circular(AppBorderRadius.md),
+              color: AppColors.surface,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 220),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: options.length,
+                  itemBuilder: (ctx, i) {
+                    final service = options.elementAt(i);
+                    return InkWell(
+                      onTap: () => onSelected(service),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundColor:
+                                  const Color(0xFF0284C7).withValues(alpha: 0.1),
+                              child: Text(
+                                service.name[0].toUpperCase(),
+                                style: AppTextStyles.caption.copyWith(
+                                    color: const Color(0xFF0284C7),
+                                    fontWeight: FontWeight.w400),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(service.name,
-                                        style: AppTextStyles.bodyMedium
-                                            .copyWith(
-                                                fontWeight: FontWeight.w400)),
-                                    Text(service.code,
-                                        style: AppTextStyles.caption.copyWith(
-                                            color: AppColors.textSecondary)),
-                                  ],
-                                ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(service.name,
+                                      style: AppTextStyles.bodyMedium
+                                          .copyWith(
+                                              fontWeight: FontWeight.w400)),
+                                  Text(service.code,
+                                      style: AppTextStyles.caption.copyWith(
+                                          color: AppColors.textSecondary)),
+                                ],
                               ),
-                              Text(
-                                '₹${service.sellingPrice.toStringAsFixed(2)}',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                    fontWeight: FontWeight.w400,
-                                    color: AppColors.textPrimary),
-                              ),
-                            ],
-                          ),
+                            ),
+                            Text(
+                              '₹${service.sellingPrice.toStringAsFixed(2)}',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.textPrimary),
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),

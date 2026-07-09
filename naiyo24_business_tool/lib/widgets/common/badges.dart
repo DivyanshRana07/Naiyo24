@@ -204,7 +204,10 @@ void confirmDeleteDialog(
           child: const Text('Cancel'),
         ),
         FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.error,
+            foregroundColor: AppColors.textOnPrimary,
+          ),
           onPressed: () {
             onConfirm();
             Navigator.pop(ctx);

@@ -77,7 +77,7 @@ Fully integrated with database persistence, relational schemas, validation middl
 
 ## Environment Configuration
 
-Create a `.env` file in the root directory:
+Create a `.env` file in the root directory. To run via Docker, Docker Compose uses `.env.docker` dynamically. For local direct running:
 
 ```env
 APP_HOST=127.0.0.1
@@ -86,13 +86,38 @@ SECRET_KEY=your_secret_jwt_key_here
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 
-# Database Configuration (Defaults to local SQLite)
+# Database Configuration (Defaults to local SQLite or PostgreSQL connection string)
 DATABASE_URL=sqlite:///./business_tools.db
+# DATABASE_URL=postgresql+psycopg2://invoice_user:invoice_password_2026@localhost:5432/invoice_business_tools
 ```
 
 ---
 
 ## Setup and Installation
+
+### Option A: Running with Docker (Recommended)
+This starts both PostgreSQL and FastAPI in containers.
+
+1. **Start** (runs checks, builds the docker containers, and tests local API health):
+   * **Windows (PowerShell)**:
+     ```powershell
+     .\start-docker.ps1
+     ```
+   * **Manual Command**:
+     ```bash
+     docker compose up -d --build
+     ```
+2. **Stop**:
+   * **Windows (PowerShell)**:
+     ```powershell
+     .\stop-docker.ps1
+     ```
+   * **Manual Command**:
+     ```bash
+     docker compose stop
+     ```
+
+### Option B: Running Locally (Direct Python setup)
 
 1. **Create and Activate Virtual Environment**
    * **macOS/Linux**:

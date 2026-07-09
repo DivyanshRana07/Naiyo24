@@ -219,6 +219,7 @@ class _ServiceFormState extends ConsumerState<ServiceForm> {
           _isEditing
               ? '${service.name} updated successfully.'
               : '${service.name} added to catalog.',
+          style: TextStyle(color: AppColors.textOnPrimary),
         ),
         backgroundColor: AppColors.success,
       ),

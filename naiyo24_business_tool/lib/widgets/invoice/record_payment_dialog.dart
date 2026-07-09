@@ -250,6 +250,7 @@ class _RecordPaymentDialogState extends ConsumerState<RecordPaymentDialog> {
       SnackBar(
         content: Text(
           '₹${entered.toStringAsFixed(2)} recorded for ${widget.invoice.invoiceNo}.',
+          style: TextStyle(color: AppColors.textOnPrimary),
         ),
         backgroundColor: AppColors.success,
         behavior: SnackBarBehavior.floating,

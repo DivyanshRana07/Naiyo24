@@ -15,19 +15,15 @@ class ConfirmDiscardDialog {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Cancel',
-              style: AppTextStyles.labelLarge
-                  .copyWith(color: AppColors.textSecondary),
-            ),
+            child: const Text('Cancel'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-            child: Text(
-              'Discard',
-              style: AppTextStyles.labelLarge.copyWith(color: Colors.white),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.textOnPrimary,
             ),
+            child: const Text('Discard'),
           ),
         ],
       ),

@@ -40,6 +40,10 @@ class QuotationCreateRequest(BaseModel):
     valid_until: Optional[date] = None
     payment_terms: Optional[str] = None
     currency: Optional[str] = "INR"
+    
+    subtitle: Optional[str] = None
+    logo: Optional[str] = None
+    settings: Optional[dict] = None
 
     items: List[QuotationItemCreate]
     status: Optional[str] = "Draft"
@@ -73,6 +77,10 @@ class QuotationResponse(BaseModel):
     valid_until: Optional[date] = None
     payment_terms: Optional[str] = None
     currency: Optional[str] = None
+    
+    subtitle: Optional[str] = None
+    logo: Optional[str] = None
+    settings: Optional[dict] = None
 
     total: float
     status: str

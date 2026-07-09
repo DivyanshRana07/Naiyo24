@@ -45,7 +45,7 @@ class LineItemsSection extends StatelessWidget {
 
     final addNewButton = AddResourceButton(
       label: 'Add New',
-      onPressed: () => AddItemServiceDialog.show(context),
+      onPressed: () => AddItemServiceDialog.show(context, onItemCreated: onItemAdded),
       icon: Icons.add_box_rounded,
     );
 
@@ -134,6 +134,12 @@ class LineItemsSection extends StatelessWidget {
                       index: i,
                       onChanged: onItemChanged,
                       onDelete: () => onItemDeleted(item),
+                      onCopy: () {
+                        final copied = item.copyWith(
+                          id: '${item.itemId}-${DateTime.now().millisecondsSinceEpoch}-copy',
+                        );
+                        onItemAdded(copied);
+                      },
                     );
                   }),
                 ],

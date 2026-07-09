@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +12,9 @@ import 'package:naiyo24_business_tool/notifiers/auth_notifier.dart';
 import 'package:naiyo24_business_tool/notifiers/invoice_notifier.dart';
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
+import 'package:naiyo24_business_tool/utils/export_helper.dart' as export_helper;
+import 'package:naiyo24_business_tool/utils/document_calculator.dart';
+import 'package:naiyo24_business_tool/widgets/common/document_settings_dialogs.dart';
 import 'package:naiyo24_business_tool/widgets/common/dashboard_app_bar.dart';
 import 'package:naiyo24_business_tool/widgets/common/side_navigation.dart';
 import 'package:naiyo24_business_tool/widgets/invoice/invoice_line_item_row.dart';
@@ -37,12 +42,57 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   String _invoiceType = 'regular'; // regular or proforma
   bool _isSaving = false;
   bool _isSavingAndSending = false;
+  late TextEditingController _invoiceNoCtrl;
+  
+  String? _subtitle;
+  bool _isEditingSubtitle = false;
+  String? _logoBase64;
+  late TextEditingController _subtitleCtrl;
 
-  double get _subTotal => _lineItems.fold(0, (s, i) => s + (i.rate * i.qty));
-  double get _totalDiscount =>
-      _lineItems.fold(0, (s, i) => s + i.discountAmount);
-  double get _totalGst => _lineItems.fold(0, (s, i) => s + i.gstAmount);
-  double get _grandTotal => _subTotal - _totalDiscount + _totalGst;
+  Map<String, dynamic> _invoiceSettings = {
+    'gst': {
+      'enabled': true,
+      'defaultRate': 12.0,
+      'isInclusive': false,
+      'gstin': '',
+    },
+    'format': {
+      'currency': 'INR',
+      'currencySymbol': '₹',
+      'decimals': 2,
+      'indianFormat': true,
+    },
+    'columns': {
+      'hsn': true,
+      'discount': true,
+      'gst': true,
+      'unit': true,
+      'category': true,
+    }
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    final invoices = ref.read(invoiceNotifierProvider);
+    final nextNum = invoices.length + 1;
+    _invoiceNoCtrl = TextEditingController(
+      text: 'INV-${nextNum.toString().padLeft(5, '0')}',
+    );
+    _subtitleCtrl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _invoiceNoCtrl.dispose();
+    _subtitleCtrl.dispose();
+    super.dispose();
+  }
+
+  double get _subTotal => DocumentCalculator.getSubTotal(_lineItems, _invoiceSettings);
+  double get _totalDiscount => DocumentCalculator.getTotalDiscount(_lineItems);
+  double get _totalGst => DocumentCalculator.getTotalGst(_lineItems, _invoiceSettings);
+  double get _grandTotal => DocumentCalculator.getGrandTotal(_lineItems, _invoiceSettings);
 
   Future<bool> _onWillPop() async {
     if (_selectedCustomer == null && _lineItems.isEmpty) {
@@ -58,15 +108,15 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancel',
-                style: AppTextStyles.labelLarge
-                    .copyWith(color: AppColors.textSecondary)),
+            child: const Text('Cancel'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-            child: Text('Discard',
-                style: AppTextStyles.labelLarge.copyWith(color: Colors.white)),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.textOnPrimary,
+            ),
+            child: const Text('Discard'),
           ),
         ],
       ),
@@ -152,14 +202,37 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                 dueDate: _dueDate,
                 onInvoiceDatePicked: (d) => setState(() => _invoiceDate = d),
                 onDueDatePicked: (d) => setState(() => _dueDate = d),
+                invoiceNoController: _invoiceNoCtrl,
               ),
               const SizedBox(height: AppSpacing.md),
-              _configButtons(),
+              DocumentSettingsButtons(
+                onConfigureGst: () => showGstConfigDialog(
+                  context: context,
+                  settings: _invoiceSettings,
+                  onSaved: (updated) => setState(() => _invoiceSettings = updated),
+                ),
+                onConfigureFormat: () => showFormatConfigDialog(
+                  context: context,
+                  settings: _invoiceSettings,
+                  onSaved: (updated) => setState(() => _invoiceSettings = updated),
+                ),
+                onConfigureColumns: () => showColumnsConfigDialog(
+                  context: context,
+                  settings: _invoiceSettings,
+                  onSaved: (updated) => setState(() => _invoiceSettings = updated),
+                ),
+              ),
               const SizedBox(height: AppSpacing.md),
               LineItemsFormSection(
                 lineItems: _lineItems,
-                onItemAdded: (item) =>
-                    setState(() => _lineItems = [..._lineItems, item]),
+                onItemAdded: (item) {
+                  final gstSettings = _invoiceSettings['gst'] as Map<String, dynamic>?;
+                  final defaultGstRate = gstSettings?['defaultRate'] as double? ?? 12.0;
+                  final updatedItem = item.copyWith(
+                    gstPercent: (item.gstPercent == 0.0 || item.gstPercent == 12.0) ? defaultGstRate : item.gstPercent,
+                  );
+                  setState(() => _lineItems = [..._lineItems, updatedItem]);
+                },
                 onItemChanged: (updated) {
                   setState(() {
                     _lineItems = [
@@ -168,13 +241,14 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                     ];
                   });
                 },
-                onItemDeleted: (item) {
+                onItemDeleted: (deleted) {
                   setState(() {
                     _lineItems =
-                        _lineItems.where((li) => li.id != item.id).toList();
+                        _lineItems.where((li) => li.id != deleted.id).toList();
                   });
                 },
                 onClearAll: () => setState(() => _lineItems = []),
+                settings: _invoiceSettings,
               ),
               const SizedBox(height: AppSpacing.md),
               _buildInvoiceTypeToggle(),
@@ -244,93 +318,171 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                 .copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: AppSpacing.sm),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.add, size: 16, color: AppColors.primary),
-              const SizedBox(width: 4),
-              Text(
-                'Add Subtitle',
-                style:
-                    AppTextStyles.bodyMedium.copyWith(color: AppColors.primary),
+          if (_isEditingSubtitle)
+            SizedBox(
+              width: 300,
+              child: TextFormField(
+                controller: _subtitleCtrl,
+                style: AppTextStyles.bodyMedium,
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                  hintText: 'e.g. Tax Invoice, Proforma',
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.check, color: Colors.green, size: 18),
+                    onPressed: () {
+                      setState(() {
+                        _subtitle = _subtitleCtrl.text.trim();
+                        _isEditingSubtitle = false;
+                      });
+                    },
+                  ),
+                ),
+                onFieldSubmitted: (v) {
+                  setState(() {
+                    _subtitle = v.trim();
+                    _isEditingSubtitle = false;
+                  });
+                },
               ),
-            ],
-          ),
+            )
+          else
+            InkWell(
+              onTap: () {
+                setState(() {
+                  _subtitleCtrl.text = _subtitle ?? '';
+                  _isEditingSubtitle = true;
+                });
+              },
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: _subtitle == null || _subtitle!.isEmpty
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add, size: 16, color: AppColors.primary),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Add Subtitle',
+                            style: AppTextStyles.bodyMedium
+                                .copyWith(color: AppColors.primary),
+                          ),
+                        ],
+                      )
+                    : Text(
+                        _subtitle!,
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          color: AppColors.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+              ),
+            ),
         ],
       ),
     );
   }
 
+  Future<void> _pickLogo() async {
+    final base64 = await export_helper.pickLogoImage();
+    if (base64 != null) {
+      setState(() {
+        _logoBase64 = base64;
+      });
+    }
+  }
+
   Widget _businessLogoBlock() {
+    final hasLogo = _logoBase64 != null && _logoBase64!.isNotEmpty;
+    Uint8List? logoBytes;
+    if (hasLogo) {
+      try {
+        final commaIdx = _logoBase64!.indexOf(',');
+        final pureBase64 = commaIdx != -1
+            ? _logoBase64!.substring(commaIdx + 1)
+            : _logoBase64!;
+        logoBytes = base64Decode(pureBase64);
+      } catch (e) {
+        logoBytes = null;
+      }
+    }
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.xl, horizontal: AppSpacing.lg),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppBorderRadius.md),
         border: Border.all(color: AppColors.border),
       ),
-      child: Column(
-        children: [
-          Icon(Icons.image_outlined, size: 40, color: AppColors.textHint),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Add Business Logo',
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
-            ),
+      child: InkWell(
+        onTap: _pickLogo,
+        borderRadius: BorderRadius.circular(AppBorderRadius.md),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+              vertical: AppSpacing.xl, horizontal: AppSpacing.lg),
+          child: Column(
+            children: [
+              if (hasLogo && logoBytes != null) ...[
+                Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 120),
+                      child: Image.memory(
+                        logoBytes,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: CircleAvatar(
+                        radius: 14,
+                        backgroundColor: Colors.red.withValues(alpha: 0.8),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: const Icon(Icons.delete, size: 14, color: Colors.white),
+                          onPressed: () {
+                            setState(() {
+                              _logoBase64 = null;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Change Business Logo',
+                  style: AppTextStyles.caption.copyWith(color: AppColors.primary),
+                ),
+              ] else ...[
+                Icon(Icons.image_outlined, size: 40, color: AppColors.textHint),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Add Business Logo',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Resolution up to 1080×1080px.\nPNG or JPEG file.',
+                  style: AppTextStyles.caption.copyWith(color: AppColors.textHint),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ],
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Resolution up to 1080×1080px.\nPNG or JPEG file.',
-            style: AppTextStyles.caption.copyWith(color: AppColors.textHint),
-            textAlign: TextAlign.center,
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _configButtons() {
-    return Column(
-      children: [
-        _configBtn(Icons.percent_rounded, 'Configure GST'),
-        const SizedBox(height: AppSpacing.sm),
-        _configBtn(
-            Icons.format_list_numbered_rounded, 'Number and Currency Format'),
-        const SizedBox(height: AppSpacing.sm),
-        _configBtn(Icons.table_chart_outlined, 'Edit Columns/Formulas'),
-      ],
-    );
-  }
 
-  Widget _configBtn(IconData icon, String label) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: () {},
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(color: AppColors.border),
-          minimumSize: const Size(0, 48),
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppBorderRadius.md),
-          ),
-        ),
-        icon: Icon(icon, size: 18, color: AppColors.primary),
-        label: Text(
-          label,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
 
   // ── Existing toggle (unchanged) ──────────────────────────────────────────────
 
@@ -408,7 +560,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
     final invoice = InvoiceModel(
       id: 'inv-${DateTime.now().millisecondsSinceEpoch}',
-      invoiceNo: '',
+      invoiceNo: _invoiceNoCtrl.text.trim(),
       customerId: _selectedCustomer!.id,
       customerName: _selectedCustomer!.name,
       customerMobile: _selectedCustomer!.mobile,
@@ -420,32 +572,51 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       paymentMethod: _paymentMethod,
       paidAmount: _paidAmount,
       invoiceType: _invoiceType,
+      subtitle: _subtitle,
+      logo: _logoBase64,
+      settings: _invoiceSettings,
     );
 
-    final saved =
-        await ref.read(invoiceNotifierProvider.notifier).saveInvoice(invoice);
+    try {
+      final saved =
+          await ref.read(invoiceNotifierProvider.notifier).saveInvoice(invoice);
 
-    if (!mounted) return null;
-    if (isSend) {
-      setState(() => _isSavingAndSending = false);
-    } else {
-      setState(() => _isSaving = false);
-    }
+      if (!mounted) return null;
+      if (isSend) {
+        setState(() => _isSavingAndSending = false);
+      } else {
+        setState(() => _isSaving = false);
+      }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${saved.invoiceNo} created for ${saved.customerName}!',
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${saved.invoiceNo} created for ${saved.customerName}!',
+          ),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
         ),
-        backgroundColor: AppColors.success,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+      );
 
-    if (navigate) {
-      context.go(AppRoutes.invoices);
+      if (navigate) {
+        context.go(AppRoutes.invoices);
+      }
+      return saved;
+    } catch (e) {
+      if (!mounted) return null;
+      setState(() {
+        _isSaving = false;
+        _isSavingAndSending = false;
+      });
+      String errorMsg = e.toString();
+      if (errorMsg.contains('UNIQUE constraint failed') || errorMsg.contains('already exists')) {
+        errorMsg = 'Invoice number already exists. Please enter a unique number.';
+      } else if (errorMsg.startsWith('Exception: ')) {
+        errorMsg = errorMsg.replaceFirst('Exception: ', '');
+      }
+      _showError(errorMsg);
+      return null;
     }
-    return saved;
   }
 
   Future<void> _saveAndSendInvoice() async {
@@ -504,7 +675,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg),
+        content: Text(
+          msg,
+          style: TextStyle(color: AppColors.textOnPrimary),
+        ),
         backgroundColor: AppColors.error,
         behavior: SnackBarBehavior.floating,
       ),

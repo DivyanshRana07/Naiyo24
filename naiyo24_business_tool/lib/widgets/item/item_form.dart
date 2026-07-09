@@ -283,6 +283,7 @@ class _ItemFormState extends ConsumerState<ItemForm> {
           _isEditing
               ? '${item.name} updated successfully.'
               : '${item.name} added to inventory.',
+          style: TextStyle(color: AppColors.textOnPrimary),
         ),
         backgroundColor: AppColors.success,
       ),

@@ -259,6 +259,7 @@ class _CustomerFormState extends ConsumerState<CustomerForm> {
           _isEditing
               ? '${customer.name} updated successfully.'
               : '${customer.name} added to directory.',
+          style: TextStyle(color: AppColors.textOnPrimary),
         ),
         backgroundColor: AppColors.success,
       ),

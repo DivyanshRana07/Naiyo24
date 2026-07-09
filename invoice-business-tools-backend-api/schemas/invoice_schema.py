@@ -10,6 +10,9 @@ class InvoiceCreateRequest(BaseModel):
     invoice_date: date = Field(default_factory=date.today)
     due_date: Optional[date] = None
     notes: Optional[str] = None
+    subtitle: Optional[str] = None
+    logo: Optional[str] = None
+    settings: Optional[dict] = None
     business: PartyDetails
     customer: PartyDetails
     items: List[InvoiceItemInput]
@@ -53,6 +56,9 @@ class InvoiceResponse(BaseModel):
     due_date: Optional[date] = None
     transaction_type: str
     notes: Optional[str] = None
+    subtitle: Optional[str] = None
+    logo: Optional[str] = None
+    settings: Optional[dict] = None
     business_details: PartyDetails
     customer_details: PartyDetails
     tax_breakdown: dict

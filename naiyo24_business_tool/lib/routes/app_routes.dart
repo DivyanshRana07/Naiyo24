@@ -18,6 +18,7 @@ abstract final class AppRoutes {
   static const String invoiceDetail = '/invoices/:id';
   static const String returnItems = '/invoices/:id/return';
   static const String newQuotation = '/quotations/new';
+  static const String quotationDetail = '/quotations/:id';
   static const String newPurchaseOrder = '/purchase-orders/new';
   static const String newVendor = '/vendors/new';
   static const String newClient = '/clients/new';
@@ -51,6 +52,8 @@ abstract final class AppRoutes {
   static String invoiceDetailPath(String id) => '/invoices/$id';
 
   static String returnItemsPath(String id) => '/invoices/$id/return';
+
+  static String quotationDetailPath(String id) => '/quotations/$id';
 
   AppRoutes._();
 }

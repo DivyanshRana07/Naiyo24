@@ -464,15 +464,15 @@ class FormActionButtons extends StatelessWidget {
               ? SizedBox(
                   width: buttonHeight * 0.35,
                   height: buttonHeight * 0.35,
-                  child: const CircularProgressIndicator(
+                  child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Colors.white,
+                    color: resolvedSaveColor == AppColors.primary ? AppColors.textOnPrimary : Colors.white,
                   ),
                 )
-              : const Icon(Icons.save_rounded, size: 18, color: Colors.white),
+              : Icon(Icons.save_rounded, size: 18, color: resolvedSaveColor == AppColors.primary ? AppColors.textOnPrimary : Colors.white),
           label: Text(
             isSaving ? 'Saving...' : saveLabel,
-            style: AppTextStyles.labelLarge.copyWith(color: Colors.white),
+            style: AppTextStyles.labelLarge.copyWith(color: resolvedSaveColor == AppColors.primary ? AppColors.textOnPrimary : Colors.white),
           ),
         ),
         if (onSaveAndSend != null) ...[

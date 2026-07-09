@@ -21,3 +21,5 @@ void downloadBytes({
 void shareToWhatsApp({required String text}) {
   impl.shareToWhatsApp(text: text);
 }
+
+Future<String?> pickLogoImage() => impl.pickLogoImage();

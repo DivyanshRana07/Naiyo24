@@ -19,6 +19,9 @@ class QuotationModel {
     this.notes,
     this.attachedFilePath,
     this.status = QuotationStatus.draft,
+    this.subtitle,
+    this.logo,
+    this.settings,
   });
 
   final String id;
@@ -46,6 +49,9 @@ class QuotationModel {
   final String? attachedFilePath;
 
   final QuotationStatus status;
+  final String? subtitle;
+  final String? logo;
+  final Map<String, dynamic>? settings;
 
   double get subTotal =>
       lineItems.fold(0, (sum, item) => sum + (item.rate * item.qty));
@@ -77,6 +83,9 @@ class QuotationModel {
     String? notes,
     String? attachedFilePath,
     QuotationStatus? status,
+    String? subtitle,
+    String? logo,
+    Map<String, dynamic>? settings,
   }) {
     return QuotationModel(
       id: id ?? this.id,
@@ -96,6 +105,9 @@ class QuotationModel {
       notes: notes ?? this.notes,
       attachedFilePath: attachedFilePath ?? this.attachedFilePath,
       status: status ?? this.status,
+      subtitle: subtitle ?? this.subtitle,
+      logo: logo ?? this.logo,
+      settings: settings ?? this.settings,
     );
   }
 
@@ -117,6 +129,9 @@ class QuotationModel {
         'notes': notes,
         'attachedFilePath': attachedFilePath,
         'status': status.name,
+        'subtitle': subtitle,
+        'logo': logo,
+        'settings': settings,
       };
 
   factory QuotationModel.fromJson(Map<String, dynamic> json) {
@@ -157,6 +172,9 @@ class QuotationModel {
         status: json['status'] != null
             ? QuotationStatus.values.byName((json['status'] as String).toLowerCase())
             : QuotationStatus.draft,
+        subtitle: json['subtitle'] as String?,
+        logo: json['logo'] as String?,
+        settings: json['settings'] as Map<String, dynamic>?,
       );
     } catch (e) {
       // Log the error with the JSON data for debugging

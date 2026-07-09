@@ -26,6 +26,10 @@ def create_quotation_service(db: Session, user_id: int, data):
         valid_until=data.valid_until,
         payment_terms=data.payment_terms,
         currency=data.currency,
+        
+        subtitle=data.subtitle,
+        logo=data.logo,
+        settings=data.settings,
 
         total=total_amount,
         status=data.status

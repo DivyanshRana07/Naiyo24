@@ -39,7 +39,7 @@ class SendOptionsDialog extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppBorderRadius.xl),
       ),
       elevation: 8,
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.background,
       child: Container(
         width: 400,
         padding: const EdgeInsets.all(AppSpacing.xl),

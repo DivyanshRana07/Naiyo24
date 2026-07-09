@@ -57,6 +57,9 @@ class InvoiceCreateRequest(BaseModel):
     due_date: Optional[date] = None
     invoice_type: Literal["regular", "proforma"] = "regular"
     notes: Optional[str] = None
+    subtitle: Optional[str] = None
+    logo: Optional[str] = None
+    settings: Optional[dict] = None
     business: PartyDetails
     customer: PartyDetails
     items: list[InvoiceItemInput]
@@ -112,11 +115,14 @@ class InvoiceComputedData(BaseModel):
     due_date: Optional[date] = None
     transaction_type: Literal["intra_state", "inter_state"]
     invoice_type: Literal["regular", "proforma"] = "regular"
+    notes: Optional[str] = None
+    subtitle: Optional[str] = None
+    logo: Optional[str] = None
+    settings: Optional[dict] = None
     business: PartyDetails
     customer: PartyDetails
     items: list[InvoiceItemComputed]
     totals: TaxBreakdown
-    notes: Optional[str] = None
     payment_method: Optional[str] = None
     paid_amount: float = 0.00
     round_off: float = 0.00

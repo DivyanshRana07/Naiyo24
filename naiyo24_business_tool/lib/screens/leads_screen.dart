@@ -22,9 +22,9 @@ class LeadsScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(AppRoutes.newLead),
         backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('New Lead',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w400)),
+        icon: Icon(Icons.add, color: AppColors.textOnPrimary),
+        label: Text('New Lead',
+            style: TextStyle(color: AppColors.textOnPrimary, fontWeight: FontWeight.w400)),
       ),
       body: RefreshIndicator(
         onRefresh: () => notifier.loadLeads(),
@@ -427,7 +427,10 @@ class LeadsScreen extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.textOnPrimary,
+            ),
             child: const Text('Delete'),
           ),
         ],

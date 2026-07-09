@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:naiyo24_business_tool/models/customer_model.dart';
 import 'package:naiyo24_business_tool/models/line_item_model.dart';
+import 'package:naiyo24_business_tool/notifiers/business_profile_notifier.dart';
 import 'package:naiyo24_business_tool/widgets/customer/customer_details_card.dart';
 import 'package:naiyo24_business_tool/widgets/invoice/invoice_autocomplete_fields.dart';
 import 'package:naiyo24_business_tool/widgets/invoice/invoice_line_item_row.dart';
@@ -44,12 +46,14 @@ class InvoiceMetaRow extends StatelessWidget {
     required this.dueDate,
     required this.onInvoiceDatePicked,
     required this.onDueDatePicked,
+    required this.invoiceNoController,
   });
 
   final DateTime invoiceDate;
   final DateTime dueDate;
   final ValueChanged<DateTime> onInvoiceDatePicked;
   final ValueChanged<DateTime> onDueDatePicked;
+  final TextEditingController invoiceNoController;
 
   static const _months = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -69,7 +73,7 @@ class InvoiceMetaRow extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _metaRow('Invoice No*', 'A00001'),
+          _inputRow('Invoice No*', invoiceNoController),
           Divider(height: 1, thickness: 1, color: AppColors.border),
           _tapRow(context, 'Invoice Date*', _fmt(invoiceDate), invoiceDate,
               onInvoiceDatePicked),
@@ -79,6 +83,40 @@ class InvoiceMetaRow extends StatelessWidget {
           _metaRow(
             'Currency*',
             'Indian Rupee (INR, ₹)',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _inputRow(String label, TextEditingController controller) {
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 8),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 130,
+            child: Text(label,
+                style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary)),
+          ),
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              style: AppTextStyles.bodyMedium,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                isDense: true,
+                hintText: 'e.g. INV-00001',
+              ),
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+            ),
           ),
         ],
       ),
@@ -142,7 +180,7 @@ class InvoiceMetaRow extends StatelessWidget {
 // ── CustomerFormSection ────────────────────────────────────────────────────────
 // Restyled to Refrens-style: Billed By (static) + Billed To (existing autocomplete).
 
-class CustomerFormSection extends StatelessWidget {
+class CustomerFormSection extends ConsumerWidget {
   const CustomerFormSection({
     super.key,
     required this.selectedCustomer,
@@ -153,7 +191,16 @@ class CustomerFormSection extends StatelessWidget {
   final ValueChanged<CustomerModel?> onSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final businessProfile = ref.watch(businessProfileNotifierProvider);
+    final businessName = businessProfile.businessName.isNotEmpty
+        ? businessProfile.businessName
+        : 'Your Business';
+    final businessAddress = businessProfile.address.isNotEmpty
+        ? businessProfile.address
+        : 'India';
+    final initials = businessName.isNotEmpty ? businessName[0].toUpperCase() : 'B';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -187,15 +234,15 @@ class CustomerFormSection extends StatelessWidget {
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(AppBorderRadius.sm),
                 ),
-                child: const Center(
-                  child: Text('A',
+                child: Center(
+                  child: Text(initials,
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold)),
+                          color: AppColors.textOnPrimary, fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: Text('Your Business',
+                child: Text(businessName,
                     style: AppTextStyles.bodyMedium.copyWith(
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary)),
@@ -214,7 +261,7 @@ class CustomerFormSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text('Your Business\nIndia',
+                child: Text(businessAddress,
                     style: AppTextStyles.bodyMedium
                         .copyWith(color: AppColors.textPrimary)),
               ),
@@ -272,11 +319,11 @@ class CustomerFormSection extends StatelessWidget {
                           BorderRadius.circular(AppBorderRadius.full),
                     ),
                   ),
-                  icon: const Icon(Icons.add_circle_outline,
-                      size: 16, color: Colors.white),
-                  label: const Text('Add New Client',
+                  icon: Icon(Icons.add_circle_outline,
+                      size: 16, color: AppColors.textOnPrimary),
+                  label: Text('Add New Client',
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w600)),
+                          color: AppColors.textOnPrimary, fontWeight: FontWeight.w600)),
                 ),
               ],
             ),
@@ -302,6 +349,7 @@ class LineItemsFormSection extends StatelessWidget {
     required this.onItemChanged,
     required this.onItemDeleted,
     required this.onClearAll,
+    this.settings,
   });
 
   final List<InvoiceLineItem> lineItems;
@@ -309,6 +357,7 @@ class LineItemsFormSection extends StatelessWidget {
   final void Function(InvoiceLineItem) onItemChanged;
   final void Function(InvoiceLineItem) onItemDeleted;
   final VoidCallback onClearAll;
+  final Map<String, dynamic>? settings;
 
   @override
   Widget build(BuildContext context) {
@@ -351,6 +400,13 @@ class LineItemsFormSection extends StatelessWidget {
                           index: i,
                           onChanged: onItemChanged,
                           onDelete: () => onItemDeleted(item),
+                          onCopy: () {
+                            final copied = item.copyWith(
+                              id: '${item.itemId}-${DateTime.now().millisecondsSinceEpoch}-copy',
+                            );
+                            onItemAdded(copied);
+                          },
+                          settings: settings,
                         ),
                       ],
                     );
@@ -358,7 +414,7 @@ class LineItemsFormSection extends StatelessWidget {
                 Divider(height: 1, thickness: 1, color: AppColors.border),
                 // Add New Line button
                 InkWell(
-                  onTap: () => AddItemServiceDialog.show(context),
+                  onTap: () => AddItemServiceDialog.show(context, onItemCreated: onItemAdded),
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.md),
                     child: Row(
@@ -392,7 +448,7 @@ class LineItemsFormSection extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: () => AddItemServiceDialog.show(context),
+              onPressed: () => AddItemServiceDialog.show(context, onItemCreated: onItemAdded),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 minimumSize: const Size(0, 48),
@@ -420,7 +476,7 @@ class LineItemsFormSection extends StatelessWidget {
                   child: ServiceDropdownSelector(onSelected: onItemAdded)),
               const SizedBox(width: AppSpacing.sm),
               FilledButton.icon(
-                onPressed: () => AddItemServiceDialog.show(context),
+                onPressed: () => AddItemServiceDialog.show(context, onItemCreated: onItemAdded),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   minimumSize: const Size(0, 48),
@@ -457,52 +513,6 @@ class LineItemsFormSection extends StatelessWidget {
     );
   }
 
-  // Kept for reference — no longer called by build() above.
-  Widget _lineItemsTable() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-        border: Border.all(color: AppColors.border),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          const double minTableWidth = 720;
-          final double tableWidth = constraints.maxWidth > minTableWidth
-              ? constraints.maxWidth
-              : minTableWidth;
-
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: tableWidth,
-                maxWidth: tableWidth,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const LineItemsHeader(),
-                  ...lineItems.asMap().entries.map((entry) {
-                    final i = entry.key;
-                    final item = entry.value;
-                    return LineItemRow(
-                      key: ValueKey(item.id),
-                      item: item,
-                      index: i,
-                      onChanged: onItemChanged,
-                      onDelete: () => onItemDeleted(item),
-                    );
-                  }),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
 
   Widget emptyItemsPlaceholder({required String hint}) {
     return Container(

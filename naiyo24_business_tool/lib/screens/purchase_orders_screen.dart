@@ -95,7 +95,7 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
             label: const Text('Add Purchase Order'),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
+              foregroundColor: AppColors.textOnPrimary,
               padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.xl, vertical: AppSpacing.md),
               shape: RoundedRectangleBorder(
@@ -276,7 +276,7 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.xl),
                     decoration: BoxDecoration(
-                      gradient: AppGradients.navbar,
+                      gradient: AppGradients.primaryButton,
                       borderRadius:
                           BorderRadius.circular(AppBorderRadius.xl),
                       boxShadow: [

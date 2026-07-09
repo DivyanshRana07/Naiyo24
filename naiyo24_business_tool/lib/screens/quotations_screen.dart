@@ -196,11 +196,11 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.md)),
             ),
-            icon: const Icon(Icons.add_rounded,
-                size: 18, color: Colors.white),
+            icon: Icon(Icons.add_rounded,
+                size: 18, color: AppColors.textOnPrimary),
             label: Text('Create Quotation',
                 style:
-                    AppTextStyles.labelLarge.copyWith(color: Colors.white)),
+                    AppTextStyles.labelLarge.copyWith(color: AppColors.textOnPrimary)),
           ),
         ],
       ),
@@ -364,6 +364,21 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
                             .copyWith(fontWeight: FontWeight.w400))),
                     DataCell(_buildStatusBadge(statusLabel, statusColor)),
                     DataCell(Row(children: [
+                      Tooltip(
+                        message: 'View',
+                        child: InkWell(
+                          onTap: () =>
+                              context.push(AppRoutes.quotationDetailPath(q.id)),
+                          borderRadius:
+                              BorderRadius.circular(AppBorderRadius.sm),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: Icon(Icons.visibility_rounded,
+                                size: 18, color: AppColors.primary),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
                       Tooltip(
                         message: 'Change Status',
                         child: InkWell(

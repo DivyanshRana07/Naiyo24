@@ -188,6 +188,7 @@ class _VendorFormState extends ConsumerState<VendorForm> {
               _isEditing
                   ? 'Vendor updated successfully'
                   : 'Vendor added successfully',
+              style: TextStyle(color: AppColors.textOnPrimary),
             ),
             backgroundColor: AppColors.success,
           ),
@@ -197,7 +198,10 @@ class _VendorFormState extends ConsumerState<VendorForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(
+              'Error: $e',
+              style: TextStyle(color: AppColors.textOnPrimary),
+            ),
             backgroundColor: AppColors.error,
           ),
         );

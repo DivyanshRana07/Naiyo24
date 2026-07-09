@@ -113,6 +113,7 @@ class InvoiceNotifier extends AutoDisposeNotifier<List<InvoiceModel>> {
       }).toList();
 
       final saved = await ref.read(invoiceApiServiceProvider).createInvoice(
+        invoiceNo: invoice.invoiceNo,
         businessDetails: businessDetails,
         customerDetails: customerDetails,
         items: items,
@@ -123,6 +124,9 @@ class InvoiceNotifier extends AutoDisposeNotifier<List<InvoiceModel>> {
         paidAmount: invoice.paidAmount,
         roundOff: invoice.roundOff,
         status: statusVal.name,
+        subtitle: invoice.subtitle,
+        logo: invoice.logo,
+        settings: invoice.settings,
       );
 
       final withCustomerId = saved.copyWith(customerId: invoice.customerId);
