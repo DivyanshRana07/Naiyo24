@@ -1,0 +1,29 @@
+# Python cache/build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE/OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Logs and runtime files
+logs/
+*.log
+*.pid
+
+# Alembic generated versions can be tracked as needed.
+# Keep .env tracked in this repository as requested.
+!.env
