@@ -117,7 +117,10 @@ class SendOptionsDialog extends ConsumerWidget {
                   }
                 }
                 final finalNo = docNo ?? invoiceNo;
-                final isLocal = finalId?.startsWith('inv-local-') ?? true;
+                final isQuotation = filenamePrefix.startsWith('quotation') ||
+                    title.toLowerCase().contains('quotation') ||
+                    savedInstance is QuotationModel;
+                final isLocal = isQuotation || (finalId?.startsWith('inv-local-') ?? true);
 
                 String finalPdfContent = pdfContent;
                 if (savedInstance != null && pdfContentBuilder != null) {
