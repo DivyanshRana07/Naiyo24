@@ -259,6 +259,7 @@ class Quotation(Base):
     valid_until = Column(Date, nullable=True)
     payment_terms = Column(String(150), nullable=True)
     currency = Column(String(20), default="INR")
+    notes = Column(String(500), nullable=True)
     
     subtitle = Column(String(200), nullable=True)
     logo = Column(String, nullable=True)

@@ -25,6 +25,17 @@ class ActivityNotifier extends AutoDisposeAsyncNotifier<List<ActivityModel>> {
       return await loadActivities();
     });
   }
+
+  Future<void> deleteActivity(int activityId) async {
+    try {
+      await ActivityService.deleteActivity(activityId);
+      // Refresh activities after deletion
+      await refresh();
+    } catch (e) {
+      AppLogger.error('Failed to delete activity', error: e);
+      rethrow;
+    }
+  }
 }
 
 final activityNotifierProvider =

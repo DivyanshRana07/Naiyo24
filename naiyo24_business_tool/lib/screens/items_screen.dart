@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:naiyo24_business_tool/notifiers/auth_notifier.dart';
 import 'package:naiyo24_business_tool/notifiers/item_notifier.dart';
@@ -13,6 +14,8 @@ import 'package:naiyo24_business_tool/widgets/common/side_navigation.dart';
 import 'package:naiyo24_business_tool/widgets/common/dashboard_app_bar.dart';
 import 'package:naiyo24_business_tool/widgets/common/export_dialog.dart';
 import 'package:naiyo24_business_tool/widgets/item/item_list_widgets.dart';
+import 'package:naiyo24_business_tool/api_services/api_routes.dart';
+import 'package:naiyo24_business_tool/utils/export_helper.dart';
 
 class ItemsScreen extends ConsumerStatefulWidget {
   const ItemsScreen({super.key});
@@ -73,6 +76,20 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen>
         whatsappText: waContent,
         pdfContent: pdfContent,
         filenamePrefix: 'items',
+        onExportPdf: () async {
+          final response = await http.get(
+            Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.itemExportListPdf}'),
+          );
+          if (response.statusCode == 200) {
+            downloadBytes(
+              filename: 'Item-List-Export.pdf',
+              bytes: response.bodyBytes,
+              mimeType: 'application/pdf',
+            );
+          } else {
+            throw Exception('Failed to export item list PDF');
+          }
+        },
       ),
     );
   }
@@ -108,6 +125,20 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen>
         whatsappText: waContent,
         pdfContent: pdfContent,
         filenamePrefix: 'services',
+        onExportPdf: () async {
+          final response = await http.get(
+            Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.serviceExportListPdf}'),
+          );
+          if (response.statusCode == 200) {
+            downloadBytes(
+              filename: 'Service-List-Export.pdf',
+              bytes: response.bodyBytes,
+              mimeType: 'application/pdf',
+            );
+          } else {
+            throw Exception('Failed to export service list PDF');
+          }
+        },
       ),
     );
   }

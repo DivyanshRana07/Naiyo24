@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
+import io
 from sqlalchemy.orm import Session
 from db import get_db
 from models.db_models import User
@@ -11,6 +13,7 @@ from services.customer_service import (
     update_customer_service,
     delete_customer_service
 )
+from services.gst_invoice_generator.list_pdf_service import ListPDFService
 
 router = APIRouter(prefix="/customers", tags=["Customers"])
 
@@ -50,6 +53,39 @@ def list_customers(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch customers: {str(e)}"
         )
+
+
+@router.get("/export-list-pdf")
+def export_customer_list_pdf(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Export all customers as a formatted PDF list"""
+    try:
+        customers = list_customers_service(db, current_user.id)
+        
+        if not customers:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No customers found"
+            )
+        
+        pdf_bytes = ListPDFService.render_customer_list_pdf(customers)
+        
+        pdf_stream = io.BytesIO(pdf_bytes)
+        filename = "Customer-List-Export.pdf"
+        
+        return StreamingResponse(
+            pdf_stream,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate customer list PDF: {str(e)}"
+        )
+
 
 @router.get("/{id}", response_model=dict)
 def get_customer(

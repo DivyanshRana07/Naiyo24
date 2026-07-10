@@ -23,4 +23,20 @@ class ActivityService {
       throw Exception('Error fetching activities: $e');
     }
   }
+
+  static Future<void> deleteActivity(int activityId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.activityDelete(activityId.toString())}?user_id=1'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode != 200) {
+        final errorBody = response.body;
+        throw Exception('Failed to delete activity (${response.statusCode}): $errorBody');
+      }
+    } catch (e) {
+      throw Exception('Error deleting activity: $e');
+    }
+  }
 }

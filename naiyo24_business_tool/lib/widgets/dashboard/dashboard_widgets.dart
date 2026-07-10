@@ -130,6 +130,8 @@ class ActivityCard extends StatefulWidget {
     required this.time,
     required this.icon,
     required this.color,
+    this.activityId,
+    this.onDelete,
   });
 
   final String title;
@@ -137,6 +139,8 @@ class ActivityCard extends StatefulWidget {
   final String time;
   final IconData icon;
   final Color color;
+  final int? activityId;
+  final VoidCallback? onDelete;
 
   @override
   State<ActivityCard> createState() => _ActivityCardState();
@@ -150,9 +154,7 @@ class _ActivityCardState extends State<ActivityCard> {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
+      child: Material(
         color: _isHovered ? AppColors.surfaceHover : Colors.transparent,
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(
@@ -174,9 +176,24 @@ class _ActivityCardState extends State<ActivityCard> {
             widget.subtitle,
             style: AppTextStyles.bodyMedium,
           ),
-          trailing: Text(
-            widget.time,
-            style: AppTextStyles.caption,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.time,
+                style: AppTextStyles.caption,
+              ),
+              if (widget.onDelete != null) ...[
+                const SizedBox(width: AppSpacing.sm),
+                IconButton(
+                  icon: Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.error),
+                  onPressed: widget.onDelete,
+                  tooltip: 'Delete activity',
+                  padding: const EdgeInsets.all(8),
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ],
           ),
         ),
       ),

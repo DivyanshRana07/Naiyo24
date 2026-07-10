@@ -150,7 +150,7 @@ class InvoicePDFService:
             customer=c_details,
             items=computed_items,
             totals=totals,
-            notes=quotation.notes,
+            notes=quotation.notes,  # Now safe to use directly
             subtitle=quotation.subtitle,
             logo=quotation.logo,
             settings=quotation.settings
@@ -179,13 +179,13 @@ class InvoicePDFService:
             except Exception:
                 pass
 
-        # Title
+        # Title with dark gray/black color
         pdf.set_font("Helvetica", "B", 18)
-        pdf.set_text_color(40, 40, 40)
+        pdf.set_text_color(30, 30, 30)  # Very dark gray/black
         pdf.set_xy(110, 15)
         pdf.cell(90, 8, title_override, align="R", new_x="LMARGIN", new_y="NEXT")
 
-        # Document Meta
+        # Document Meta with enhanced information
         pdf.set_font("Helvetica", "", 9)
         pdf.set_text_color(100, 100, 100)
         
@@ -202,86 +202,140 @@ class InvoicePDFService:
         if invoice.due_date:
             pdf.set_xy(110, 34)
             pdf.cell(90, 5, f"{doc_due_label}: {invoice.due_date.strftime('%d-%b-%Y')}", align="R", new_x="LMARGIN", new_y="NEXT")
+        
+        # Add transaction type if invoice
+        if title_override != "QUOTATION":
+            pdf.set_xy(110, 39)
+            trans_type = "Intra State" if invoice.transaction_type == "intra_state" else "Inter State"
+            pdf.cell(90, 5, f"Transaction: {trans_type}", align="R", new_x="LMARGIN", new_y="NEXT")
+            
+            # Add status
+            pdf.set_xy(110, 44)
+            status_display = invoice.status.upper() if hasattr(invoice, 'status') else "DUE"
+            pdf.cell(90, 5, f"Status: {status_display}", align="R", new_x="LMARGIN", new_y="NEXT")
 
-        start_y = 50 if logo_drawn else 40
+        # Add subtitle if available
+        if invoice.subtitle:
+            pdf.set_xy(10, pdf.get_y() + 2)
+            pdf.set_font("Helvetica", "I", 9)
+            pdf.set_text_color(120, 120, 120)
+            pdf.multi_cell(190, 4, invoice.subtitle, align="C")
+
+        start_y = 58 if logo_drawn else 48
         pdf.set_y(start_y)
 
-        # Party Cards (Billed By / Billed To)
-        pdf.set_fill_color(248, 248, 248)
-        pdf.set_draw_color(220, 220, 220)
-        card_h = 42
+        # Party Cards (Billed By / Billed To) with light gray background
+        pdf.set_fill_color(245, 245, 245)  # Light gray background
+        pdf.set_draw_color(180, 180, 180)  # Medium gray border
+        card_h = 50
         pdf.rect(10, start_y, 92, card_h, style="DF")
         pdf.rect(108, start_y, 92, card_h, style="DF")
 
         # Billed By Card
         pdf.set_xy(13, start_y + 3)
         pdf.set_font("Helvetica", "B", 10)
-        pdf.set_text_color(50, 50, 50)
+        pdf.set_text_color(40, 40, 40)  # Dark gray text for header
         pdf.cell(86, 5, "Billed By:", new_x="LMARGIN", new_y="NEXT")
         
-        pdf.set_font("Helvetica", "", 9)
-        pdf.set_text_color(80, 80, 80)
+        pdf.set_font("Helvetica", "B", 9)
+        pdf.set_text_color(60, 60, 60)
         pdf.set_x(13)
         pdf.cell(86, 5, invoice.business.name, new_x="LMARGIN", new_y="NEXT")
+        
+        pdf.set_font("Helvetica", "", 8)
+        pdf.set_text_color(80, 80, 80)
         
         address_line = invoice.business.address_line_1 or invoice.business.address or ""
         if address_line:
             pdf.set_x(13)
-            pdf.multi_cell(86, 4, address_line[:80])
+            pdf.multi_cell(86, 4, address_line[:100])
+            
+        if invoice.business.city or invoice.business.state_name or invoice.business.postal_code:
+            city_state = []
+            if invoice.business.city:
+                city_state.append(invoice.business.city)
+            if invoice.business.state_name:
+                city_state.append(invoice.business.state_name)
+            if invoice.business.postal_code:
+                city_state.append(invoice.business.postal_code)
+            pdf.set_x(13)
+            pdf.cell(86, 4, ", ".join(city_state), new_x="LMARGIN", new_y="NEXT")
             
         if invoice.business.phone:
             pdf.set_x(13)
-            pdf.cell(86, 5, f"Phone: {invoice.business.phone}", new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(86, 4, f"Ph: {invoice.business.phone}", new_x="LMARGIN", new_y="NEXT")
+            
+        if invoice.business.email:
+            pdf.set_x(13)
+            pdf.cell(86, 4, f"Email: {invoice.business.email}", new_x="LMARGIN", new_y="NEXT")
             
         if invoice.business.gstin:
             pdf.set_x(13)
-            pdf.set_font("Helvetica", "B", 9)
-            pdf.cell(86, 5, f"GSTIN: {invoice.business.gstin}", new_x="LMARGIN", new_y="NEXT")
-            pdf.set_font("Helvetica", "", 9)
+            pdf.set_font("Helvetica", "B", 8)
+            pdf.cell(86, 4, f"GSTIN: {invoice.business.gstin}", new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font("Helvetica", "", 8)
 
         # Billed To Card
         pdf.set_xy(111, start_y + 3)
         pdf.set_font("Helvetica", "B", 10)
-        pdf.set_text_color(50, 50, 50)
+        pdf.set_text_color(40, 40, 40)  # Dark gray text for header
         pdf.cell(86, 5, "Billed To:", new_x="LMARGIN", new_y="NEXT")
         
-        pdf.set_font("Helvetica", "", 9)
-        pdf.set_text_color(80, 80, 80)
+        pdf.set_font("Helvetica", "B", 9)
+        pdf.set_text_color(60, 60, 60)
         pdf.set_x(111)
         pdf.cell(86, 5, invoice.customer.name, new_x="LMARGIN", new_y="NEXT")
+        
+        pdf.set_font("Helvetica", "", 8)
+        pdf.set_text_color(80, 80, 80)
         
         c_address = invoice.customer.address_line_1 or invoice.customer.address or ""
         if c_address:
             pdf.set_x(111)
-            pdf.multi_cell(86, 4, c_address[:80])
+            pdf.multi_cell(86, 4, c_address[:100])
+            
+        if invoice.customer.city or invoice.customer.state_name or invoice.customer.postal_code:
+            city_state = []
+            if invoice.customer.city:
+                city_state.append(invoice.customer.city)
+            if invoice.customer.state_name:
+                city_state.append(invoice.customer.state_name)
+            if invoice.customer.postal_code:
+                city_state.append(invoice.customer.postal_code)
+            pdf.set_x(111)
+            pdf.cell(86, 4, ", ".join(city_state), new_x="LMARGIN", new_y="NEXT")
             
         if invoice.customer.phone:
             pdf.set_x(111)
-            pdf.cell(86, 5, f"Phone: {invoice.customer.phone}", new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(86, 4, f"Ph: {invoice.customer.phone}", new_x="LMARGIN", new_y="NEXT")
+            
+        if invoice.customer.email:
+            pdf.set_x(111)
+            pdf.cell(86, 4, f"Email: {invoice.customer.email}", new_x="LMARGIN", new_y="NEXT")
             
         if invoice.customer.gstin:
             pdf.set_x(111)
-            pdf.set_font("Helvetica", "B", 9)
-            pdf.cell(86, 5, f"GSTIN: {invoice.customer.gstin}", new_x="LMARGIN", new_y="NEXT")
-            pdf.set_font("Helvetica", "", 9)
+            pdf.set_font("Helvetica", "B", 8)
+            pdf.cell(86, 4, f"GSTIN: {invoice.customer.gstin}", new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font("Helvetica", "", 8)
 
-        pdf.set_y(start_y + card_h + 8)
+        pdf.set_y(start_y + card_h + 10)
 
         # Dynamic Item Table
         has_igst = invoice.transaction_type == "inter_state" or any(item.igst_amount > 0 for item in invoice.items)
 
         def draw_table_header():
             pdf.set_font("Helvetica", "B", 8)
-            pdf.set_fill_color(240, 240, 240)
-            pdf.set_draw_color(220, 220, 220)
-            pdf.set_text_color(50, 50, 50)
+            pdf.set_fill_color(60, 60, 60)  # Dark gray/charcoal background for table header
+            pdf.set_draw_color(60, 60, 60)  # Dark gray border
+            pdf.set_text_color(255, 255, 255)  # White text
             
             if has_igst:
-                headers = ["S.No", "Item Description", "Qty", "Rate", "Taxable", "GST %", "CGST", "SGST", "IGST", "Total"]
-                col_widths = [8, 42, 16, 16, 20, 22, 16, 16, 16, 18]
+                headers = ["#", "Item Description", "Qty", "Rate", "Taxable", "GST%", "CGST", "SGST", "IGST", "Total"]
+                col_widths = [8, 42, 15, 18, 20, 16, 16, 16, 16, 23]
             else:
-                headers = ["S.No", "Item Description", "Qty", "Rate", "Taxable", "GST %", "CGST", "SGST", "Total"]
-                col_widths = [10, 48, 20, 20, 22, 22, 16, 16, 16]
+                headers = ["#", "Item Description", "Qty", "Rate", "Taxable", "GST%", "CGST", "SGST", "Total"]
+                col_widths = [10, 48, 18, 20, 22, 18, 18, 18, 18]
                 
             for width, header in zip(col_widths, headers):
                 pdf.cell(width, 8, header, border=1, align="C" if header != "Item Description" else "L", fill=True)
@@ -291,11 +345,13 @@ class InvoicePDFService:
 
         pdf.set_font("Helvetica", "", 8)
         pdf.set_text_color(80, 80, 80)
+        pdf.set_draw_color(220, 220, 220)  # Reset border color for rows
+        pdf.set_fill_color(252, 252, 252)  # Very light gray for alternating rows
         
         if has_igst:
-            col_widths = [8, 42, 16, 16, 20, 22, 16, 16, 16, 18]
+            col_widths = [8, 42, 15, 18, 20, 16, 16, 16, 16, 23]
         else:
-            col_widths = [10, 48, 20, 20, 22, 22, 16, 16, 16]
+            col_widths = [10, 48, 18, 20, 22, 18, 18, 18, 18]
 
         for idx, item in enumerate(invoice.items, 1):
             if pdf.get_y() > 260:
@@ -303,11 +359,15 @@ class InvoicePDFService:
                 draw_table_header()
                 pdf.set_font("Helvetica", "", 8)
                 pdf.set_text_color(80, 80, 80)
-                
+                pdf.set_draw_color(220, 220, 220)  # Reset border color for rows
+            
+            # Alternate row colors for better readability
+            fill_row = idx % 2 == 0
+            
             if has_igst:
                 row_vals = [
                     str(idx),
-                    item.name[:25],
+                    item.name[:30],
                     f"{item.quantity:.2f}",
                     f"{item.price:.2f}",
                     f"{item.taxable_amount:.2f}",
@@ -320,7 +380,7 @@ class InvoicePDFService:
             else:
                 row_vals = [
                     str(idx),
-                    item.name[:30],
+                    item.name[:35],
                     f"{item.quantity:.2f}",
                     f"{item.price:.2f}",
                     f"{item.taxable_amount:.2f}",
@@ -330,12 +390,12 @@ class InvoicePDFService:
                     f"{item.line_total:.2f}"
                 ]
                 
-            for width, val, header in zip(col_widths, row_vals, ["S.No", "Item Description"] + [""] * 8):
-                align = "C" if header == "S.No" else ("L" if header == "Item Description" else "R")
-                pdf.cell(width, 7, val, border=1, align=align)
+            for width, val, header in zip(col_widths, row_vals, ["#", "Item Description"] + [""] * 8):
+                align = "C" if header == "#" else ("L" if header == "Item Description" else "R")
+                pdf.cell(width, 7, val, border=1, align=align, fill=fill_row)
             pdf.ln(7)
 
-        # Totals Section
+        # Totals Section with enhanced grayscale colors
         pdf.ln(4)
         if pdf.get_y() > 220:
             pdf.add_page()
@@ -345,42 +405,120 @@ class InvoicePDFService:
         
         pdf.set_font("Helvetica", "B", 8)
         pdf.set_text_color(50, 50, 50)
+        pdf.set_draw_color(200, 200, 200)
+        pdf.set_fill_color(250, 250, 250)
         
         # Subtotal
-        pdf.cell(total_lbl_w, 7, "Subtotal (Taxable Amount)", border=1, align="R")
-        pdf.cell(total_val_w, 7, f"{invoice.totals.total_taxable_amount:.2f}", border=1, align="R", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(total_lbl_w, 7, "Subtotal (Taxable Amount)", border=1, align="R", fill=True)
+        pdf.cell(total_val_w, 7, f"Rs {invoice.totals.total_taxable_amount:.2f}", border=1, align="R", fill=True, new_x="LMARGIN", new_y="NEXT")
         
         # CGST
-        pdf.cell(total_lbl_w, 7, "Total CGST", border=1, align="R")
-        pdf.cell(total_val_w, 7, f"{invoice.totals.total_cgst:.2f}", border=1, align="R", new_x="LMARGIN", new_y="NEXT")
+        if invoice.totals.total_cgst > 0:
+            pdf.cell(total_lbl_w, 7, "Total CGST", border=1, align="R")
+            pdf.cell(total_val_w, 7, f"Rs {invoice.totals.total_cgst:.2f}", border=1, align="R", new_x="LMARGIN", new_y="NEXT")
         
         # SGST
-        pdf.cell(total_lbl_w, 7, "Total SGST", border=1, align="R")
-        pdf.cell(total_val_w, 7, f"{invoice.totals.total_sgst:.2f}", border=1, align="R", new_x="LMARGIN", new_y="NEXT")
+        if invoice.totals.total_sgst > 0:
+            pdf.cell(total_lbl_w, 7, "Total SGST", border=1, align="R")
+            pdf.cell(total_val_w, 7, f"Rs {invoice.totals.total_sgst:.2f}", border=1, align="R", new_x="LMARGIN", new_y="NEXT")
         
-        if has_igst:
+        if has_igst and invoice.totals.total_igst > 0:
             # IGST
             pdf.cell(total_lbl_w, 7, "Total IGST", border=1, align="R")
-            pdf.cell(total_val_w, 7, f"{invoice.totals.total_igst:.2f}", border=1, align="R", new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(total_val_w, 7, f"Rs {invoice.totals.total_igst:.2f}", border=1, align="R", new_x="LMARGIN", new_y="NEXT")
             
         round_off = getattr(invoice, "round_off", 0.00)
         if round_off != 0.00:
             pdf.cell(total_lbl_w, 7, "Round-off", border=1, align="R")
-            pdf.cell(total_val_w, 7, f"{round_off:.2f}", border=1, align="R", new_x="LMARGIN", new_y="NEXT")
+            sign = "+" if round_off >= 0 else ""
+            pdf.cell(total_val_w, 7, f"Rs {sign}{round_off:.2f}", border=1, align="R", new_x="LMARGIN", new_y="NEXT")
             
-        pdf.set_fill_color(240, 240, 240)
-        pdf.set_font("Helvetica", "B", 9)
-        pdf.cell(total_lbl_w, 8, "Grand Total", border=1, align="R", fill=True)
-        pdf.cell(total_val_w, 8, f"{invoice.totals.grand_total:.2f}", border=1, align="R", fill=True, new_x="LMARGIN", new_y="NEXT")
+        pdf.set_fill_color(60, 60, 60)  # Dark gray background for grand total
+        pdf.set_draw_color(60, 60, 60)  # Dark gray border
+        pdf.set_text_color(255, 255, 255)  # White text
+        pdf.set_font("Helvetica", "B", 10)
+        pdf.cell(total_lbl_w, 9, "Grand Total", border=1, align="R", fill=True)
+        pdf.cell(total_val_w, 9, f"Rs {invoice.totals.grand_total:.2f}", border=1, align="R", fill=True, new_x="LMARGIN", new_y="NEXT")
+        
+        # Payment information for invoices
+        if title_override != "QUOTATION":
+            pdf.ln(2)
+            pdf.set_font("Helvetica", "", 8)
+            pdf.set_text_color(80, 80, 80)
+            
+            # Show payment details if available
+            paid_amount = getattr(invoice, "paid_amount", 0.00)
+            payment_method = getattr(invoice, "payment_method", None)
+            
+            if paid_amount > 0:
+                pdf.set_font("Helvetica", "B", 8)
+                pdf.cell(total_lbl_w, 6, "Paid Amount", border=1, align="R")
+                pdf.cell(total_val_w, 6, f"Rs {paid_amount:.2f}", border=1, align="R", new_x="LMARGIN", new_y="NEXT")
+                
+                balance = float(invoice.totals.grand_total) - paid_amount
+                if balance > 0:
+                    pdf.set_fill_color(255, 240, 240)  # Light red tint
+                    pdf.cell(total_lbl_w, 6, "Balance Due", border=1, align="R", fill=True)
+                    pdf.cell(total_val_w, 6, f"Rs {balance:.2f}", border=1, align="R", fill=True, new_x="LMARGIN", new_y="NEXT")
+                elif balance == 0:
+                    pdf.set_fill_color(240, 255, 240)  # Light green tint
+                    pdf.cell(total_lbl_w, 6, "Status", border=1, align="R", fill=True)
+                    pdf.cell(total_val_w, 6, "PAID", border=1, align="C", fill=True, new_x="LMARGIN", new_y="NEXT")
+                    
+            if payment_method:
+                pdf.set_font("Helvetica", "", 8)
+                pdf.cell(0, 5, f"Payment Method: {payment_method}", new_x="LMARGIN", new_y="NEXT")
 
+        # Notes section with better formatting
         if invoice.notes:
-            pdf.ln(5)
+            pdf.ln(6)
             if pdf.get_y() > 250:
                 pdf.add_page()
-            pdf.set_font("Helvetica", "B", 10)
-            pdf.cell(0, 7, "Notes:", new_x="LMARGIN", new_y="NEXT")
-            pdf.set_font("Helvetica", "", 9)
-            pdf.multi_cell(0, 5, invoice.notes)
+            
+            pdf.set_fill_color(248, 248, 248)
+            pdf.set_draw_color(200, 200, 200)
+            pdf.rect(10, pdf.get_y(), 190, 1, style="F")
+            pdf.ln(2)
+            
+            pdf.set_font("Helvetica", "B", 9)
+            pdf.set_text_color(50, 50, 50)
+            pdf.cell(0, 6, "Notes / Terms & Conditions:", new_x="LMARGIN", new_y="NEXT")
+            
+            pdf.set_font("Helvetica", "", 8)
+            pdf.set_text_color(80, 80, 80)
+            pdf.multi_cell(0, 4, invoice.notes)
+
+        # Bank details or additional info section (if settings provided)
+        if invoice.settings and isinstance(invoice.settings, dict):
+            bank_details = invoice.settings.get("bank_details")
+            if bank_details:
+                pdf.ln(4)
+                if pdf.get_y() > 250:
+                    pdf.add_page()
+                    
+                pdf.set_fill_color(248, 248, 248)
+                pdf.set_draw_color(200, 200, 200)
+                pdf.rect(10, pdf.get_y(), 190, 1, style="F")
+                pdf.ln(2)
+                
+                pdf.set_font("Helvetica", "B", 9)
+                pdf.set_text_color(50, 50, 50)
+                pdf.cell(0, 6, "Bank Details for Payment:", new_x="LMARGIN", new_y="NEXT")
+                
+                pdf.set_font("Helvetica", "", 8)
+                pdf.set_text_color(80, 80, 80)
+                
+                if isinstance(bank_details, dict):
+                    if bank_details.get("bank_name"):
+                        pdf.cell(0, 4, f"Bank Name: {bank_details['bank_name']}", new_x="LMARGIN", new_y="NEXT")
+                    if bank_details.get("account_number"):
+                        pdf.cell(0, 4, f"Account Number: {bank_details['account_number']}", new_x="LMARGIN", new_y="NEXT")
+                    if bank_details.get("ifsc_code"):
+                        pdf.cell(0, 4, f"IFSC Code: {bank_details['ifsc_code']}", new_x="LMARGIN", new_y="NEXT")
+                    if bank_details.get("branch"):
+                        pdf.cell(0, 4, f"Branch: {bank_details['branch']}", new_x="LMARGIN", new_y="NEXT")
+                elif isinstance(bank_details, str):
+                    pdf.multi_cell(0, 4, bank_details)
 
         output = pdf.output(dest="S")
         if isinstance(output, bytearray):

@@ -1,5 +1,7 @@
 # pyrefly: ignore [missing-import]
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
+import io
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 from db import get_db
@@ -14,6 +16,7 @@ from services.item_service import (
     update_item_stock_service,
     delete_item_service
 )
+from services.gst_invoice_generator.list_pdf_service import ListPDFService
 
 router = APIRouter(prefix="/items", tags=["Items"])
 
@@ -53,6 +56,39 @@ def list_items(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch items: {str(e)}"
         )
+
+
+@router.get("/export-list-pdf")
+def export_item_list_pdf(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Export all items as a formatted PDF list"""
+    try:
+        items = list_items_service(db, current_user.id)
+        
+        if not items:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No items found"
+            )
+        
+        pdf_bytes = ListPDFService.render_item_list_pdf(items)
+        
+        pdf_stream = io.BytesIO(pdf_bytes)
+        filename = "Item-List-Export.pdf"
+        
+        return StreamingResponse(
+            pdf_stream,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate item list PDF: {str(e)}"
+        )
+
 
 @router.get("/{id}", response_model=dict)
 def get_item(

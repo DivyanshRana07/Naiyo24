@@ -10,6 +10,7 @@ class ExportOptionsDialog extends StatelessWidget {
     required this.whatsappText,
     required this.pdfContent,
     required this.filenamePrefix,
+    this.onExportPdf,
   });
 
   final String title;
@@ -17,6 +18,7 @@ class ExportOptionsDialog extends StatelessWidget {
   final String whatsappText;
   final String pdfContent;
   final String filenamePrefix;
+  final Future<void> Function()? onExportPdf;
 
   @override
   Widget build(BuildContext context) {
@@ -78,17 +80,66 @@ class ExportOptionsDialog extends StatelessWidget {
               icon: Icons.picture_as_pdf_rounded,
               color: AppColors.error,
               title: 'Export as PDF',
-              subtitle: 'Download printable text report document (.pdf)',
+              subtitle: 'Download professionally formatted PDF report',
+              onTap: () async {
+                if (onExportPdf != null) {
+                  Navigator.pop(context);
+                  try {
+                    await onExportPdf!();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('PDF exported successfully!'),
+                          backgroundColor: AppColors.success,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Failed to export PDF: $e'),
+                          backgroundColor: AppColors.error,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  }
+                } else {
+                  downloadFile(
+                    filename: '${filenamePrefix}_report.txt',
+                    content: pdfContent,
+                    mimeType: 'text/plain',
+                  );
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Text report exported successfully!'),
+                      backgroundColor: AppColors.success,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _buildOptionCard(
+              context: context,
+              icon: Icons.description_rounded,
+              color: AppColors.info,
+              title: 'Export as Text Report',
+              subtitle: 'Download printable text report document (.txt)',
               onTap: () {
                 downloadFile(
-                  filename: '${filenamePrefix}_report.pdf',
+                  filename: '${filenamePrefix}_report.txt',
                   content: pdfContent,
-                  mimeType: 'application/pdf',
+                  mimeType: 'text/plain',
                 );
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text('PDF report exported successfully!'),
+                    content: const Text('Text report exported successfully!'),
                     backgroundColor: AppColors.success,
                     behavior: SnackBarBehavior.floating,
                   ),

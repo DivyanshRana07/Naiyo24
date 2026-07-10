@@ -13,6 +13,8 @@ import 'package:naiyo24_business_tool/widgets/common/loading_placeholder.dart';
 import 'package:naiyo24_business_tool/widgets/common/screen_shell.dart';
 import 'package:naiyo24_business_tool/widgets/invoice/invoice_status_badge.dart';
 import 'package:naiyo24_business_tool/widgets/invoice/send_options_dialog.dart';
+import 'package:naiyo24_business_tool/providers/api_providers.dart';
+import 'package:naiyo24_business_tool/utils/export_helper.dart';
 
 final asyncInvoicesProvider = FutureProvider.autoDispose((ref) async {
   final data = ref.watch(invoiceNotifierProvider);
@@ -69,6 +71,15 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
         whatsappText: waContent,
         pdfContent: pdfContent,
         filenamePrefix: 'invoices',
+        onExportPdf: () async {
+          final service = ref.read(invoiceApiServiceProvider);
+          final pdfBytes = await service.exportInvoiceListPdf();
+          downloadBytes(
+            filename: 'Invoice-List-Export.pdf',
+            bytes: pdfBytes,
+            mimeType: 'application/pdf',
+          );
+        },
       ),
     );
   }

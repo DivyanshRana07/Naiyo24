@@ -92,5 +92,21 @@ class QuotationService {
       throw Exception('Error downloading quotation PDF: $e');
     }
   }
+
+  static Future<List<int>> exportQuotationListPdf() async {
+    try {
+      final response = await http.get(
+        Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.quotationExportListPdf}'),
+      );
+
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
+      } else {
+        throw Exception('Failed to export quotation list PDF: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error exporting quotation list PDF: $e');
+    }
+  }
 }
 

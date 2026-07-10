@@ -4,6 +4,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from models.db_models import Invoice
 from services.gst_invoice_generator.pdf_service import InvoicePDFService
+from services.gst_invoice_generator.list_pdf_service import ListPDFService
 
 
 from schemas.quotation_schema import (
@@ -62,6 +63,35 @@ def list_quotations(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to fetch quotation records: {str(e)}"
+        )
+
+
+@router.get("/export-list-pdf")
+def export_quotation_list_pdf(db: Session = Depends(get_db)):
+    """Export all quotations as a formatted PDF list"""
+    try:
+        quotations = list_quotation_service(db, user_id=1)
+        
+        if not quotations:
+            raise HTTPException(
+                status_code=404,
+                detail="No quotations found"
+            )
+        
+        pdf_bytes = ListPDFService.render_quotation_list_pdf(quotations)
+        
+        pdf_stream = io.BytesIO(pdf_bytes)
+        filename = f"Quotation-List-Export.pdf"
+        
+        return StreamingResponse(
+            pdf_stream,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate quotation list PDF: {str(e)}"
         )
 
 
@@ -156,4 +186,5 @@ def download_quotation_pdf(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to generate PDF: {str(e)}"
-        )
+        )
+

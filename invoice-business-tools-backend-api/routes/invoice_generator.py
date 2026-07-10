@@ -19,6 +19,7 @@ from services.invoice_service import (
 )
 from services.gst_invoice_generator.gst_invoice_service import GSTInvoiceService
 from services.gst_invoice_generator.pdf_service import InvoicePDFService
+from services.gst_invoice_generator.list_pdf_service import ListPDFService
 from models.invoice_generator import (
     InvoiceComputedData,
     TaxBreakdown,
@@ -66,6 +67,38 @@ def list_invoices(
         "success": True,
         "data": [InvoiceResponse.model_validate(inv) for inv in invoices]
     }
+
+
+@router.get("/export-list-pdf")
+def export_invoice_list_pdf(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Export all invoices as a formatted PDF list"""
+    try:
+        invoices = list_invoices_service(db, current_user.id)
+        
+        if not invoices:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No invoices found"
+            )
+        
+        pdf_bytes = ListPDFService.render_invoice_list_pdf(invoices)
+        
+        pdf_stream = io.BytesIO(pdf_bytes)
+        filename = f"Invoice-List-Export.pdf"
+        
+        return StreamingResponse(
+            pdf_stream,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate invoice list PDF: {str(e)}"
+        )
 
 
 @router.get("/{id}", response_model=dict)
@@ -171,7 +204,14 @@ def download_invoice_pdf(
             customer=customer,
             items=computed_items,
             totals=totals,
-            notes=db_invoice.notes
+            notes=db_invoice.notes,
+            subtitle=db_invoice.subtitle,
+            logo=db_invoice.logo,
+            settings=db_invoice.settings,
+            payment_method=db_invoice.payment_method,
+            paid_amount=float(db_invoice.paid_amount) if db_invoice.paid_amount else 0.00,
+            round_off=float(db_invoice.round_off) if db_invoice.round_off else 0.00,
+            status=db_invoice.status or "due"
         )
         
         pdf_bytes = InvoicePDFService.render_invoice_pdf(computed_data)

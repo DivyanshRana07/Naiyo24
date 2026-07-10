@@ -12,6 +12,8 @@ import 'package:naiyo24_business_tool/widgets/common/export_dialog.dart';
 import 'package:naiyo24_business_tool/widgets/common/loading_placeholder.dart';
 import 'package:naiyo24_business_tool/widgets/common/screen_shell.dart';
 import 'package:naiyo24_business_tool/widgets/invoice/send_options_dialog.dart';
+import 'package:naiyo24_business_tool/api_services/services/quotation_services.dart';
+import 'package:naiyo24_business_tool/utils/export_helper.dart';
 
 class QuotationsScreen extends ConsumerStatefulWidget {
   const QuotationsScreen({super.key});
@@ -48,6 +50,8 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
       context: context,
       builder: (_) => SendOptionsDialog(
         title: 'Quotation',
+        invoiceId: q.id.toString(),  // Pass the quotation ID
+        invoiceNo: q.quotationNo,     // Pass the quotation number
         whatsappText: [
           '*Naiyo24 Quotation*',
           'Quotation No: ${q.quotationNo}',
@@ -145,6 +149,14 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
               '${q.quotationNo}\t${q.customerName}\t${fmtDate.format(q.quotationDate)}\t${fmt.format(q.grandTotal)}\t${_getStatusLabel(q.status)}')
         ].join('\n'),
         filenamePrefix: 'quotations',
+        onExportPdf: () async {
+          final pdfBytes = await QuotationService.exportQuotationListPdf();
+          downloadBytes(
+            filename: 'Quotation-List-Export.pdf',
+            bytes: pdfBytes,
+            mimeType: 'application/pdf',
+          );
+        },
       ),
     );
   }

@@ -130,6 +130,24 @@ class InvoiceService {
     }
   }
 
+  Future<List<int>> exportInvoiceListPdf() async {
+    try {
+      final response = await _client.dio.get<List<int>>(
+        ApiRoutes.invoiceExportListPdf,
+        options: Options(
+          responseType: ResponseType.bytes,
+        ),
+      );
+      if (response.data != null) {
+        return response.data!;
+      }
+      throw Exception('Empty PDF response');
+    } on DioException catch (e, st) {
+      AppLogger.error('exportInvoiceListPdf API error', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
   InvoiceModel mapJsonToInvoiceModel(Map<String, dynamic> json) {
     final customerDetails = json['customer_details'] as Map<String, dynamic>? ?? {};
     final itemsList = json['items'] as List? ?? [];

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:naiyo24_business_tool/notifiers/purchase_order_notifier.dart';
 import 'package:naiyo24_business_tool/models/purchase_order_model.dart';
@@ -11,6 +12,8 @@ import 'package:naiyo24_business_tool/widgets/common/empty_state_placeholder.dar
 import 'package:naiyo24_business_tool/widgets/common/export_dialog.dart';
 import 'package:naiyo24_business_tool/widgets/common/loading_placeholder.dart';
 import 'package:naiyo24_business_tool/widgets/common/screen_shell.dart';
+import 'package:naiyo24_business_tool/api_services/api_routes.dart';
+import 'package:naiyo24_business_tool/utils/export_helper.dart';
 
 class PurchaseOrdersScreen extends ConsumerStatefulWidget {
   const PurchaseOrdersScreen({super.key});
@@ -50,6 +53,20 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
         whatsappText: waContent,
         pdfContent: pdfContent,
         filenamePrefix: 'expenses',
+        onExportPdf: () async {
+          final response = await http.get(
+            Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.purchaseOrderExportListPdf}'),
+          );
+          if (response.statusCode == 200) {
+            downloadBytes(
+              filename: 'Expense-Report-Export.pdf',
+              bytes: response.bodyBytes,
+              mimeType: 'application/pdf',
+            );
+          } else {
+            throw Exception('Failed to export expense report PDF');
+          }
+        },
       ),
     );
   }

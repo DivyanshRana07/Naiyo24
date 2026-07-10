@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:naiyo24_business_tool/notifiers/customer_notifier.dart';
 import 'package:naiyo24_business_tool/models/customer_model.dart';
@@ -11,6 +12,8 @@ import 'package:naiyo24_business_tool/widgets/common/empty_state_placeholder.dar
 import 'package:naiyo24_business_tool/widgets/common/export_dialog.dart';
 import 'package:naiyo24_business_tool/widgets/common/loading_placeholder.dart';
 import 'package:naiyo24_business_tool/widgets/common/screen_shell.dart';
+import 'package:naiyo24_business_tool/api_services/api_routes.dart';
+import 'package:naiyo24_business_tool/utils/export_helper.dart';
 
 final asyncCustomersProvider = FutureProvider.autoDispose((ref) async {
   final data = ref.watch(customerNotifierProvider);
@@ -69,6 +72,20 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         whatsappText: waContent,
         pdfContent: pdfContent,
         filenamePrefix: 'clients',
+        onExportPdf: () async {
+          final response = await http.get(
+            Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.customerExportListPdf}'),
+          );
+          if (response.statusCode == 200) {
+            downloadBytes(
+              filename: 'Customer-List-Export.pdf',
+              bytes: response.bodyBytes,
+              mimeType: 'application/pdf',
+            );
+          } else {
+            throw Exception('Failed to export customer list PDF');
+          }
+        },
       ),
     );
   }

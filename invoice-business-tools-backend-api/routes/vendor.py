@@ -1,5 +1,7 @@
 # pyrefly: ignore [missing-import]
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
+import io
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 from db import get_db
@@ -11,6 +13,7 @@ from services.vendor_service import (
     update_vendor_service,
     delete_vendor_service
 )
+from services.gst_invoice_generator.list_pdf_service import ListPDFService
 
 router = APIRouter(prefix="/vendors", tags=["Vendors"])
 
@@ -30,6 +33,36 @@ def list_vendors(user_id: int = None, db: Session = Depends(get_db)):
         "success": True,
         "data": [VendorResponse.model_validate(v) for v in result]
     }
+
+
+@router.get("/export-list-pdf")
+def export_vendor_list_pdf(db: Session = Depends(get_db)):
+    """Export all vendors as a formatted PDF list"""
+    try:
+        vendors = list_vendors_service(db, user_id=None)
+        
+        if not vendors:
+            raise HTTPException(
+                status_code=404,
+                detail="No vendors found"
+            )
+        
+        pdf_bytes = ListPDFService.render_vendor_list_pdf(vendors)
+        
+        pdf_stream = io.BytesIO(pdf_bytes)
+        filename = "Vendor-List-Export.pdf"
+        
+        return StreamingResponse(
+            pdf_stream,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate vendor list PDF: {str(e)}"
+        )
+
 
 @router.get("/{id}", response_model=dict)
 def get_vendor(id: int, db: Session = Depends(get_db)):
