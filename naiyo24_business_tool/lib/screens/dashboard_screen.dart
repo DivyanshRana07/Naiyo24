@@ -26,6 +26,7 @@ class DashboardScreen extends ConsumerWidget {
       title: 'Dashboard',
       icon: Icons.dashboard_rounded,
       showBackButton: false,
+      scrollable: false,
       actions: OutlinedButton.icon(
         onPressed: () => ref.read(dashboardNotifierProvider.notifier).refresh(),
         style: OutlinedButton.styleFrom(
@@ -348,8 +349,8 @@ class _GettingStartedGrid extends StatelessWidget {
         iconColor: tertiaryColor,
         title: 'Expenses',
         description:
-            'Record purchase orders, vendor bills, and day-to-day expenses to keep your books accurate and up to date.',
-        actionLabel: 'Record New Purchase',
+            'Record day-to-day expenses, vendor bills, and outgoing payments to keep your books accurate.',
+        actionLabel: 'Record New Expense',
         route: AppRoutes.newPurchaseOrder,
         listRoute: AppRoutes.purchaseOrders,
       ),

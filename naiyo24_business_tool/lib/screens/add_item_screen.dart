@@ -19,8 +19,8 @@ class AddItemScreen extends StatelessWidget {
       title: isEditing ? 'Edit Item' : 'Add New Item',
       icon: Icons.inventory_2_rounded,
       onBack: () {
-        if (context.canPop()) {
-          context.pop();
+        if (Navigator.of(context).canPop()) {
+          Navigator.maybePop(context);
         } else {
           context.go(AppRoutes.items);
         }

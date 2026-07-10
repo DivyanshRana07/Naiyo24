@@ -81,16 +81,15 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
       currentRoute: AppRoutes.invoices,
       title: 'Invoices',
       icon: Icons.receipt_long_rounded,
-      actions: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          OutlinedButton.icon(
+      actions: LayoutBuilder(
+        builder: (context, constraints) {
+          final isBounded = constraints.hasBoundedWidth;
+          final exportBtn = OutlinedButton.icon(
             onPressed: () => _handleExport(
                 context, ref.read(invoiceNotifierProvider)),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: AppColors.border),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.md)),
             ),
@@ -99,23 +98,34 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
             label: Text('Export',
                 style: AppTextStyles.labelLarge
                     .copyWith(color: AppColors.textPrimary)),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          FilledButton.icon(
+          );
+          final newBtn = FilledButton.icon(
             onPressed: () => context.push(AppRoutes.newInvoice),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.md)),
             ),
-            icon: Icon(Icons.add_rounded, size: 18, color: AppColors.textOnPrimary),
-            label: Text('Create new invoice',
-                style:
-                    AppTextStyles.labelLarge.copyWith(color: AppColors.textOnPrimary)),
-          ),
-        ],
+            icon: Icon(Icons.add_rounded,
+                size: 18, color: AppColors.textOnPrimary),
+            label: Text('New Invoice',
+                style: AppTextStyles.labelLarge
+                    .copyWith(color: AppColors.textOnPrimary)),
+          );
+          if (isBounded) {
+            return Row(children: [
+              Expanded(child: exportBtn),
+              const SizedBox(width: 8),
+              Expanded(child: newBtn),
+            ]);
+          }
+          return Row(mainAxisSize: MainAxisSize.min, children: [
+            exportBtn,
+            const SizedBox(width: AppSpacing.md),
+            newBtn,
+          ]);
+        },
       ),
       body: asyncInvoices.when(
         loading: () =>

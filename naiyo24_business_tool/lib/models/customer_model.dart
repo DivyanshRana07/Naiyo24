@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class CustomerModel {
   const CustomerModel({
     required this.id,
@@ -93,8 +95,8 @@ class CustomerModel {
             : CustomerStatus.active,
       );
     } catch (e) {
-      print('Error parsing CustomerModel from JSON: $e');
-      print('JSON data: $json');
+      debugPrint('Error parsing CustomerModel from JSON: $e');
+      debugPrint('JSON data: $json');
       rethrow;
     }
   }

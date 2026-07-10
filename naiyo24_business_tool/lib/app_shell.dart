@@ -16,7 +16,7 @@ class AppShell extends ConsumerWidget {
     AppColors.isDarkMode = (themeMode == ThemeMode.dark);
 
     return MaterialApp.router(
-      title: 'Naiyo24 Business Tool',
+      title: 'Business Tool',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

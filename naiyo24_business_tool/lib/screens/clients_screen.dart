@@ -82,15 +82,15 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
       currentRoute: AppRoutes.clients,
       title: 'Clients',
       icon: Icons.people_rounded,
-      actions: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          OutlinedButton.icon(
+      actions: LayoutBuilder(
+        builder: (context, constraints) {
+          final isBounded = constraints.hasBoundedWidth;
+          final exportBtn = OutlinedButton.icon(
             onPressed: () => _handleExport(
                 context, ref.read(customerNotifierProvider)),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: AppColors.border),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.md)),
             ),
@@ -99,22 +99,33 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
             label: Text('Export',
                 style: AppTextStyles.labelLarge
                     .copyWith(color: AppColors.textPrimary)),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          FilledButton.icon(
+          );
+          final newBtn = FilledButton.icon(
             onPressed: () => context.push(AppRoutes.newClient),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.md)),
             ),
             icon: Icon(Icons.add, size: 18, color: AppColors.textOnPrimary),
-            label: Text('Add New Client',
-                style:
-                    AppTextStyles.labelLarge.copyWith(color: AppColors.textOnPrimary)),
-          ),
-        ],
+            label: Text('Add Client',
+                style: AppTextStyles.labelLarge
+                    .copyWith(color: AppColors.textOnPrimary)),
+          );
+          if (isBounded) {
+            return Row(children: [
+              Expanded(child: exportBtn),
+              const SizedBox(width: 8),
+              Expanded(child: newBtn),
+            ]);
+          }
+          return Row(mainAxisSize: MainAxisSize.min, children: [
+            exportBtn,
+            const SizedBox(width: AppSpacing.md),
+            newBtn,
+          ]);
+        },
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

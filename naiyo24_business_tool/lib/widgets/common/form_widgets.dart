@@ -15,10 +15,19 @@ class FormSectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: AppColors.primary, size: 20),
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Icon(icon, color: AppColors.primary, size: 20),
+        ),
         const SizedBox(width: AppSpacing.sm),
-        Text(title, style: AppTextStyles.h2),
+        Flexible(
+          child: Text(
+            title,
+            style: AppTextStyles.h2,
+          ),
+        ),
       ],
     );
   }

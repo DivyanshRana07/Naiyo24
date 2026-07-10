@@ -35,7 +35,7 @@ class DemoCredentials {
 class AppConfig {
   AppConfig._();
   
-  static const String appName = 'Naiyo24 Business Tool';
+  static const String appName = 'Business Tool';
   static const String appVersion = '1.0.0';
   static const Duration splashDuration = Duration(seconds: 2);
   static const Duration defaultAnimationDuration = Duration(milliseconds: 300);

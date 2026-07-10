@@ -1,6 +1,6 @@
 {
-    "name": "naiyo24_business_tool",
-    "short_name": "naiyo24_business_tool",
+    "name": "Business Tool",
+    "short_name": "Business Tool",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

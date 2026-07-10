@@ -71,7 +71,7 @@ Widget _switchTile({
       contentPadding: EdgeInsets.zero,
       title: Text(label, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary)),
       value: value,
-      activeColor: AppColors.primary,
+      activeThumbColor: AppColors.primary,
       onChanged: onChanged,
     ),
   );
@@ -125,7 +125,7 @@ void showGstConfigDialog({
               if (enabled) ...[
                 const SizedBox(height: 16),
                 DropdownButtonFormField<double>(
-                  value: defaultRate,
+                  initialValue: defaultRate,
                   decoration: _inputDec('Default GST Rate'),
                   dropdownColor: AppColors.cardBg,
                   style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
@@ -216,7 +216,7 @@ void showFormatConfigDialog({
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonFormField<String>(
-              value: currency,
+              initialValue: currency,
               decoration: _inputDec('Currency'),
               dropdownColor: AppColors.cardBg,
               style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
@@ -242,7 +242,7 @@ void showFormatConfigDialog({
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<int>(
-              value: decimals,
+              initialValue: decimals,
               decoration: _inputDec('Decimal Places'),
               dropdownColor: AppColors.cardBg,
               style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),

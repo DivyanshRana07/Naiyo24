@@ -22,7 +22,9 @@ def create_po_service(db: Session, data: PurchaseOrderCreateRequest):
         notes=data.notes,
         title=data.title,
         description=data.description,
-        total_amount=total_val
+        total_amount=total_val,
+        gst_amount=data.gst_amount or 0.00,
+        receipt_image=data.receipt_image
     )
     db.add(new_po)
     db.flush()  # get the ID

@@ -6,6 +6,7 @@ import 'package:naiyo24_business_tool/notifiers/vendor_notifier.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
 import 'package:naiyo24_business_tool/widgets/common/custom_text_field.dart';
 import 'package:naiyo24_business_tool/widgets/common/form_widgets.dart';
+import 'package:naiyo24_business_tool/widgets/common/confirm_discard_dialog.dart';
 
 class VendorForm extends ConsumerStatefulWidget {
   const VendorForm({
@@ -56,10 +57,36 @@ class _VendorFormState extends ConsumerState<VendorForm> {
     super.dispose();
   }
 
+  bool _hasChanges() {
+    final v = widget.existingVendor;
+    if (v == null) {
+      return _nameController.text.isNotEmpty ||
+          _contactPersonController.text.isNotEmpty ||
+          _emailController.text.isNotEmpty ||
+          _phoneController.text.isNotEmpty ||
+          _addressController.text.isNotEmpty;
+    } else {
+      return _nameController.text != v.name ||
+          _contactPersonController.text != v.contactPerson ||
+          _emailController.text != v.email ||
+          _phoneController.text != v.phone ||
+          _addressController.text != v.address;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
+    return PopScope(
+      canPop: !_hasChanges(),
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await ConfirmDiscardDialog.show(context);
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Form(
+        key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -123,7 +150,7 @@ class _VendorFormState extends ConsumerState<VendorForm> {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: widget.onCancel ?? () => Navigator.pop(context),
+                  onPressed: widget.onCancel ?? () => Navigator.maybePop(context),
                   child: const Text('Cancel'),
                 ),
               ),
@@ -149,8 +176,9 @@ class _VendorFormState extends ConsumerState<VendorForm> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _save() async {
     if (!_formKey.currentState!.validate()) return;

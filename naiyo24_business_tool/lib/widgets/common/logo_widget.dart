@@ -22,12 +22,15 @@ class LogoWidget extends StatelessWidget {
     final wordmarkColor =
         secondaryTextColor ?? (textColor ?? AppColors.textPrimary);
     final primaryPartColor = textColor ?? AppColors.primary;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Row containing ONLY Logo icon and Company Name text (vertically centered with each other)
         Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(fontSize * 0.25),
@@ -51,6 +54,7 @@ class LogoWidget extends StatelessWidget {
                       fontSize: fontSize,
                       fontWeight: FontWeight.w700,
                       color: primaryPartColor,
+                      height: 1.0,
                     ),
                   ),
                   TextSpan(
@@ -59,6 +63,7 @@ class LogoWidget extends StatelessWidget {
                       fontSize: fontSize,
                       fontWeight: FontWeight.w700,
                       color: wordmarkColor,
+                      height: 1.0,
                     ),
                   ),
                 ],
@@ -67,14 +72,20 @@ class LogoWidget extends StatelessWidget {
           ],
         ),
         if (showTagline) ...[
-          const SizedBox(height: 4),
-          Text(
-            'Business Tool',
-            style: GoogleFonts.jaldi(
-              fontSize: fontSize * 0.5,
-              fontWeight: FontWeight.w400,
-              color: textColor ?? AppColors.textSecondary,
-              letterSpacing: 0.5,
+          Transform.translate(
+            offset: Offset(0, -fontSize * 0.16),
+            child: Padding(
+              padding: EdgeInsets.only(left: (fontSize * 1.2) + 8),
+              child: Text(
+                'Business Tool',
+                style: GoogleFonts.jaldi(
+                  fontSize: fontSize * 0.5,
+                  fontWeight: FontWeight.w400,
+                  color: textColor ?? AppColors.textSecondary,
+                  letterSpacing: 0.5,
+                  height: 1.0,
+                ),
+              ),
             ),
           ),
         ],

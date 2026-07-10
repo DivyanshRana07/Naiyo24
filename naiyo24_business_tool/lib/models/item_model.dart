@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class ItemModel {
   const ItemModel({
     required this.id,
@@ -101,8 +103,8 @@ class ItemModel {
             : ItemStatus.active,
       );
     } catch (e) {
-      print('Error parsing ItemModel from JSON: $e');
-      print('JSON data: $json');
+      debugPrint('Error parsing ItemModel from JSON: $e');
+      debugPrint('JSON data: $json');
       rethrow;
     }
   }

@@ -19,8 +19,8 @@ class AddVendorScreen extends StatelessWidget {
       title: isEditing ? 'Edit Vendor' : 'Add New Vendor',
       icon: Icons.store_rounded,
       onBack: () {
-        if (context.canPop()) {
-          context.pop();
+        if (Navigator.of(context).canPop()) {
+          Navigator.maybePop(context);
         } else {
           context.go(AppRoutes.vendors);
         }

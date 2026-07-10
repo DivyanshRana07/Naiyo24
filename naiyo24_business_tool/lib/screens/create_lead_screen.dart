@@ -5,6 +5,7 @@ import 'package:naiyo24_business_tool/notifiers/lead_notifier.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
 import 'package:naiyo24_business_tool/widgets/common/screen_shell.dart';
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
+import 'package:naiyo24_business_tool/widgets/common/confirm_discard_dialog.dart';
 
 class CreateLeadScreen extends ConsumerStatefulWidget {
   const CreateLeadScreen({super.key});
@@ -34,10 +35,28 @@ class _CreateLeadScreenState extends ConsumerState<CreateLeadScreen> {
     super.dispose();
   }
 
+  bool _hasChanges() {
+    return _nameController.text.isNotEmpty ||
+        _emailController.text.isNotEmpty ||
+        _phoneController.text.isNotEmpty ||
+        _companyController.text.isNotEmpty ||
+        _notesController.text.isNotEmpty ||
+        _source != 'website';
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ScreenShell(
-      currentRoute: AppRoutes.leads,
+    return PopScope(
+      canPop: !_hasChanges(),
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await ConfirmDiscardDialog.show(context);
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: ScreenShell(
+        currentRoute: AppRoutes.leads,
       title: 'Add New Lead',
       icon: Icons.person_add_rounded,
       body: SingleChildScrollView(
@@ -61,8 +80,9 @@ class _CreateLeadScreenState extends ConsumerState<CreateLeadScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildHeader() {
     return Column(
@@ -174,7 +194,7 @@ class _CreateLeadScreenState extends ConsumerState<CreateLeadScreen> {
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: _isSaving ? null : () => context.pop(),
+            onPressed: _isSaving ? null : () => Navigator.maybePop(context),
             child: const Text('Cancel'),
           ),
         ),

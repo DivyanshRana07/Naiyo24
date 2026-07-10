@@ -1,4 +1,4 @@
-import 'export_helper_stub.dart'
+import 'export_helper_mobile.dart'
     if (dart.library.js_util) 'export_helper_web.dart'
     if (dart.library.html) 'export_helper_web.dart' as impl;
 

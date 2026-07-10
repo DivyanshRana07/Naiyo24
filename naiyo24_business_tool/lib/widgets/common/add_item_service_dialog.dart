@@ -74,7 +74,7 @@ class AddItemServiceDialog {
                                           );
                                           onItemCreated(lineItem);
                                         },
-                                        onCancel: () => Navigator.pop(formContext),
+                                        onCancel: () => Navigator.maybePop(formContext),
                                       ),
                                     ],
                                   ),
@@ -155,7 +155,7 @@ class AddItemServiceDialog {
                                           );
                                           onItemCreated(lineItem);
                                         },
-                                        onCancel: () => Navigator.pop(formContext),
+                                        onCancel: () => Navigator.maybePop(formContext),
                                       ),
                                     ],
                                   ),

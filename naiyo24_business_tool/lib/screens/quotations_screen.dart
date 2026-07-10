@@ -157,10 +157,10 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
       currentRoute: AppRoutes.quotations,
       title: 'Quotations',
       icon: Icons.description_rounded,
-      actions: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          OutlinedButton.icon(
+      actions: LayoutBuilder(
+        builder: (context, constraints) {
+          final isBounded = constraints.hasBoundedWidth;
+          final exportBtn = OutlinedButton.icon(
             onPressed: () {
               final asyncQuotations = ref.read(quotationNotifierProvider);
               asyncQuotations.whenData((quotations) {
@@ -175,8 +175,7 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
             },
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: AppColors.border),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.md)),
             ),
@@ -185,24 +184,34 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
             label: Text('Export',
                 style: AppTextStyles.labelLarge
                     .copyWith(color: AppColors.textPrimary)),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          FilledButton.icon(
+          );
+          final newBtn = FilledButton.icon(
             onPressed: () => context.push(AppRoutes.newQuotation),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.md)),
             ),
             icon: Icon(Icons.add_rounded,
                 size: 18, color: AppColors.textOnPrimary),
-            label: Text('Create Quotation',
-                style:
-                    AppTextStyles.labelLarge.copyWith(color: AppColors.textOnPrimary)),
-          ),
-        ],
+            label: Text('New Quotation',
+                style: AppTextStyles.labelLarge
+                    .copyWith(color: AppColors.textOnPrimary)),
+          );
+          if (isBounded) {
+            return Row(children: [
+              Expanded(child: exportBtn),
+              const SizedBox(width: 8),
+              Expanded(child: newBtn),
+            ]);
+          }
+          return Row(mainAxisSize: MainAxisSize.min, children: [
+            exportBtn,
+            const SizedBox(width: AppSpacing.md),
+            newBtn,
+          ]);
+        },
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

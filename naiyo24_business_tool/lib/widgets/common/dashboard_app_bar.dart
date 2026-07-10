@@ -36,8 +36,8 @@ class DashboardAppBar extends ConsumerWidget implements PreferredSizeWidget {
               icon: const Icon(Icons.arrow_back_rounded),
               tooltip: 'Back',
               onPressed: () {
-                if (context.canPop()) {
-                  context.pop();
+                if (Navigator.of(context).canPop()) {
+                  Navigator.maybePop(context);
                 } else {
                   context.go(backRoute ?? AppRoutes.dashboard);
                 }

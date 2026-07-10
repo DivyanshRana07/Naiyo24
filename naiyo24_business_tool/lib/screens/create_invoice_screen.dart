@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:naiyo24_business_tool/widgets/common/confirm_discard_dialog.dart';
 
 import 'package:naiyo24_business_tool/models/customer_model.dart';
 import 'package:naiyo24_business_tool/models/line_item_model.dart';
@@ -94,46 +95,17 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   double get _totalGst => DocumentCalculator.getTotalGst(_lineItems, _invoiceSettings);
   double get _grandTotal => DocumentCalculator.getGrandTotal(_lineItems, _invoiceSettings);
 
-  Future<bool> _onWillPop() async {
-    if (_selectedCustomer == null && _lineItems.isEmpty) {
-      return true;
-    }
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Discard Changes?', style: AppTextStyles.h2),
-        content: Text(
-            'You have unsaved changes. Are you sure you want to discard them?',
-            style: AppTextStyles.bodyMedium),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: AppColors.textOnPrimary,
-            ),
-            child: const Text('Discard'),
-          ),
-        ],
-      ),
-    );
-    return confirm ?? false;
-  }
-
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     final isMedium = MediaQuery.of(context).size.width >= 900;
+    final hasChanges = _selectedCustomer != null || _lineItems.isNotEmpty;
 
     return PopScope(
-      canPop: false,
+      canPop: !hasChanges,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        final shouldPop = await _onWillPop();
+        final shouldPop = await ConfirmDiscardDialog.show(context);
         if (shouldPop && context.mounted) {
           Navigator.of(context).pop();
         }
@@ -271,7 +243,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                 isSavingAndSending: _isSavingAndSending,
                 onSave: _saveInvoice,
                 onSaveAndSend: _saveAndSendInvoice,
-                onCancel: () => context.pop(),
+                onCancel: () => Navigator.maybePop(context),
                 saveLabel: 'Save Invoice',
                 buttonHeight: 52,
               ),

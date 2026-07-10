@@ -286,7 +286,7 @@ class _LineItemRowState extends State<LineItemRow> {
           ),
           Expanded(
             child: DropdownButtonFormField<double>(
-              value: currentVal,
+              initialValue: currentVal,
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 isDense: true,

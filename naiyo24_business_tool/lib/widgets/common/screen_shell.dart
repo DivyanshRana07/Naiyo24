@@ -98,8 +98,8 @@ class ScreenShell extends ConsumerWidget {
               InkWell(
                 onTap: onBack ??
                     () {
-                      if (context.canPop()) {
-                        context.pop();
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.maybePop(context);
                       } else {
                         context.go(AppRoutes.dashboard);
                       }
@@ -142,7 +142,7 @@ class ScreenShell extends ConsumerWidget {
         }
 
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             titleRow,
             const SizedBox(height: AppSpacing.md),
@@ -152,24 +152,35 @@ class ScreenShell extends ConsumerWidget {
       },
     );
 
-    Widget pageContent = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        content,
-        const SizedBox(height: AppSpacing.lg),
-        body,
-      ],
-    );
+    Widget pageContent;
 
     if (scrollable) {
+      // Outer scroll handles everything — body sizes to its natural height
       pageContent = SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-        child: pageContent,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            content,
+            const SizedBox(height: AppSpacing.lg),
+            body,
+          ],
+        ),
       );
     } else {
+      // Body fills remaining height and manages its own scroll
+      // (used by Dashboard which has RefreshIndicator + its own SingleChildScrollView)
       pageContent = Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-        child: pageContent,
+        padding: const EdgeInsets.only(
+            top: AppSpacing.xl, bottom: AppSpacing.xl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            content,
+            const SizedBox(height: AppSpacing.lg),
+            Expanded(child: body),
+          ],
+        ),
       );
     }
 

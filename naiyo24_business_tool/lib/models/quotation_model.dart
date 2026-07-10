@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:naiyo24_business_tool/models/line_item_model.dart';
 
 class QuotationModel {
@@ -178,8 +179,8 @@ class QuotationModel {
       );
     } catch (e) {
       // Log the error with the JSON data for debugging
-      print('Error parsing QuotationModel from JSON: $e');
-      print('JSON data: $json');
+      debugPrint('Error parsing QuotationModel from JSON: $e');
+      debugPrint('JSON data: $json');
       rethrow;
     }
   }

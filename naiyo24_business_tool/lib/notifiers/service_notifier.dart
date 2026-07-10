@@ -3,25 +3,70 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:naiyo24_business_tool/models/service_model.dart';
 import 'package:naiyo24_business_tool/utils/logger.dart';
 
-/// Service state is held in-memory with seed data.
-/// When the backend is ready, replace [_seed] with an API call in [build].
+import 'package:naiyo24_business_tool/providers/api_providers.dart';
+
 class ServiceNotifier extends AutoDisposeNotifier<List<ServiceModel>> {
   @override
-  List<ServiceModel> build() => _seed;
+  List<ServiceModel> build() {
+    // Watch provider to trigger rebuilds if client config changes
+    ref.watch(serviceApiServiceProvider);
 
-  void addService(ServiceModel service) {
-    state = [...state, service];
-    AppLogger.info('Service added', data: {'id': service.id, 'name': service.name});
+    // Trigger async fetch in background to sync with backend
+    _fetchServices();
+
+    return [];
   }
 
-  void updateService(ServiceModel updated) {
-    state = [for (final s in state) s.id == updated.id ? updated : s];
-    AppLogger.info('Service updated', data: {'id': updated.id, 'name': updated.name});
+  Future<void> _fetchServices() async {
+    try {
+      final services = await ref.read(serviceApiServiceProvider).listServices();
+      state = services;
+      AppLogger.info('Services list updated from backend', data: {'count': state.length});
+    } catch (e, st) {
+      AppLogger.error('Failed to fetch services from backend', error: e, stackTrace: st);
+    }
   }
 
-  void deleteService(String id) {
-    state = state.where((s) => s.id != id).toList();
-    AppLogger.info('Service deleted', data: {'id': id});
+  Future<void> addService(ServiceModel service) async {
+    try {
+      final saved = await ref.read(serviceApiServiceProvider).createService(service);
+      state = [...state, saved];
+      AppLogger.info('Service added on backend', data: {
+        'id': saved.id,
+        'name': saved.name,
+        'code': saved.code,
+      });
+    } catch (e, st) {
+      AppLogger.error('Failed to add service on backend', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  Future<void> updateService(ServiceModel updated) async {
+    try {
+      final saved = await ref.read(serviceApiServiceProvider).updateService(updated);
+      state = [
+        for (final s in state) s.id == saved.id ? saved : s,
+      ];
+      AppLogger.info('Service updated on backend', data: {
+        'id': saved.id,
+        'name': saved.name,
+      });
+    } catch (e, st) {
+      AppLogger.error('Failed to update service on backend', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteService(String id) async {
+    try {
+      await ref.read(serviceApiServiceProvider).deleteService(id);
+      state = state.where((s) => s.id != id).toList();
+      AppLogger.info('Service deleted on backend', data: {'id': id});
+    } catch (e, st) {
+      AppLogger.error('Failed to delete service on backend', error: e, stackTrace: st);
+      rethrow;
+    }
   }
 
   List<ServiceModel> search(String query) {
@@ -37,38 +82,7 @@ class ServiceNotifier extends AutoDisposeNotifier<List<ServiceModel>> {
   }
 }
 
-// TODO(backend): Replace with AutoDisposeAsyncNotifierProvider once API is wired.
-final serviceNotifierProvider =
-    AutoDisposeNotifierProvider<ServiceNotifier, List<ServiceModel>>(
+// Provider
+final serviceNotifierProvider = AutoDisposeNotifierProvider<ServiceNotifier, List<ServiceModel>>(
   () => ServiceNotifier(),
 );
-
-// ---------------------------------------------------------------------------
-// Seed / dummy data — replace with API call in build() when backend is ready
-// ---------------------------------------------------------------------------
-const _seed = [
-  ServiceModel(
-    id: 's-seed-001',
-    code: 'S001',
-    name: 'Home Delivery',
-    category: 'Delivery',
-    sellingPrice: 30.0,
-    gstPercent: 18,
-  ),
-  ServiceModel(
-    id: 's-seed-002',
-    code: 'S002',
-    name: 'Consultation Fee',
-    category: 'Consulting',
-    sellingPrice: 200.0,
-    gstPercent: 18,
-  ),
-  ServiceModel(
-    id: 's-seed-003',
-    code: 'S003',
-    name: 'Lab Test',
-    category: 'Laboratory',
-    sellingPrice: 150.0,
-    gstPercent: 5,
-  ),
-];

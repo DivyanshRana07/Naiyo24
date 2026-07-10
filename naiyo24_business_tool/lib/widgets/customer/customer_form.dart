@@ -5,6 +5,7 @@ import 'package:naiyo24_business_tool/models/customer_model.dart';
 import 'package:naiyo24_business_tool/notifiers/customer_notifier.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
 import 'package:naiyo24_business_tool/widgets/common/form_widgets.dart';
+import 'package:naiyo24_business_tool/widgets/common/confirm_discard_dialog.dart';
 
 class CustomerForm extends ConsumerStatefulWidget {
   const CustomerForm({
@@ -68,10 +69,43 @@ class _CustomerFormState extends ConsumerState<CustomerForm> {
     super.dispose();
   }
 
+  bool _hasChanges() {
+    final e = widget.existing;
+    if (e == null) {
+      return _nameCtrl.text.isNotEmpty ||
+          _codeCtrl.text.isNotEmpty ||
+          _mobileCtrl.text.isNotEmpty ||
+          _emailCtrl.text.isNotEmpty ||
+          _addressCtrl.text.isNotEmpty ||
+          _gstCtrl.text.isNotEmpty ||
+          (_creditLimitCtrl.text.isNotEmpty && _creditLimitCtrl.text != '0' && _creditLimitCtrl.text != '0.0') ||
+          (_openingBalanceCtrl.text.isNotEmpty && _openingBalanceCtrl.text != '0' && _openingBalanceCtrl.text != '0.0');
+    } else {
+      return _nameCtrl.text != e.name ||
+          _codeCtrl.text != e.code ||
+          _mobileCtrl.text != e.mobile ||
+          _emailCtrl.text != (e.email ?? '') ||
+          _addressCtrl.text != (e.address ?? '') ||
+          _gstCtrl.text != (e.gstNumber ?? '') ||
+          _creditLimitCtrl.text != e.creditLimit.toString() ||
+          _openingBalanceCtrl.text != e.openingBalance.toString() ||
+          _status != e.status;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
+    return PopScope(
+      canPop: !_hasChanges(),
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await ConfirmDiscardDialog.show(context);
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Form(
+        key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -195,7 +229,7 @@ class _CustomerFormState extends ConsumerState<CustomerForm> {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: widget.onCancel ?? () => Navigator.pop(context),
+                  onPressed: widget.onCancel ?? () => Navigator.maybePop(context),
                   child: const Text('Cancel'),
                 ),
               ),
@@ -221,8 +255,9 @@ class _CustomerFormState extends ConsumerState<CustomerForm> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _save() {
     if (!_formKey.currentState!.validate()) return;

@@ -103,7 +103,7 @@ class AppFormDialog extends StatelessWidget {
                         child: Text(title, style: AppTextStyles.h2),
                       ),
                       IconButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => Navigator.maybePop(context),
                         icon: const Icon(Icons.close),
                         style: IconButton.styleFrom(
                             foregroundColor: AppColors.textSecondary),
@@ -124,7 +124,7 @@ class AppFormDialog extends StatelessWidget {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: () => Navigator.maybePop(context),
                           child: const Text('Cancel'),
                         ),
                       ),

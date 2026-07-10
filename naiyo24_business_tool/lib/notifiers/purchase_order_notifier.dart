@@ -48,6 +48,8 @@ class PurchaseOrderNotifier
         'title': po.title,
         'description': po.description,
         'total_amount': po.totalAmount,
+        'gst_amount': po.gstAmount,
+        'receipt_image': po.receiptImage,
       });
       
       state = AsyncData([

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class VendorModel {
   final String id;
   final String name;
@@ -54,8 +56,8 @@ class VendorModel {
         address: json['address'] as String? ?? '',
       );
     } catch (e) {
-      print('Error parsing VendorModel from JSON: $e');
-      print('JSON data: $json');
+      debugPrint('Error parsing VendorModel from JSON: $e');
+      debugPrint('JSON data: $json');
       rethrow;
     }
   }

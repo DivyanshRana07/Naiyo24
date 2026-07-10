@@ -287,7 +287,7 @@ class _CreateQuotationScreenState extends ConsumerState<CreateQuotationScreen> {
                 isSavingAndSending: _isSavingAndSending,
                 onSave: () => _saveQuotation(showSendDialog: false),
                 onSaveAndSend: () => _saveQuotation(showSendDialog: true),
-                onCancel: () => context.pop(),
+                onCancel: () => Navigator.maybePop(context),
                 saveLabel: 'Save Quotation',
                 buttonHeight: 52,
               ),

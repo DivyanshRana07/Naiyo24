@@ -26,6 +26,11 @@ class ApiRoutes {
   static String itemDelete(String id) => '/items/$id';
   static String itemStock(String id) => '/items/$id/stock';
 
+  // Services Endpoints
+  static const String services = '/services';
+  static String serviceUpdate(String id) => '/services/$id';
+  static String serviceDelete(String id) => '/services/$id';
+
   // Dashboard Endpoints
   static const String dashboardStats = '/dashboard/stats';
 

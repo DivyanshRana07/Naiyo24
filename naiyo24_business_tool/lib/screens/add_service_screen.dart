@@ -19,8 +19,8 @@ class AddServiceScreen extends StatelessWidget {
       title: isEditing ? 'Edit Service' : 'Add New Service',
       icon: Icons.miscellaneous_services_rounded,
       onBack: () {
-        if (context.canPop()) {
-          context.pop();
+        if (Navigator.of(context).canPop()) {
+          Navigator.maybePop(context);
         } else {
           context.go(AppRoutes.items);
         }

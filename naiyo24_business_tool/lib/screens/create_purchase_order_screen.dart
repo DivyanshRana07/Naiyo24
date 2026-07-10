@@ -1,8 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:naiyo24_business_tool/utils/export_helper.dart' as export_helper;
 
 import 'package:naiyo24_business_tool/notifiers/auth_notifier.dart';
 import 'package:naiyo24_business_tool/notifiers/vendor_notifier.dart';
@@ -12,6 +13,7 @@ import 'package:naiyo24_business_tool/theme/theme.dart';
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
 import 'package:naiyo24_business_tool/widgets/common/dashboard_app_bar.dart';
 import 'package:naiyo24_business_tool/widgets/common/side_navigation.dart';
+import 'package:naiyo24_business_tool/widgets/common/confirm_discard_dialog.dart';
 
 class CreatePurchaseOrderScreen extends ConsumerStatefulWidget {
   const CreatePurchaseOrderScreen({super.key});
@@ -27,8 +29,10 @@ class _CreatePurchaseOrderScreenState
   late final TextEditingController _descriptionController;
   late final TextEditingController _poNumberController;
   late final TextEditingController _dateController;
+  late final TextEditingController _gstController;
 
   VendorModel? _selectedVendor;
+  String? _receiptImageBase64;
   final List<Map<String, dynamic>> _items = [
     {
       'desc': TextEditingController(),
@@ -44,9 +48,10 @@ class _CreatePurchaseOrderScreenState
     _descriptionController = TextEditingController();
     _poNumberController = TextEditingController(
         text:
-            'PO-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}');
+            'EXP-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}');
     _dateController = TextEditingController(
         text: DateFormat('yyyy-MM-dd').format(DateTime.now()));
+    _gstController = TextEditingController(text: '0.00');
   }
 
   @override
@@ -55,6 +60,7 @@ class _CreatePurchaseOrderScreenState
     _descriptionController.dispose();
     _poNumberController.dispose();
     _dateController.dispose();
+    _gstController.dispose();
     for (final item in _items) {
       (item['desc'] as TextEditingController).dispose();
       (item['qty'] as TextEditingController).dispose();
@@ -92,6 +98,15 @@ class _CreatePurchaseOrderScreenState
 
   double get _totalAmount =>
       _items.fold(0.0, (sum, item) => sum + _itemTotal(item));
+
+  Future<void> _pickReceipt() async {
+    final base64 = await export_helper.pickLogoImage();
+    if (base64 != null) {
+      setState(() {
+        _receiptImageBase64 = base64;
+      });
+    }
+  }
 
   void _logout(BuildContext context) {
     ref.read(authNotifierProvider.notifier).logout();
@@ -163,6 +178,7 @@ class _CreatePurchaseOrderScreenState
       }
     }
 
+    final gstVal = double.tryParse(_gstController.text) ?? 0.0;
     final poData = {
       'vendor_id': int.tryParse(_selectedVendor!.id) ?? 0,
       'po_number': _poNumberController.text.trim(),
@@ -170,7 +186,9 @@ class _CreatePurchaseOrderScreenState
       'status': 'unpayed',
       'title': _titleController.text.trim(),
       'description': _descriptionController.text.trim(),
-      'total_amount': _totalAmount,
+      'total_amount': _totalAmount + gstVal,
+      'gst_amount': gstVal,
+      'receipt_image': _receiptImageBase64,
       'items': _items.map((item) {
         final desc = (item['desc'] as TextEditingController).text.trim();
         final qty = double.tryParse((item['qty'] as TextEditingController).text) ?? 0.0;
@@ -193,7 +211,7 @@ class _CreatePurchaseOrderScreenState
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Purchase Order ${_poNumberController.text} created successfully!', style: TextStyle(color: AppColors.textOnPrimary)),
+          content: Text('Expense created successfully!', style: TextStyle(color: AppColors.textOnPrimary)),
           backgroundColor: AppColors.success,
         ),
       );
@@ -204,11 +222,34 @@ class _CreatePurchaseOrderScreenState
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to create purchase order: $error', style: TextStyle(color: AppColors.textOnPrimary)),
+          content: Text('Failed to create expense: $error', style: TextStyle(color: AppColors.textOnPrimary)),
           backgroundColor: AppColors.error,
         ),
       );
     }
+  }
+
+  bool _hasChanges() {
+    if (_selectedVendor != null ||
+        _titleController.text.isNotEmpty ||
+        _descriptionController.text.isNotEmpty ||
+        _gstController.text != '0.00' ||
+        _receiptImageBase64 != null) {
+      return true;
+    }
+    if (_items.length > 1) {
+      return true;
+    }
+    if (_items.isNotEmpty) {
+      final firstItem = _items[0];
+      final desc = (firstItem['desc'] as TextEditingController).text;
+      final qty = (firstItem['qty'] as TextEditingController).text;
+      final price = (firstItem['price'] as TextEditingController).text;
+      if (desc.isNotEmpty || qty != '1' || (price.isNotEmpty && price != '0' && price != '0.0')) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @override
@@ -218,8 +259,17 @@ class _CreatePurchaseOrderScreenState
     final isDesktop = MediaQuery.of(context).size.width >= 1100;
     final isMobile = MediaQuery.of(context).size.width < 768;
 
-    return asyncVendors.when(
-      loading: () => Scaffold(
+    return PopScope(
+      canPop: !_hasChanges(),
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await ConfirmDiscardDialog.show(context);
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: asyncVendors.when(
+        loading: () => Scaffold(
         backgroundColor: AppColors.background,
         appBar: DashboardAppBar(
           email: authState.userEmail,
@@ -290,7 +340,7 @@ class _CreatePurchaseOrderScreenState
                           if (isMobile) ...[
                             _buildTopLeftSection(context),
                             const SizedBox(height: AppSpacing.lg),
-                            Center(child: _buildLogoBox()),
+                            Center(child: _buildReceiptBox()),
                           ] else
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,7 +350,7 @@ class _CreatePurchaseOrderScreenState
                                   child: _buildTopLeftSection(context),
                                 ),
                                 const SizedBox(width: AppSpacing.xxl),
-                                _buildLogoBox(),
+                                _buildReceiptBox(),
                               ],
                             ),
                           
@@ -347,14 +397,15 @@ class _CreatePurchaseOrderScreenState
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _header() {
     return Row(
       children: [
         GestureDetector(
-          onTap: () => context.pop(),
+          onTap: () => Navigator.maybePop(context),
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -371,7 +422,7 @@ class _CreatePurchaseOrderScreenState
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
-            'Create Purchase Order',
+            'Record Expense',
             style: AppTextStyles.h1,
           ),
         ),
@@ -394,7 +445,7 @@ class _CreatePurchaseOrderScreenState
                   color: AppColors.textPrimary,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Purchase Title',
+                  hintText: 'Expense Title',
                   hintStyle: AppTextStyles.displayMedium.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.textSecondary.withValues(alpha: 0.4),
@@ -417,7 +468,7 @@ class _CreatePurchaseOrderScreenState
           controller: _descriptionController,
           style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
           decoration: InputDecoration(
-            hintText: '+ Add Description / Subtitle',
+            hintText: '+ Add Description',
             hintStyle: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary.withValues(alpha: 0.5),
             ),
@@ -434,7 +485,7 @@ class _CreatePurchaseOrderScreenState
           children: [
             Expanded(
               child: _buildMetadataField(
-                label: 'PO Number *',
+                label: 'Expense Reference # *',
                 controller: _poNumberController,
               ),
             ),
@@ -496,39 +547,76 @@ class _CreatePurchaseOrderScreenState
     );
   }
 
-  Widget _buildLogoBox() {
-    return Container(
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        color: AppColors.background, // Nested `#101010` background
-        borderRadius: BorderRadius.circular(AppBorderRadius.md),
-        border: Border.all(color: AppColors.border, style: BorderStyle.solid),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppBorderRadius.md - 1),
-        child: Container(
-          color: Colors.black, // Matches fixed logo background
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                'assets/images/naiyo24_official_logo.jpg',
-                width: 44,
-                height: 44,
-                fit: BoxFit.cover,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Naiyo24',
-                style: GoogleFonts.jaldi(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
+  Widget _buildReceiptBox() {
+    final pureBase64 = _receiptImageBase64 != null && _receiptImageBase64!.contains(',')
+        ? _receiptImageBase64!.split(',').last
+        : _receiptImageBase64;
+    final imageBytes = pureBase64 != null ? base64Decode(pureBase64) : null;
+    return GestureDetector(
+      onTap: _pickReceipt,
+      child: Container(
+        width: 120,
+        height: 120,
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(AppBorderRadius.md),
+          border: Border.all(color: AppColors.border, style: BorderStyle.solid),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppBorderRadius.md - 1),
+          child: imageBytes != null
+              ? Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.memory(
+                      imageBytes,
+                      fit: BoxFit.cover,
+                    ),
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _receiptImageBase64 = null;
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.black54,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.delete_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add_photo_alternate_rounded,
+                      size: 32,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Attach Receipt',
+                      style: AppTextStyles.caption.copyWith(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -613,13 +701,16 @@ class _CreatePurchaseOrderScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Order To (Vendor Details)',
-                style: AppTextStyles.caption.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary,
+              Flexible(
+                child: Text(
+                  'Order To (Vendor Details)',
+                  style: AppTextStyles.caption.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               GestureDetector(
                 onTap: () => context.push(AppRoutes.newVendor),
                 child: Text(
@@ -817,11 +908,11 @@ class _CreatePurchaseOrderScreenState
               children: [
                 _buildTotalRow('Subtotal', '₹${_totalAmount.toStringAsFixed(2)}'),
                 const SizedBox(height: AppSpacing.sm),
-                _buildTotalRow('Tax (0%)', '₹0.00'),
+                _buildGstInputRow(),
                 Divider(color: AppColors.border),
                 _buildTotalRow(
                   'Total Amount',
-                  '₹${_totalAmount.toStringAsFixed(2)}',
+                  '₹${(_totalAmount + (double.tryParse(_gstController.text) ?? 0.0)).toStringAsFixed(2)}',
                   highlight: true,
                 ),
               ],
@@ -861,6 +952,43 @@ class _CreatePurchaseOrderScreenState
         ),
         filled: true,
         fillColor: AppColors.background, // Nested `#101010`
+      ),
+    );
+  }
+
+  Widget _buildGstInputRow() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Associated GST (₹)',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+          ),
+          SizedBox(
+            width: 100,
+            child: TextField(
+              controller: _gstController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+              textAlign: TextAlign.right,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppBorderRadius.xs),
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppBorderRadius.xs),
+                  borderSide: BorderSide(color: AppColors.primary),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -915,7 +1043,7 @@ class _CreatePurchaseOrderScreenState
                 ),
                 const SizedBox(height: AppSpacing.md),
                 OutlinedButton(
-                  onPressed: () => context.pop(),
+                  onPressed: () => Navigator.maybePop(context),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                     side: BorderSide(color: AppColors.border),
@@ -931,7 +1059,7 @@ class _CreatePurchaseOrderScreenState
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 OutlinedButton(
-                  onPressed: () => context.pop(),
+                  onPressed: () => Navigator.maybePop(context),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.xl,

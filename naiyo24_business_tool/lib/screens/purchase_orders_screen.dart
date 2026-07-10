@@ -25,31 +25,31 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
 
   void _handleExport(BuildContext context, List<PurchaseOrderModel> pos) {
     final csvContent = [
-      'PO Number,Date,Vendor,Title,Amount,Status',
+      'Ref Number,Date,Vendor,Title,Amount,Status',
       ...pos.map((p) =>
           '${p.poNumber},${p.date.toIso8601String().split('T')[0]},"${p.vendorName}","${p.title}",${p.totalAmount},${p.status.name}')
     ].join('\n');
     final waContent = [
-      '*Naiyo24 Purchase Order Export*',
-      'Total POs: ${pos.length}',
+      '*Naiyo24 Expense Export*',
+      'Total Expenses: ${pos.length}',
       ...pos.map((p) =>
           '- ${p.poNumber} | ${p.vendorName} | ₹${p.totalAmount} (${p.status.name.toUpperCase()})')
     ].join('\n');
     final pdfContent = [
-      'Naiyo24 Business Tool - Purchase Orders Report',
+      'Naiyo24 Business Tool - Expenses Report',
       '==============================================',
-      'PO Number\tDate\tVendor\tTotal\tStatus',
+      'Ref Number\tDate\tVendor\tTotal\tStatus',
       ...pos.map((p) =>
           '${p.poNumber}\t${p.date.toIso8601String().split('T')[0]}\t${p.vendorName}\t₹${p.totalAmount}\t${p.status.name}')
     ].join('\n');
     showDialog(
       context: context,
       builder: (_) => ExportOptionsDialog(
-        title: 'Purchase Orders',
+        title: 'Expenses',
         csvContent: csvContent,
         whatsappText: waContent,
         pdfContent: pdfContent,
-        filenamePrefix: 'purchase_orders',
+        filenamePrefix: 'expenses',
       ),
     );
   }
@@ -60,12 +60,12 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
 
     return ScreenShell(
       currentRoute: AppRoutes.purchaseOrders,
-      title: 'Purchase Orders',
-      icon: Icons.shopping_bag_rounded,
-      actions: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          OutlinedButton.icon(
+      title: 'Expenses',
+      icon: Icons.account_balance_wallet_rounded,
+      actions: LayoutBuilder(
+        builder: (context, constraints) {
+          final isBounded = constraints.hasBoundedWidth;
+          final exportBtn = OutlinedButton.icon(
             onPressed: () {
               final asyncPosData = ref.read(purchaseOrderNotifierProvider);
               asyncPosData.whenData((pos) {
@@ -77,8 +77,7 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
             },
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: AppColors.border),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.md)),
             ),
@@ -87,37 +86,47 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
             label: Text('Export',
                 style: AppTextStyles.labelLarge
                     .copyWith(color: AppColors.textPrimary)),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          FilledButton.icon(
+          );
+          final newBtn = FilledButton.icon(
             onPressed: () => context.push(AppRoutes.newPurchaseOrder),
             icon: const Icon(Icons.add_rounded, size: 18),
-            label: const Text('Add Purchase Order'),
+            label: const Text('Record Expense'),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.textOnPrimary,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xl, vertical: AppSpacing.md),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.md)),
             ),
-          ),
-        ],
+          );
+          if (isBounded) {
+            return Row(children: [
+              Expanded(child: exportBtn),
+              const SizedBox(width: 8),
+              Expanded(child: newBtn),
+            ]);
+          }
+          return Row(mainAxisSize: MainAxisSize.min, children: [
+            exportBtn,
+            const SizedBox(width: AppSpacing.md),
+            newBtn,
+          ]);
+        },
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Filter chips
-          Row(
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text('Filter by Status: ', style: AppTextStyles.bodyMedium),
-              const SizedBox(width: AppSpacing.sm),
               _filterChip('All', _filterStatus == null,
                   () => setState(() => _filterStatus = null)),
-              const SizedBox(width: AppSpacing.sm),
               _filterChip('Unpaid', _filterStatus == POStatus.unpayed,
                   () => setState(() => _filterStatus = POStatus.unpayed)),
-              const SizedBox(width: AppSpacing.sm),
               _filterChip('Paid', _filterStatus == POStatus.payed,
                   () => setState(() => _filterStatus = POStatus.payed)),
             ],
@@ -137,10 +146,10 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
 
               if (pos.isEmpty) {
                 return EmptyStatePlaceholder(
-                  icon: Icons.shopping_bag_outlined,
-                  title: 'No purchase orders found',
-                  message: 'Create a new purchase order to track expenses.',
-                  actionLabel: 'Create PO',
+                  icon: Icons.account_balance_wallet_outlined,
+                  title: 'No expenses found',
+                  message: 'Record a new expense to track your outgoing money.',
+                  actionLabel: 'Record Expense',
                   onAction: () => context.push(AppRoutes.newPurchaseOrder),
                 );
               }
@@ -177,7 +186,7 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
                               dataRowMaxHeight: 64,
                               dataRowMinHeight: 64,
                               columns: const [
-                                DataColumn(label: Text('PO NUMBER')),
+                                DataColumn(label: Text('REFERENCE NUMBER')),
                                 DataColumn(label: Text('DATE')),
                                 DataColumn(label: Text('VENDOR')),
                                 DataColumn(label: Text('TOTAL AMOUNT')),
@@ -187,11 +196,21 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
                                 final isPayed =
                                     po.status == POStatus.payed;
                                 return DataRow(cells: [
-                                  DataCell(Text(po.poNumber,
-                                      style: AppTextStyles.bodyMedium
-                                          .copyWith(
-                                              fontWeight:
-                                                  FontWeight.w400))),
+                                  DataCell(
+                                    InkWell(
+                                      onTap: () => context.push(
+                                          AppRoutes.expenseDetailPath(po.id)),
+                                      borderRadius: BorderRadius.circular(
+                                          AppBorderRadius.sm),
+                                      child: Text(
+                                        po.poNumber,
+                                        style: AppTextStyles.bodyMedium
+                                            .copyWith(
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColors.primary),
+                                      ),
+                                    ),
+                                  ),
                                   DataCell(Text(
                                       DateFormat('MMM dd, yyyy')
                                           .format(po.date),

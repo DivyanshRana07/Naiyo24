@@ -1,6 +1,37 @@
+import 'package:flutter/foundation.dart';
+
 enum POStatus {
   payed,
   unpayed,
+}
+
+class PurchaseOrderItemModel {
+  final String id;
+  final String name;
+  final double quantity;
+  final double price;
+  final double gstRate;
+  final double lineTotal;
+
+  const PurchaseOrderItemModel({
+    required this.id,
+    required this.name,
+    required this.quantity,
+    required this.price,
+    required this.gstRate,
+    required this.lineTotal,
+  });
+
+  factory PurchaseOrderItemModel.fromJson(Map<String, dynamic> json) {
+    return PurchaseOrderItemModel(
+      id: json['id']?.toString() ?? '',
+      name: json['name'] as String? ?? '',
+      quantity: (json['quantity'] as num?)?.toDouble() ?? 0.0,
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      gstRate: (json['gst_rate'] as num?)?.toDouble() ?? (json['gstRate'] as num?)?.toDouble() ?? 0.0,
+      lineTotal: (json['line_total'] as num?)?.toDouble() ?? (json['lineTotal'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
 }
 
 class PurchaseOrderModel {
@@ -13,6 +44,9 @@ class PurchaseOrderModel {
   final DateTime date;
   final double totalAmount;
   final POStatus status;
+  final double gstAmount;
+  final String? receiptImage;
+  final List<PurchaseOrderItemModel> items;
 
   const PurchaseOrderModel({
     required this.id,
@@ -24,6 +58,9 @@ class PurchaseOrderModel {
     required this.date,
     required this.totalAmount,
     required this.status,
+    this.gstAmount = 0.0,
+    this.receiptImage,
+    this.items = const [],
   });
 
   PurchaseOrderModel copyWith({
@@ -36,6 +73,9 @@ class PurchaseOrderModel {
     DateTime? date,
     double? totalAmount,
     POStatus? status,
+    double? gstAmount,
+    String? receiptImage,
+    List<PurchaseOrderItemModel>? items,
   }) {
     return PurchaseOrderModel(
       id: id ?? this.id,
@@ -47,6 +87,9 @@ class PurchaseOrderModel {
       date: date ?? this.date,
       totalAmount: totalAmount ?? this.totalAmount,
       status: status ?? this.status,
+      gstAmount: gstAmount ?? this.gstAmount,
+      receiptImage: receiptImage ?? this.receiptImage,
+      items: items ?? this.items,
     );
   }
 
@@ -60,6 +103,16 @@ class PurchaseOrderModel {
         'date': date.toIso8601String(),
         'totalAmount': totalAmount,
         'status': status.name,
+        'gstAmount': gstAmount,
+        'receiptImage': receiptImage,
+        'items': items.map((i) => {
+          'id': i.id,
+          'name': i.name,
+          'quantity': i.quantity,
+          'price': i.price,
+          'gst_rate': i.gstRate,
+          'line_total': i.lineTotal,
+        }).toList(),
       };
 
   factory PurchaseOrderModel.fromJson(Map<String, dynamic> json) {
@@ -84,10 +137,19 @@ class PurchaseOrderModel {
         status: json['status'] != null
             ? _parseStatus(json['status'] as String)
             : POStatus.unpayed,
+        gstAmount: json['gstAmount'] != null
+            ? (json['gstAmount'] as num).toDouble()
+            : (json['gst_amount'] != null
+                ? (json['gst_amount'] as num).toDouble()
+                : 0.0),
+        receiptImage: json['receiptImage'] as String? ?? json['receipt_image'] as String?,
+        items: (json['items'] as List?)
+                ?.map((i) => PurchaseOrderItemModel.fromJson(i as Map<String, dynamic>))
+                .toList() ??
+            const [],
       );
     } catch (e) {
-      print('Error parsing PurchaseOrderModel from JSON: $e');
-      print('JSON data: $json');
+      debugPrint('Error parsing PurchaseOrderModel from JSON: $e');
       rethrow;
     }
   }

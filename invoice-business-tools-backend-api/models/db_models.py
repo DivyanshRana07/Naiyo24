@@ -357,6 +357,8 @@ class PurchaseOrder(Base):
     title = Column(String(150), nullable=True)
     description = Column(String(500), nullable=True)
     total_amount = Column(Numeric(12, 2), default=0.00, nullable=True)
+    gst_amount = Column(Numeric(12, 2), default=0.00, nullable=True)
+    receipt_image = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="purchase_orders")

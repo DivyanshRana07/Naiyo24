@@ -26,6 +26,7 @@ dependencies:
   
   uuid: any
   web: ^1.1.0
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

@@ -6,6 +6,7 @@ import 'package:naiyo24_business_tool/notifiers/item_notifier.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
 import 'package:naiyo24_business_tool/widgets/common/dropdown_field.dart';
 import 'package:naiyo24_business_tool/widgets/common/form_widgets.dart';
+import 'package:naiyo24_business_tool/widgets/common/confirm_discard_dialog.dart';
 
 class ItemForm extends ConsumerStatefulWidget {
   const ItemForm({
@@ -96,10 +97,43 @@ class _ItemFormState extends ConsumerState<ItemForm> {
     super.dispose();
   }
 
+  bool _hasChanges() {
+    final e = widget.existing;
+    if (e == null) {
+      return _nameCtrl.text.isNotEmpty ||
+          _codeCtrl.text.isNotEmpty ||
+          _purchasePriceCtrl.text.isNotEmpty ||
+          _sellingPriceCtrl.text.isNotEmpty ||
+          _stockCtrl.text.isNotEmpty ||
+          _category != 'Medicine' ||
+          _unit != 'Strip' ||
+          _status != ItemStatus.active;
+    } else {
+      return _nameCtrl.text != e.name ||
+          _codeCtrl.text != e.code ||
+          _purchasePriceCtrl.text != e.purchasePrice.toString() ||
+          _sellingPriceCtrl.text != e.sellingPrice.toString() ||
+          _stockCtrl.text != e.stockQty.toString() ||
+          _gstCtrl.text != e.gstPercent.toStringAsFixed(0) ||
+          _category != e.category ||
+          _unit != e.unit ||
+          _status != e.status;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
+    return PopScope(
+      canPop: !_hasChanges(),
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await ConfirmDiscardDialog.show(context);
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Form(
+        key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -220,7 +254,7 @@ class _ItemFormState extends ConsumerState<ItemForm> {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: widget.onCancel ?? () => Navigator.pop(context),
+                  onPressed: widget.onCancel ?? () => Navigator.maybePop(context),
                   child: const Text('Cancel'),
                 ),
               ),
@@ -246,8 +280,9 @@ class _ItemFormState extends ConsumerState<ItemForm> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _save() {
     if (!_formKey.currentState!.validate()) return;

@@ -19,8 +19,8 @@ class AddClientScreen extends StatelessWidget {
       title: isEditing ? 'Edit Client' : 'Add New Client',
       icon: Icons.person_add_rounded,
       onBack: () {
-        if (context.canPop()) {
-          context.pop();
+        if (Navigator.of(context).canPop()) {
+          Navigator.maybePop(context);
         } else {
           context.go(AppRoutes.clients);
         }

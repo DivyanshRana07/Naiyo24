@@ -44,7 +44,7 @@ class ItemFormDialog extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.maybePop(context),
                       icon: const Icon(Icons.close),
                       style: IconButton.styleFrom(
                           foregroundColor: AppColors.textSecondary),

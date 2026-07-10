@@ -55,5 +55,7 @@ abstract final class AppRoutes {
 
   static String quotationDetailPath(String id) => '/quotations/$id';
 
+  static String expenseDetailPath(String id) => '/purchase-orders/$id';
+
   AppRoutes._();
 }

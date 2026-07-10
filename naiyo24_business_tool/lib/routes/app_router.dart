@@ -52,6 +52,8 @@ import 'package:naiyo24_business_tool/screens/leads_screen.dart'
     deferred as leads;
 import 'package:naiyo24_business_tool/screens/create_lead_screen.dart'
     deferred as create_lead;
+import 'package:naiyo24_business_tool/screens/expense_detail_screen.dart'
+    deferred as expense_detail_screen;
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
 
 class DeferredWidget extends StatefulWidget {
@@ -289,6 +291,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
               transitionsBuilder: _slideTransition,
             ),
+          ),
+          GoRoute(
+            path: ':id',
+            name: 'expense-detail',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: DeferredWidget(
+                  load: expense_detail_screen.loadLibrary,
+                  builder: (context) =>
+                      expense_detail_screen.ExpenseDetailScreen(expenseId: id),
+                ),
+                transitionsBuilder: _slideTransition,
+              );
+            },
           ),
         ],
       ),

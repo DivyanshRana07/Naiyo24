@@ -61,8 +61,8 @@ class ActivityModel {
         color: color,
       );
     } catch (e) {
-      print('Error parsing ActivityModel from JSON: $e');
-      print('JSON data: $json');
+      debugPrint('Error parsing ActivityModel from JSON: $e');
+      debugPrint('JSON data: $json');
       rethrow;
     }
   }

@@ -34,6 +34,8 @@ class PurchaseOrderCreateRequest(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     total_amount: Annotated[Optional[float], Field(alias="totalAmount")] = 0.00
+    gst_amount: Annotated[Optional[float], Field(alias="gstAmount")] = 0.00
+    receipt_image: Annotated[Optional[str], Field(alias="receiptImage")] = None
     items: Optional[List[PurchaseOrderItemRequest]] = None
     user_id: Optional[int] = None
 
@@ -50,6 +52,8 @@ class PurchaseOrderUpdateRequest(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     total_amount: Annotated[Optional[float], Field(alias="totalAmount")] = None
+    gst_amount: Annotated[Optional[float], Field(alias="gstAmount")] = None
+    receipt_image: Annotated[Optional[str], Field(alias="receiptImage")] = None
     items: Optional[List[PurchaseOrderItemRequest]] = None
 
     model_config = ConfigDict(populate_by_name=True)
@@ -68,6 +72,8 @@ class PurchaseOrderResponse(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     total_amount: Annotated[Optional[float], Field(alias="totalAmount")] = None
+    gst_amount: Annotated[Optional[float], Field(alias="gstAmount")] = None
+    receipt_image: Annotated[Optional[str], Field(alias="receiptImage")] = None
     created_at: Optional[datetime] = None
     items: List[PurchaseOrderItemResponse] = []
 

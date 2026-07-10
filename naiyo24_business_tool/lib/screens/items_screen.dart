@@ -115,7 +115,6 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen>
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
-    final isDesktop = MediaQuery.of(context).size.width >= 1100;
     final isMedium = MediaQuery.of(context).size.width >= 900;
 
     return Scaffold(
@@ -152,66 +151,103 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen>
                       horizontal: AppSpacing.xl,
                       vertical: AppSpacing.md,
                     ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.inventory_2_rounded,
-                            color: AppColors.primary, size: 28),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: Text(
-                            'Inventory & Catalog',
-                            style: AppTextStyles.h1,
-                          ),
-                        ),
-                        Row(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isWide = constraints.maxWidth >= 600;
+
+                        final titleRow = Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.download_rounded),
-                              tooltip: 'Export',
-                              onPressed: () {
-                                if (_tabController.index == 0) {
-                                  final items =
-                                      ref.read(itemNotifierProvider);
-                                  _handleExportItems(context, items);
-                                } else {
-                                  final services =
-                                      ref.read(serviceNotifierProvider);
-                                  _handleExportServices(context, services);
-                                }
-                              },
-                            ),
+                            Icon(Icons.inventory_2_rounded,
+                                color: AppColors.primary, size: 28),
                             const SizedBox(width: AppSpacing.sm),
-                            FilledButton.icon(
-                              onPressed: () {
-                                if (_tabController.index == 0) {
-                                  _showItemDialog();
-                                } else {
-                                  _showServiceDialog();
-                                }
-                              },
-                              style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(AppBorderRadius.md),
-                                ),
-                              ),
-                              icon: Icon(Icons.add,
-                                  size: 18, color: AppColors.textOnPrimary),
-                              label: Text(
-                                _tabController.index == 0
-                                    ? (isDesktop ? 'Add New Item' : 'Item')
-                                    : (isDesktop ? 'Add New Service' : 'Service'),
-                                style: AppTextStyles.labelLarge
-                                    .copyWith(color: AppColors.textOnPrimary),
+                            Flexible(
+                              child: Text(
+                                'Inventory & Catalog',
+                                style: AppTextStyles.h1,
                               ),
                             ),
                           ],
-                        ),
-                      ],
+                        );
+
+                        final exportBtn = IconButton(
+                          icon: const Icon(Icons.download_rounded),
+                          tooltip: 'Export',
+                          onPressed: () {
+                            if (_tabController.index == 0) {
+                              final items = ref.read(itemNotifierProvider);
+                              _handleExportItems(context, items);
+                            } else {
+                              final services =
+                                  ref.read(serviceNotifierProvider);
+                              _handleExportServices(context, services);
+                            }
+                          },
+                        );
+
+                        final addBtn = FilledButton.icon(
+                          onPressed: () {
+                            if (_tabController.index == 0) {
+                              _showItemDialog();
+                            } else {
+                              _showServiceDialog();
+                            }
+                          },
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppBorderRadius.md),
+                            ),
+                          ),
+                          icon: Icon(Icons.add,
+                              size: 18, color: AppColors.textOnPrimary),
+                          label: Text(
+                            _tabController.index == 0
+                                ? 'Add Item'
+                                : 'Add Service',
+                            style: AppTextStyles.labelLarge
+                                .copyWith(color: AppColors.textOnPrimary),
+                          ),
+                        );
+
+                        if (isWide) {
+                          // Web: title left, buttons right — same as ScreenShell
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(child: titleRow),
+                              const SizedBox(width: AppSpacing.md),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  exportBtn,
+                                  const SizedBox(width: AppSpacing.sm),
+                                  addBtn,
+                                ],
+                              ),
+                            ],
+                          );
+                        }
+
+                        // Phone: title on top, full-width equal buttons below
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            titleRow,
+                            const SizedBox(height: AppSpacing.md),
+                            Row(
+                              children: [
+                                exportBtn,
+                                const SizedBox(width: 8),
+                                Expanded(child: addBtn),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                   Container(
