@@ -5,6 +5,7 @@ import 'package:naiyo24_business_tool/utils/export_helper.dart';
 import 'package:naiyo24_business_tool/notifiers/invoice_notifier.dart';
 import 'package:naiyo24_business_tool/models/invoice_model.dart';
 import 'package:naiyo24_business_tool/models/quotation_model.dart';
+import 'package:naiyo24_business_tool/notifiers/quotation_notifier.dart';
 
 class SendOptionsDialog extends ConsumerWidget {
   const SendOptionsDialog({
@@ -120,7 +121,7 @@ class SendOptionsDialog extends ConsumerWidget {
                 final isQuotation = filenamePrefix.startsWith('quotation') ||
                     title.toLowerCase().contains('quotation') ||
                     savedInstance is QuotationModel;
-                final isLocal = isQuotation || (finalId?.startsWith('inv-local-') ?? true);
+                final isLocal = finalId == null || int.tryParse(finalId) == null;
 
                 String finalPdfContent = pdfContent;
                 if (savedInstance != null && pdfContentBuilder != null) {
@@ -129,15 +130,21 @@ class SendOptionsDialog extends ConsumerWidget {
 
                 if (finalId != null && finalNo != null && !isLocal) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Downloading GST invoice from backend...'),
+                    SnackBar(
+                      content: Text('Downloading GST ${isQuotation ? "quotation" : "invoice"} from backend...'),
                       behavior: SnackBarBehavior.floating,
-                      duration: Duration(seconds: 1),
+                      duration: const Duration(seconds: 1),
                     ),
                   );
-                  await ref
-                      .read(invoiceNotifierProvider.notifier)
-                      .downloadInvoicePdf(finalId!, finalNo);
+                  if (isQuotation) {
+                    await ref
+                        .read(quotationNotifierProvider.notifier)
+                        .downloadQuotationPdf(finalId, finalNo);
+                  } else {
+                    await ref
+                        .read(invoiceNotifierProvider.notifier)
+                        .downloadInvoicePdf(finalId, finalNo);
+                  }
                 } else {
                   final numberSuffix = finalNo ?? '';
                   final filename = numberSuffix.isNotEmpty

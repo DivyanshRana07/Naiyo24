@@ -617,8 +617,9 @@ class _CreateQuotationScreenState extends ConsumerState<CreateQuotationScreen> {
         }).toList(),
       };
 
+      QuotationModel? saved;
       try {
-        await ref.read(quotationNotifierProvider.notifier).addQuotation(quotationData);
+        saved = await ref.read(quotationNotifierProvider.notifier).addQuotation(quotationData);
       } catch (e) {
         if (mounted) {
           context.showErrorSnackBar('Failed to save quotation: $e');
@@ -633,7 +634,7 @@ class _CreateQuotationScreenState extends ConsumerState<CreateQuotationScreen> {
       if (!showSendDialog) {
         context.go(AppRoutes.quotations);
       }
-      return quotation;
+      return saved;
     } catch (e) {
       if (mounted) {
         context.showErrorSnackBar(ErrorMessages.dataSaveError);

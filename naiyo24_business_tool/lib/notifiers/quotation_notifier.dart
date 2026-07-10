@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:naiyo24_business_tool/api_services/services/quotation_services.dart';
 import 'package:naiyo24_business_tool/models/quotation_model.dart';
 import 'package:naiyo24_business_tool/utils/logger.dart';
+import 'package:naiyo24_business_tool/utils/export_helper.dart';
 
 /// Quotation state fetched from backend API
 class QuotationNotifier extends AutoDisposeAsyncNotifier<List<QuotationModel>> {
@@ -19,7 +20,7 @@ class QuotationNotifier extends AutoDisposeAsyncNotifier<List<QuotationModel>> {
     }
   }
 
-  Future<void> addQuotation(Map<String, dynamic> quotationData) async {
+  Future<QuotationModel> addQuotation(Map<String, dynamic> quotationData) async {
     try {
       final newQuotation = await QuotationService.createQuotation(quotationData);
       
@@ -29,6 +30,7 @@ class QuotationNotifier extends AutoDisposeAsyncNotifier<List<QuotationModel>> {
         'quotationNo': newQuotation.quotationNo,
         'customerName': newQuotation.customerName,
       });
+      return newQuotation;
     } catch (e) {
       AppLogger.error('Failed to add quotation', error: e);
       rethrow;
@@ -78,6 +80,20 @@ class QuotationNotifier extends AutoDisposeAsyncNotifier<List<QuotationModel>> {
       return state.value?.firstWhere((q) => q.id == id);
     } catch (_) {
       return null;
+    }
+  }
+
+  Future<void> downloadQuotationPdf(String id, String quotationNo) async {
+    try {
+      final bytes = await QuotationService.downloadQuotationPdf(id);
+      downloadBytes(
+        filename: 'Quotation-$quotationNo.pdf',
+        bytes: bytes,
+        mimeType: 'application/pdf',
+      );
+      AppLogger.info('Quotation PDF downloaded', data: {'id': id, 'quotationNo': quotationNo});
+    } catch (e) {
+      AppLogger.error('Failed to download quotation PDF', error: e);
     }
   }
 }

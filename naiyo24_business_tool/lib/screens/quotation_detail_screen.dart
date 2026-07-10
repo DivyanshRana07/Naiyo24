@@ -175,6 +175,8 @@ class QuotationDetailScreen extends ConsumerWidget {
       context: context,
       builder: (_) => SendOptionsDialog(
         title: 'Quotation',
+        invoiceId: q.id,
+        invoiceNo: q.quotationNo,
         whatsappText: [
           '*Naiyo24 Quotation*',
           'Quotation No: ${q.quotationNo}',
@@ -189,7 +191,7 @@ class QuotationDetailScreen extends ConsumerWidget {
           'Date: ${fmtDate.format(q.quotationDate)}',
           'Amount: ${fmt.format(q.grandTotal)}',
         ].join('\n'),
-        filenamePrefix: 'quotation_${q.quotationNo}',
+        filenamePrefix: 'quotation',
         onClose: () {},
       ),
     );

@@ -58,6 +58,8 @@ class ApiRoutes {
   static String quotationDetail(String id) => '/quotation/$id';
   static String quotationUpdate(String id) => '/quotation/$id';
   static String quotationDelete(String id) => '/quotation/$id';
+  static String quotationDownloadPdf(String id) => '/quotation/$id/download-pdf';
+
 
   // Purchase Orders Endpoints
   static const String purchaseOrders = '/purchase-orders';

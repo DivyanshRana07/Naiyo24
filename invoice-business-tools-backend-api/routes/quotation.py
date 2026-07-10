@@ -1,5 +1,10 @@
+import io
 from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
+from models.db_models import Invoice
+from services.gst_invoice_generator.pdf_service import InvoicePDFService
+
 
 from schemas.quotation_schema import (
     QuotationCreateRequest,
@@ -118,3 +123,37 @@ def delete_quotation(
         "success": True,
         "message": "Quotation deleted successfully"
     }
+
+
+@router.get("/{id}/download-pdf")
+def download_quotation_pdf(
+    id: int,
+    db: Session = Depends(get_db)
+):
+    db_quotation = get_quotation_by_id_service(db, 1, id)
+    if not db_quotation:
+        raise HTTPException(
+            status_code=404,
+            detail="Quotation not found"
+        )
+    
+    try:
+        # Fetch user's latest invoice for business details
+        latest_invoice = db.query(Invoice).filter(Invoice.user_id == 1).order_by(Invoice.id.desc()).first()
+        business_details = latest_invoice.business_details if latest_invoice else None
+        
+        pdf_bytes = InvoicePDFService.render_quotation_pdf(db_quotation, business_details)
+        
+        pdf_stream = io.BytesIO(pdf_bytes)
+        filename = f"Quotation-{db_quotation.id}.pdf"
+        
+        return StreamingResponse(
+            pdf_stream,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate PDF: {str(e)}"
+        )

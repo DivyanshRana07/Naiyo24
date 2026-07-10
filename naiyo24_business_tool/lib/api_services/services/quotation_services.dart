@@ -76,4 +76,21 @@ class QuotationService {
       throw Exception('Error deleting quotation: $e');
     }
   }
+
+  static Future<List<int>> downloadQuotationPdf(String id) async {
+    try {
+      final response = await http.get(
+        Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.quotationDownloadPdf(id)}'),
+      );
+
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
+      } else {
+        throw Exception('Failed to download quotation PDF: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error downloading quotation PDF: $e');
+    }
+  }
 }
+
