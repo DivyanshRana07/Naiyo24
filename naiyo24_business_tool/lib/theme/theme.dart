@@ -4,4 +4,6 @@ export 'package:naiyo24_business_tool/theme/app_spacing.dart';
 export 'package:naiyo24_business_tool/theme/app_text_styles.dart';
 export 'package:naiyo24_business_tool/theme/app_theme.dart';
 export 'package:naiyo24_business_tool/theme/grid_background.dart';
+export 'package:naiyo24_business_tool/theme/responsive.dart';
+export 'package:naiyo24_business_tool/theme/responsive_widget_mixin.dart';
 

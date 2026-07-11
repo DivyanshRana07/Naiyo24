@@ -50,55 +50,105 @@ class InvoiceDetailScreen extends ConsumerWidget {
       );
     }
 
-    final actionButtons = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (invoice.status != InvoiceStatus.paid) ...[
-          FilledButton.icon(
-            onPressed: () => _showRecordPayment(context, ref, invoice),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.success,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppBorderRadius.md)),
-            ),
-            icon: const Icon(Icons.payments_rounded,
-                size: 18, color: Colors.white),
-            label: Text('Record Payment',
-                style: AppTextStyles.labelLarge.copyWith(color: Colors.white)),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-        ],
-        OutlinedButton.icon(
-          onPressed: () =>
-              context.push(AppRoutes.returnItemsPath(invoice.id)),
-          style: OutlinedButton.styleFrom(
-            side: BorderSide(color: AppColors.warning),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppBorderRadius.md)),
-          ),
-          icon: Icon(Icons.assignment_return_rounded,
-              size: 18, color: AppColors.warning),
-          label: Text('Return',
-              style: AppTextStyles.labelLarge.copyWith(color: AppColors.warning)),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        OutlinedButton.icon(
-          onPressed: () => _confirmDelete(context, ref, invoice),
-          style: OutlinedButton.styleFrom(
-            side: BorderSide(color: AppColors.error),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppBorderRadius.md)),
-          ),
-          icon: Icon(Icons.delete_rounded,
-              size: 18, color: AppColors.error),
-          label: Text('Delete',
-              style: AppTextStyles.labelLarge.copyWith(color: AppColors.error)),
-        ),
-      ],
-    );
+    final actionButtons = isDesktop
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (invoice.status != InvoiceStatus.paid) ...[
+                FilledButton.icon(
+                  onPressed: () => _showRecordPayment(context, ref, invoice),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.success,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                  ),
+                  icon: const Icon(Icons.payments_rounded,
+                      size: 18, color: Colors.white),
+                  label: Text('Record Payment',
+                      style: AppTextStyles.labelLarge.copyWith(color: Colors.white)),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              OutlinedButton.icon(
+                onPressed: () =>
+                    context.push(AppRoutes.returnItemsPath(invoice.id)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppColors.warning),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                ),
+                icon: Icon(Icons.assignment_return_rounded,
+                    size: 18, color: AppColors.warning),
+                label: Text('Return',
+                    style: AppTextStyles.labelLarge.copyWith(color: AppColors.warning)),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              OutlinedButton.icon(
+                onPressed: () => _confirmDelete(context, ref, invoice),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppColors.error),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                ),
+                icon: Icon(Icons.delete_rounded,
+                    size: 18, color: AppColors.error),
+                label: Text('Delete',
+                    style: AppTextStyles.labelLarge.copyWith(color: AppColors.error)),
+              ),
+            ],
+          )
+        : Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            alignment: WrapAlignment.end,
+            children: [
+              if (invoice.status != InvoiceStatus.paid)
+                FilledButton.icon(
+                  onPressed: () => _showRecordPayment(context, ref, invoice),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.success,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                  ),
+                  icon: const Icon(Icons.payments_rounded, size: 16, color: Colors.white),
+                  label: Text('Record Payment',
+                      style: AppTextStyles.labelLarge.copyWith(
+                          color: Colors.white, fontSize: 13)),
+                ),
+              OutlinedButton.icon(
+                onPressed: () =>
+                    context.push(AppRoutes.returnItemsPath(invoice.id)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppColors.warning),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                ),
+                icon: Icon(Icons.assignment_return_rounded,
+                    size: 16, color: AppColors.warning),
+                label: Text('Return',
+                    style: AppTextStyles.labelLarge.copyWith(
+                        color: AppColors.warning, fontSize: 13)),
+              ),
+              OutlinedButton.icon(
+                onPressed: () => _confirmDelete(context, ref, invoice),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppColors.error),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                ),
+                icon: Icon(Icons.delete_rounded, size: 16, color: AppColors.error),
+                label: Text('Delete',
+                    style: AppTextStyles.labelLarge.copyWith(
+                        color: AppColors.error, fontSize: 13)),
+              ),
+            ],
+          );
 
     return ScreenShell(
       currentRoute: AppRoutes.invoices,

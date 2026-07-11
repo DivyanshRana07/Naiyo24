@@ -18,6 +18,7 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final r = context.responsive;
     final email = ref.watch(authNotifierProvider).userEmail;
     final dashboardState = ref.watch(dashboardNotifierProvider);
 
@@ -31,25 +32,30 @@ class DashboardScreen extends ConsumerWidget {
         onPressed: () => ref.read(dashboardNotifierProvider.notifier).refresh(),
         style: OutlinedButton.styleFrom(
           side: BorderSide(color: AppColors.border),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          padding: r.padding(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppBorderRadius.md),
+            borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md)),
           ),
         ),
-        icon: Icon(Icons.refresh_rounded, size: 18, color: AppColors.textPrimary),
+        icon: Icon(Icons.refresh_rounded, size: r.iconSize(18), color: AppColors.textPrimary),
         label: Text(
           'Refresh',
-          style: AppTextStyles.labelLarge.copyWith(color: AppColors.textPrimary),
+          style: AppTextStyles.labelLarge.copyWith(
+            color: AppColors.textPrimary,
+            fontSize: r.fontSize(15),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showChatSupportPopup(context),
         backgroundColor: AppColors.primary,
         icon: Icon(Icons.chat_bubble_outline_rounded,
-            color: AppColors.textOnPrimary),
+            color: AppColors.textOnPrimary, size: r.iconSize(20)),
         label: Text('Chat Support',
             style: TextStyle(
-                color: AppColors.textOnPrimary, fontWeight: FontWeight.w400)),
+                color: AppColors.textOnPrimary,
+                fontWeight: FontWeight.w400,
+                fontSize: r.fontSize(14))),
       ),
       body: RefreshIndicator(
         onRefresh: () => ref.read(dashboardNotifierProvider.notifier).refresh(),
@@ -59,16 +65,16 @@ class DashboardScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _ProfileHeader(email: email),
-              const SizedBox(height: AppSpacing.xxl),
+              SizedBox(height: r.spacing(AppSpacing.xxl)),
               if (dashboardState.error != null)
                 _ErrorBanner(error: dashboardState.error!),
               _StatsGrid(
                 stats: dashboardState.stats,
                 isLoading: dashboardState.isLoading,
               ),
-              const SizedBox(height: AppSpacing.xxl),
+              SizedBox(height: r.spacing(AppSpacing.xxl)),
               const _GettingStartedGrid(),
-              const SizedBox(height: AppSpacing.xxl),
+              SizedBox(height: r.spacing(AppSpacing.xxl)),
             ],
           ),
         ),
@@ -83,6 +89,8 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final r = context.responsive;
+    
     String displayName = 'Demo User';
     if (email != null && email!.contains('@')) {
       final raw = email!.split('@').first;
@@ -104,17 +112,17 @@ class _ProfileHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CircleAvatar(
-              radius: 32,
+              radius: r.spacing(32),
               backgroundColor: AppColors.primary,
               child: Text(
                 initial,
                 style: TextStyle(
                     color: AppColors.textOnPrimary,
                     fontWeight: FontWeight.w400,
-                    fontSize: 26),
+                    fontSize: r.fontSize(26)),
               ),
             ),
-            const SizedBox(width: AppSpacing.lg),
+            SizedBox(width: r.spacing(AppSpacing.lg)),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,15 +133,15 @@ class _ProfileHeader extends StatelessWidget {
                     style: AppTextStyles.bodyLarge.copyWith(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w400,
-                        fontSize: 15),
+                        fontSize: r.fontSize(15)),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: r.spacing(2)),
                   Text(
                     'Welcome to $companyName!',
                     style: AppTextStyles.h2.copyWith(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w400,
-                        fontSize: 20),
+                        fontSize: r.fontSize(20)),
                   ),
                 ],
               ),
@@ -148,17 +156,17 @@ class _ProfileHeader extends StatelessWidget {
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.primary,
             foregroundColor: AppColors.textOnPrimary,
-            minimumSize: const Size(0, 44),
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg, vertical: 0),
+            minimumSize: Size(0, r.spacing(44)),
+            padding: EdgeInsets.symmetric(
+                horizontal: r.spacing(AppSpacing.lg), vertical: 0),
             shape: RoundedRectangleBorder(
                 borderRadius:
-                    BorderRadius.circular(AppBorderRadius.md)),
+                    BorderRadius.circular(r.borderRadius(AppBorderRadius.md))),
           ),
-          icon: const Icon(Icons.desktop_mac_outlined, size: 16),
-          label: const Text('Book A Demo',
+          icon: Icon(Icons.desktop_mac_outlined, size: r.iconSize(16)),
+          label: Text('Book A Demo',
               style: TextStyle(
-                  fontWeight: FontWeight.w400, fontSize: 13)),
+                  fontWeight: FontWeight.w400, fontSize: r.fontSize(13))),
         );
 
         if (isSmall) {
@@ -166,13 +174,13 @@ class _ProfileHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 avatarAndText,
-                const SizedBox(height: AppSpacing.lg),
+                SizedBox(height: r.spacing(AppSpacing.lg)),
                 button,
               ]);
         }
         return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
           Expanded(child: avatarAndText),
-          const SizedBox(width: AppSpacing.lg),
+          SizedBox(width: r.spacing(AppSpacing.lg)),
           button,
         ]);
       },
@@ -186,22 +194,27 @@ class _ErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final r = context.responsive;
+    
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      margin: EdgeInsets.only(bottom: r.spacing(AppSpacing.lg)),
+      padding: r.padding(all: AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.error.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(AppBorderRadius.md),
+        borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md)),
         border: Border.all(color: AppColors.error),
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: AppColors.error),
-          const SizedBox(width: AppSpacing.sm),
+          Icon(Icons.error_outline, color: AppColors.error, size: r.iconSize(20)),
+          SizedBox(width: r.spacing(AppSpacing.sm)),
           Expanded(
             child: Text(
               'Failed to load stats. Using cached data.',
-              style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.error,
+                fontSize: r.fontSize(12),
+              ),
             ),
           ),
         ],
@@ -318,6 +331,7 @@ class _GettingStartedGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final r = context.responsive;
     final primaryColor = AppColors.primary;
     final secondaryColor = AppColors.isDarkMode ? const Color(0xFFD1D5DB) : const Color(0xFF374151);
     final tertiaryColor = AppColors.isDarkMode ? const Color(0xFF9CA3AF) : const Color(0xFF4B5563);
@@ -369,24 +383,24 @@ class _GettingStartedGrid extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Getting Started', style: AppTextStyles.h2),
-        const SizedBox(height: AppSpacing.md),
+        Text('Getting Started', style: AppTextStyles.h2.copyWith(fontSize: r.fontSize(20))),
+        SizedBox(height: r.spacing(AppSpacing.md)),
         LayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.maxWidth;
             double cardWidth;
             if (width > 1200) {
-              cardWidth = (width - (AppSpacing.lg * 3)) / 4;
+              cardWidth = (width - (r.spacing(AppSpacing.lg) * 3)) / 4;
             } else if (width > 800) {
-              cardWidth = (width - (AppSpacing.lg * 2)) / 3;
+              cardWidth = (width - (r.spacing(AppSpacing.lg) * 2)) / 3;
             } else if (width > 500) {
-              cardWidth = (width - AppSpacing.lg) / 2;
+              cardWidth = (width - r.spacing(AppSpacing.lg)) / 2;
             } else {
               cardWidth = width;
             }
             return Wrap(
-              spacing: AppSpacing.lg,
-              runSpacing: AppSpacing.lg,
+              spacing: r.spacing(AppSpacing.lg),
+              runSpacing: r.spacing(AppSpacing.lg),
               children: blocks.map((b) {
                 return SizedBox(
                   width: cardWidth,

@@ -163,6 +163,7 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final r = context.responsive;
     final asyncQuotations = ref.watch(quotationNotifierProvider);
 
     return ScreenShell(
@@ -187,40 +188,40 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
             },
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: AppColors.border),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: r.padding(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                  borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md))),
             ),
             icon: Icon(Icons.download_rounded,
-                size: 18, color: AppColors.textPrimary),
+                size: r.iconSize(18), color: AppColors.textPrimary),
             label: Text('Export',
                 style: AppTextStyles.labelLarge
-                    .copyWith(color: AppColors.textPrimary)),
+                    .copyWith(color: AppColors.textPrimary, fontSize: r.fontSize(15))),
           );
           final newBtn = FilledButton.icon(
             onPressed: () => context.push(AppRoutes.newQuotation),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: r.padding(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                  borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md))),
             ),
             icon: Icon(Icons.add_rounded,
-                size: 18, color: AppColors.textOnPrimary),
+                size: r.iconSize(18), color: AppColors.textOnPrimary),
             label: Text('New Quotation',
                 style: AppTextStyles.labelLarge
-                    .copyWith(color: AppColors.textOnPrimary)),
+                    .copyWith(color: AppColors.textOnPrimary, fontSize: r.fontSize(15))),
           );
           if (isBounded) {
             return Row(children: [
               Expanded(child: exportBtn),
-              const SizedBox(width: 8),
+              SizedBox(width: r.spacing(8)),
               Expanded(child: newBtn),
             ]);
           }
           return Row(mainAxisSize: MainAxisSize.min, children: [
             exportBtn,
-            const SizedBox(width: AppSpacing.md),
+            SizedBox(width: r.spacing(AppSpacing.md)),
             newBtn,
           ]);
         },
@@ -229,7 +230,7 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _buildFilterBar(),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: r.spacing(AppSpacing.lg)),
           asyncQuotations.when(
             loading: () => const LoadingPlaceholder(
                 message: 'Loading quotations...'),
@@ -249,15 +250,17 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
   }
 
   Widget _buildFilterBar() {
+    final r = context.responsive;
+    
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.lg)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: r.spacing(10),
+            offset: Offset(0, r.spacing(4)),
           ),
         ],
         border:
@@ -268,15 +271,15 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
           Expanded(
             child: TextField(
               onChanged: (v) => setState(() => _searchQuery = v),
-              style: AppTextStyles.bodyMedium,
+              style: AppTextStyles.bodyMedium.copyWith(fontSize: r.fontSize(14)),
               decoration: InputDecoration(
                 hintText:
                     'Search by client name or quotation number...',
                 hintStyle: AppTextStyles.bodyMedium
-                    .copyWith(color: AppColors.textHint),
+                    .copyWith(color: AppColors.textHint, fontSize: r.fontSize(14)),
                 prefixIcon: Icon(Icons.search_rounded,
-                    size: 22, color: AppColors.textSecondary),
-                contentPadding: const EdgeInsets.symmetric(
+                    size: r.iconSize(22), color: AppColors.textSecondary),
+                contentPadding: r.padding(
                     vertical: 16, horizontal: 16),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
@@ -285,28 +288,27 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
             ),
           ),
           Container(
-            height: 32,
+            height: r.spacing(32),
             width: 1,
             color: AppColors.border,
-            margin:
-                const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            margin: r.padding(horizontal: AppSpacing.sm),
           ),
           Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            padding: r.padding(right: AppSpacing.sm),
             child: TextButton.icon(
               onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                     content: Text('Advanced filtering coming soon')),
               ),
-              icon: const Icon(Icons.filter_list_rounded, size: 20),
-              label: Text('Filter', style: AppTextStyles.labelLarge),
+              icon: Icon(Icons.filter_list_rounded, size: r.iconSize(20)),
+              label: Text('Filter', style: AppTextStyles.labelLarge.copyWith(fontSize: r.fontSize(15))),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.textSecondary,
-                padding: const EdgeInsets.symmetric(
+                padding: r.padding(
                     horizontal: AppSpacing.md, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius:
-                      BorderRadius.circular(AppBorderRadius.sm),
+                      BorderRadius.circular(r.borderRadius(AppBorderRadius.sm)),
                 ),
               ),
             ),
@@ -457,17 +459,19 @@ class _QuotationsScreenState extends ConsumerState<QuotationsScreen> {
   }
 
   Widget _buildStatusBadge(String label, Color color) {
+    final r = context.responsive;
+    
     return Container(
-      padding: const EdgeInsets.symmetric(
+      padding: r.padding(
           horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppBorderRadius.sm),
+        borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.sm)),
       ),
       child: Text(
         label,
         style: AppTextStyles.labelMedium
-            .copyWith(color: color, fontWeight: FontWeight.w400),
+            .copyWith(color: color, fontWeight: FontWeight.w400, fontSize: r.fontSize(13)),
       ),
     );
   }

@@ -88,6 +88,7 @@ class ScreenShell extends ConsumerWidget {
 
     Widget content = LayoutBuilder(
       builder: (context, constraints) {
+        final r = context.responsive;
         final isWide = constraints.maxWidth >= 600;
 
         final titleRow = Row(
@@ -104,26 +105,29 @@ class ScreenShell extends ConsumerWidget {
                         context.go(AppRoutes.dashboard);
                       }
                     },
-                borderRadius: BorderRadius.circular(AppBorderRadius.sm),
+                borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.sm)),
                 child: Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: r.padding(all: 8),
                   decoration: BoxDecoration(
                     color: AppColors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(AppBorderRadius.sm),
+                    borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.sm)),
                   ),
                   child: Icon(
                     Icons.arrow_back_rounded,
-                    size: 20,
+                    size: r.iconSize(20),
                     color: AppColors.textSecondary,
                   ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.md),
+              SizedBox(width: r.spacing(AppSpacing.md)),
             ],
-            Icon(icon, color: AppColors.primary, size: 28),
-            const SizedBox(width: AppSpacing.sm),
+            Icon(icon, color: AppColors.primary, size: r.iconSize(28)),
+            SizedBox(width: r.spacing(AppSpacing.sm)),
             Flexible(
-              child: Text(title, style: AppTextStyles.h1),
+              child: Text(
+                title,
+                style: AppTextStyles.h1.copyWith(fontSize: r.fontSize(24)),
+              ),
             ),
           ],
         );
@@ -135,7 +139,7 @@ class ScreenShell extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Flexible(child: titleRow),
-              const SizedBox(width: AppSpacing.md),
+              SizedBox(width: r.spacing(AppSpacing.md)),
               actions!,
             ],
           );
@@ -145,44 +149,50 @@ class ScreenShell extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             titleRow,
-            const SizedBox(height: AppSpacing.md),
+            SizedBox(height: r.spacing(AppSpacing.md)),
             actions!,
           ],
         );
       },
     );
 
-    Widget pageContent;
-
-    if (scrollable) {
-      // Outer scroll handles everything — body sizes to its natural height
-      pageContent = SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            content,
-            const SizedBox(height: AppSpacing.lg),
-            body,
-          ],
-        ),
-      );
-    } else {
-      // Body fills remaining height and manages its own scroll
-      // (used by Dashboard which has RefreshIndicator + its own SingleChildScrollView)
-      pageContent = Padding(
-        padding: const EdgeInsets.only(
-            top: AppSpacing.xl, bottom: AppSpacing.xl),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            content,
-            const SizedBox(height: AppSpacing.lg),
-            Expanded(child: body),
-          ],
-        ),
-      );
-    }
+    Widget pageContent = Builder(
+      builder: (context) {
+        final r = context.responsive;
+        
+        if (scrollable) {
+          // Outer scroll handles everything — body sizes to its natural height
+          return SingleChildScrollView(
+            padding: r.padding(vertical: AppSpacing.xl),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                content,
+                SizedBox(height: r.spacing(AppSpacing.lg)),
+                body,
+              ],
+            ),
+          );
+        } else {
+          // Body fills remaining height and manages its own scroll
+          // (used by Dashboard which has RefreshIndicator + its own SingleChildScrollView)
+          return Padding(
+            padding: EdgeInsets.only(
+              top: r.spacing(AppSpacing.xl),
+              bottom: r.spacing(AppSpacing.xl),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                content,
+                SizedBox(height: r.spacing(AppSpacing.lg)),
+                Expanded(child: body),
+              ],
+            ),
+          );
+        }
+      },
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -208,10 +218,14 @@ class ScreenShell extends ConsumerWidget {
             children: [
               if (isDesktop) nav,
               Expanded(
-                child: Container(
-                  constraints: BoxConstraints(maxWidth: maxContentWidth),
-                  margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                  child: pageContent,
+                child: Builder(
+                  builder: (context) {
+                    return Container(
+                      constraints: BoxConstraints(maxWidth: maxContentWidth),
+                      margin: context.responsive.padding(horizontal: AppSpacing.xl),
+                      child: pageContent,
+                    );
+                  }
                 ),
               ),
             ],

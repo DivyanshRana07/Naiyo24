@@ -26,6 +26,8 @@ class DashboardAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final r = context.responsive;
+    
     return AppBar(
       elevation: 0,
       scrolledUnderElevation: 1,
@@ -33,7 +35,7 @@ class DashboardAppBar extends ConsumerWidget implements PreferredSizeWidget {
       titleSpacing: 0,
       leading: showBackButton
           ? IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: Icon(Icons.arrow_back_rounded, size: r.iconSize(24)),
               tooltip: 'Back',
               onPressed: () {
                 if (Navigator.of(context).canPop()) {
@@ -45,7 +47,7 @@ class DashboardAppBar extends ConsumerWidget implements PreferredSizeWidget {
             )
           : Builder(
               builder: (innerContext) => IconButton(
-                icon: const Icon(Icons.menu_rounded),
+                icon: Icon(Icons.menu_rounded, size: r.iconSize(24)),
                 onPressed: () {
                   if (MediaQuery.of(innerContext).size.width < 900) {
                     Scaffold.of(innerContext).openDrawer();
@@ -55,32 +57,33 @@ class DashboardAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 },
               ),
             ),
-      title: const Padding(
-        padding: EdgeInsets.only(left: AppSpacing.xs),
+      title: Padding(
+        padding: EdgeInsets.only(left: r.spacing(AppSpacing.xs)),
         child: LogoWidget(
-          fontSize: 20,
+          fontSize: r.fontSize(20),
           textColor: Colors.white,
         ),
       ),
       actions: [
         PopupMenuButton<String>(
-          offset: const Offset(0, 48),
+          offset: Offset(0, r.spacing(48)),
           elevation: 4,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+            borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.lg)),
           ),
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             child: Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.md),
+              padding: r.padding(right: AppSpacing.md),
               child: CircleAvatar(
-                radius: 18,
+                radius: r.spacing(18),
                 backgroundColor: AppColors.surfaceVariant,
                 child: Text(
                   (email?.isNotEmpty == true) ? email![0].toUpperCase() : 'D',
                   style: AppTextStyles.labelLarge.copyWith(
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w400,
+                    fontSize: r.fontSize(15),
                   ),
                 ),
               ),
@@ -100,9 +103,11 @@ class DashboardAppBar extends ConsumerWidget implements PreferredSizeWidget {
               child: Row(
                 children: [
                   Icon(Icons.settings_outlined,
-                      size: 20, color: AppColors.textSecondary),
-                  const SizedBox(width: 8),
-                  Text('Settings', style: AppTextStyles.bodyMedium),
+                      size: r.iconSize(20), color: AppColors.textSecondary),
+                  SizedBox(width: r.spacing(8)),
+                  Text('Settings', style: AppTextStyles.bodyMedium.copyWith(
+                    fontSize: r.fontSize(14),
+                  )),
                 ],
               ),
             ),
@@ -112,13 +117,14 @@ class DashboardAppBar extends ConsumerWidget implements PreferredSizeWidget {
               child: Row(
                 children: [
                   Icon(Icons.logout_rounded,
-                      size: 20, color: AppColors.error),
-                  const SizedBox(width: 8),
+                      size: r.iconSize(20), color: AppColors.error),
+                  SizedBox(width: r.spacing(8)),
                   Text(
                     'Logout',
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.error,
                       fontWeight: FontWeight.w400,
+                      fontSize: r.fontSize(14),
                     ),
                   ),
                 ],

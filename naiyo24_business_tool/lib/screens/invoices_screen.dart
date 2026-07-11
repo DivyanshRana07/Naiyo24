@@ -86,6 +86,7 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final r = context.responsive;
     final asyncInvoices = ref.watch(asyncInvoicesProvider);
 
     return ScreenShell(
@@ -100,40 +101,40 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
                 context, ref.read(invoiceNotifierProvider)),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: AppColors.border),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: r.padding(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                  borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md))),
             ),
             icon: Icon(Icons.download_rounded,
-                size: 18, color: AppColors.textPrimary),
+                size: r.iconSize(18), color: AppColors.textPrimary),
             label: Text('Export',
                 style: AppTextStyles.labelLarge
-                    .copyWith(color: AppColors.textPrimary)),
+                    .copyWith(color: AppColors.textPrimary, fontSize: r.fontSize(15))),
           );
           final newBtn = FilledButton.icon(
             onPressed: () => context.push(AppRoutes.newInvoice),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: r.padding(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                  borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md))),
             ),
             icon: Icon(Icons.add_rounded,
-                size: 18, color: AppColors.textOnPrimary),
+                size: r.iconSize(18), color: AppColors.textOnPrimary),
             label: Text('New Invoice',
                 style: AppTextStyles.labelLarge
-                    .copyWith(color: AppColors.textOnPrimary)),
+                    .copyWith(color: AppColors.textOnPrimary, fontSize: r.fontSize(15))),
           );
           if (isBounded) {
             return Row(children: [
               Expanded(child: exportBtn),
-              const SizedBox(width: 8),
+              SizedBox(width: r.spacing(8)),
               Expanded(child: newBtn),
             ]);
           }
           return Row(mainAxisSize: MainAxisSize.min, children: [
             exportBtn,
-            const SizedBox(width: AppSpacing.md),
+            SizedBox(width: r.spacing(AppSpacing.md)),
             newBtn,
           ]);
         },
@@ -158,9 +159,9 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _SummaryChips(invoices: allInvoices),
-              const SizedBox(height: AppSpacing.lg),
+              SizedBox(height: r.spacing(AppSpacing.lg)),
               _filterBar(),
-              const SizedBox(height: AppSpacing.lg),
+              SizedBox(height: r.spacing(AppSpacing.lg)),
               if (filtered.isEmpty)
                 EmptyStatePlaceholder(
                   icon: Icons.receipt_long_outlined,
@@ -177,11 +178,11 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
                     invoices: filtered, onDelete: _confirmDelete),
               if (filtered.isNotEmpty)
                 Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.sm),
+                  padding: EdgeInsets.only(top: r.spacing(AppSpacing.sm)),
                   child: Text(
                     'Total Invoices: ${filtered.length}',
                     style: AppTextStyles.caption
-                        .copyWith(color: AppColors.textSecondary),
+                        .copyWith(color: AppColors.textSecondary, fontSize: r.fontSize(11)),
                   ),
                 ),
             ],
@@ -192,6 +193,8 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
   }
 
   Widget _filterBar() {
+    final r = context.responsive;
+    
     return Row(
       children: [
         Expanded(
@@ -200,36 +203,36 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
             decoration: InputDecoration(
               hintText: 'Search by client name or invoice number...',
               prefixIcon: Icon(Icons.search_rounded,
-                  color: AppColors.textSecondary),
+                  color: AppColors.textSecondary, size: r.iconSize(20)),
             ),
           ),
         ),
-        const SizedBox(width: AppSpacing.md),
+        SizedBox(width: r.spacing(AppSpacing.md)),
         DropdownButtonHideUnderline(
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            padding: r.padding(horizontal: 12, vertical: 2),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppBorderRadius.md),
+              borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md)),
               border: Border.all(color: AppColors.border),
             ),
             child: DropdownButton<InvoiceStatus?>(
               value: _filterStatus,
-              hint: const Text('All Status'),
+              hint: Text('All Status', style: TextStyle(fontSize: r.fontSize(14))),
               items: [
-                const DropdownMenuItem(value: null, child: Text('All')),
+                DropdownMenuItem(value: null, child: Text('All', style: TextStyle(fontSize: r.fontSize(14)))),
                 DropdownMenuItem(
                     value: InvoiceStatus.paid,
                     child: Text('Paid',
-                        style: TextStyle(color: AppColors.success))),
+                        style: TextStyle(color: AppColors.success, fontSize: r.fontSize(14)))),
                 DropdownMenuItem(
                     value: InvoiceStatus.partial,
                     child: Text('Partial',
-                        style: TextStyle(color: AppColors.warning))),
+                        style: TextStyle(color: AppColors.warning, fontSize: r.fontSize(14)))),
                 DropdownMenuItem(
                     value: InvoiceStatus.due,
                     child: Text('Due',
-                        style: TextStyle(color: AppColors.error))),
+                        style: TextStyle(color: AppColors.error, fontSize: r.fontSize(14)))),
               ],
               onChanged: (v) => setState(() => _filterStatus = v),
             ),
@@ -273,6 +276,7 @@ class _SummaryChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final r = context.responsive;
     final total = invoices.fold(0.0, (s, i) => s + i.grandTotal);
     final paid = invoices.where((i) => i.status == InvoiceStatus.paid).length;
     final due = invoices
@@ -280,39 +284,41 @@ class _SummaryChips extends StatelessWidget {
         .fold(0.0, (s, i) => s + i.dueAmount);
 
     return Wrap(
-      spacing: AppSpacing.md,
-      runSpacing: AppSpacing.sm,
+      spacing: r.spacing(AppSpacing.md),
+      runSpacing: r.spacing(AppSpacing.sm),
       children: [
-        _chip('Total Invoiced', '₹${total.toStringAsFixed(0)}',
+        _chip(context, 'Total Invoiced', '₹${total.toStringAsFixed(0)}',
             AppColors.primary, Icons.receipt_rounded),
-        _chip('Paid Invoices', '$paid', AppColors.success,
+        _chip(context, 'Paid Invoices', '$paid', AppColors.success,
             Icons.check_circle_rounded),
-        _chip('Total Due', '₹${due.toStringAsFixed(0)}', AppColors.error,
+        _chip(context, 'Total Due', '₹${due.toStringAsFixed(0)}', AppColors.error,
             Icons.warning_rounded),
       ],
     );
   }
 
-  Widget _chip(String label, String value, Color color, IconData icon) {
+  Widget _chip(BuildContext context, String label, String value, Color color, IconData icon) {
+    final r = context.responsive;
+    
     return Container(
-      padding: const EdgeInsets.symmetric(
+      padding: r.padding(
           horizontal: AppSpacing.md, vertical: AppSpacing.sm),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.07),
-        borderRadius: BorderRadius.circular(AppBorderRadius.full),
+        borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.full)),
         border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 6),
+          Icon(icon, size: r.iconSize(16), color: color),
+          SizedBox(width: r.spacing(6)),
           Text('$label: ',
               style: AppTextStyles.caption
-                  .copyWith(color: AppColors.textSecondary)),
+                  .copyWith(color: AppColors.textSecondary, fontSize: r.fontSize(11))),
           Text(value,
               style: AppTextStyles.caption
-                  .copyWith(color: color, fontWeight: FontWeight.w400)),
+                  .copyWith(color: color, fontWeight: FontWeight.w400, fontSize: r.fontSize(11))),
         ],
       ),
     );

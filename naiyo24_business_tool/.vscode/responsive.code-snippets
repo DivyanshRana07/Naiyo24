@@ -1,0 +1,97 @@
+{
+  "Responsive Padding": {
+    "prefix": "rpad",
+    "body": [
+      "context.responsive.padding(${1|all,horizontal,vertical|}: ${2:16})"
+    ],
+    "description": "Add responsive padding"
+  },
+  "Responsive Font Size": {
+    "prefix": "rfont",
+    "body": [
+      "context.responsive.fontSize(${1:16})"
+    ],
+    "description": "Add responsive font size"
+  },
+  "Responsive Icon Size": {
+    "prefix": "ricon",
+    "body": [
+      "context.responsive.iconSize(${1:24})"
+    ],
+    "description": "Add responsive icon size"
+  },
+  "Responsive Spacing": {
+    "prefix": "rspace",
+    "body": [
+      "context.responsive.spacing(${1:16})"
+    ],
+    "description": "Add responsive spacing"
+  },
+  "Responsive Border Radius": {
+    "prefix": "rborder",
+    "body": [
+      "context.responsive.borderRadius(${1:12})"
+    ],
+    "description": "Add responsive border radius"
+  },
+  "Responsive Builder": {
+    "prefix": "rbuilder",
+    "body": [
+      "Builder(",
+      "  builder: (context) {",
+      "    final r = context.responsive;",
+      "    return ${1:Container}(",
+      "      ${2:// Your widget here}",
+      "    );",
+      "  }",
+      ")"
+    ],
+    "description": "Create responsive Builder widget"
+  },
+  "Responsive Helper Variable": {
+    "prefix": "rhelper",
+    "body": [
+      "final r = context.responsive;"
+    ],
+    "description": "Create responsive helper variable"
+  },
+  "Responsive SizedBox Height": {
+    "prefix": "rheight",
+    "body": [
+      "SizedBox(height: context.responsive.spacing(${1:16}))"
+    ],
+    "description": "Create responsive height SizedBox"
+  },
+  "Responsive SizedBox Width": {
+    "prefix": "rwidth",
+    "body": [
+      "SizedBox(width: context.responsive.spacing(${1:16}))"
+    ],
+    "description": "Create responsive width SizedBox"
+  },
+  "Check if Mobile": {
+    "prefix": "rismobile",
+    "body": [
+      "context.responsive.isMobile"
+    ],
+    "description": "Check if screen is mobile"
+  },
+  "Check if Desktop": {
+    "prefix": "risdesktop",
+    "body": [
+      "context.responsive.isDesktop"
+    ],
+    "description": "Check if screen is desktop"
+  },
+  "Responsive Value": {
+    "prefix": "rvalue",
+    "body": [
+      "context.responsive.value<${1:int}>(",
+      "  mobile: ${2:1},",
+      "  tablet: ${3:2},",
+      "  desktop: ${4:3},",
+      ")"
+    ],
+    "description": "Get different values for different screen sizes"
+  }
+}

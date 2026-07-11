@@ -309,52 +309,61 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   // Unpaid balance banner
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.xl),
-                    decoration: BoxDecoration(
-                      gradient: AppGradients.primaryButton,
-                      borderRadius:
-                          BorderRadius.circular(AppBorderRadius.xl),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(AppSpacing.md),
-                          decoration: BoxDecoration(
-                            color:
-                                Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                              Icons.account_balance_wallet_rounded,
-                              color: Colors.white,
-                              size: 32),
-                        ),
-                        const SizedBox(width: AppSpacing.lg),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Total Unpaid Balance',
-                                style: AppTextStyles.labelLarge.copyWith(
-                                    color: Colors.white
-                                        .withValues(alpha: 0.8))),
-                            const SizedBox(height: 4),
-                            Text(
-                              '₹${totalUnpaid.toStringAsFixed(2)}',
-                              style: AppTextStyles.h1.copyWith(
-                                  color: Colors.white, fontSize: 32),
+                  Builder(
+                    builder: (context) {
+                      final responsive = context.responsive;
+                      return Container(
+                        padding: responsive.padding(all: AppSpacing.xl),
+                        decoration: BoxDecoration(
+                          gradient: AppGradients.primaryButton,
+                          borderRadius:
+                              BorderRadius.circular(responsive.borderRadius(AppBorderRadius.xl)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              blurRadius: responsive.spacing(12),
+                              offset: Offset(0, responsive.spacing(4)),
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: responsive.padding(all: AppSpacing.md),
+                              decoration: BoxDecoration(
+                                color:
+                                    Colors.white.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                  Icons.account_balance_wallet_rounded,
+                                  color: Colors.white,
+                                  size: responsive.iconSize(32)),
+                            ),
+                            SizedBox(width: responsive.spacing(AppSpacing.lg)),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Total Unpaid Balance',
+                                      style: AppTextStyles.labelLarge.copyWith(
+                                          fontSize: responsive.fontSize(15),
+                                          color: Colors.white
+                                              .withValues(alpha: 0.8))),
+                                  SizedBox(height: responsive.spacing(4)),
+                                  Text(
+                                    '₹${totalUnpaid.toStringAsFixed(2)}',
+                                  style: AppTextStyles.h1.copyWith(
+                                      fontSize: responsive.fontSize(32),
+                                      color: Colors.white),
+                                ),
+                              ],
+                            ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   ),
                 ],
               );
