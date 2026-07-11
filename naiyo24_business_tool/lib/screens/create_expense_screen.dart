@@ -7,7 +7,7 @@ import 'package:naiyo24_business_tool/utils/export_helper.dart' as export_helper
 
 import 'package:naiyo24_business_tool/notifiers/auth_notifier.dart';
 import 'package:naiyo24_business_tool/notifiers/vendor_notifier.dart';
-import 'package:naiyo24_business_tool/notifiers/purchase_order_notifier.dart';
+import 'package:naiyo24_business_tool/notifiers/expense_notifier.dart';
 import 'package:naiyo24_business_tool/models/vendor_model.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
@@ -15,19 +15,19 @@ import 'package:naiyo24_business_tool/widgets/common/dashboard_app_bar.dart';
 import 'package:naiyo24_business_tool/widgets/common/side_navigation.dart';
 import 'package:naiyo24_business_tool/widgets/common/confirm_discard_dialog.dart';
 
-class CreatePurchaseOrderScreen extends ConsumerStatefulWidget {
-  const CreatePurchaseOrderScreen({super.key});
+class CreateExpenseScreen extends ConsumerStatefulWidget {
+  const CreateExpenseScreen({super.key});
 
   @override
-  ConsumerState<CreatePurchaseOrderScreen> createState() =>
-      _CreatePurchaseOrderScreenState();
+  ConsumerState<CreateExpenseScreen> createState() =>
+      _CreateExpenseScreenState();
 }
 
-class _CreatePurchaseOrderScreenState
-    extends ConsumerState<CreatePurchaseOrderScreen> {
+class _CreateExpenseScreenState
+    extends ConsumerState<CreateExpenseScreen> {
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
-  late final TextEditingController _poNumberController;
+  late final TextEditingController _expenseNumberController;
   late final TextEditingController _dateController;
   late final TextEditingController _gstController;
 
@@ -46,7 +46,7 @@ class _CreatePurchaseOrderScreenState
     super.initState();
     _titleController = TextEditingController();
     _descriptionController = TextEditingController();
-    _poNumberController = TextEditingController(
+    _expenseNumberController = TextEditingController(
         text:
             'EXP-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}');
     _dateController = TextEditingController(
@@ -58,7 +58,7 @@ class _CreatePurchaseOrderScreenState
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _poNumberController.dispose();
+    _expenseNumberController.dispose();
     _dateController.dispose();
     _gstController.dispose();
     for (final item in _items) {
@@ -143,7 +143,7 @@ class _CreatePurchaseOrderScreenState
     }
   }
 
-  void _savePO() async {
+  void _saveExpense() async {
     if (_selectedVendor == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -179,11 +179,11 @@ class _CreatePurchaseOrderScreenState
     }
 
     final gstVal = double.tryParse(_gstController.text) ?? 0.0;
-    final poData = {
+    final expenseData = {
       'vendor_id': int.tryParse(_selectedVendor!.id) ?? 0,
-      'po_number': _poNumberController.text.trim(),
-      'po_date': _dateController.text.trim(),
-      'status': 'unpayed',
+      'expense_number': _expenseNumberController.text.trim(),
+      'expense_date': _dateController.text.trim(),
+      'status': 'unpaid',
       'title': _titleController.text.trim(),
       'description': _descriptionController.text.trim(),
       'total_amount': _totalAmount + gstVal,
@@ -205,7 +205,7 @@ class _CreatePurchaseOrderScreenState
     };
 
     try {
-      await ref.read(purchaseOrderNotifierProvider.notifier).addPurchaseOrder(poData);
+      await ref.read(expenseNotifierProvider.notifier).addExpense(expenseData);
       
       if (!mounted) return;
       
@@ -480,13 +480,13 @@ class _CreatePurchaseOrderScreenState
         ),
         const SizedBox(height: AppSpacing.xl),
 
-        // Metadata Fields: PO Number & Date Row
+        // Metadata Fields: Expense Number & Date Row
         Row(
           children: [
             Expanded(
               child: _buildMetadataField(
                 label: 'Expense Reference # *',
-                controller: _poNumberController,
+                controller: _expenseNumberController,
               ),
             ),
             const SizedBox(width: AppSpacing.lg),
@@ -1030,7 +1030,7 @@ class _CreatePurchaseOrderScreenState
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 FilledButton(
-                  onPressed: _savePO,
+                  onPressed: _saveExpense,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.textOnPrimary,
@@ -1074,7 +1074,7 @@ class _CreatePurchaseOrderScreenState
                 ),
                 const SizedBox(width: AppSpacing.md),
                 FilledButton(
-                  onPressed: _savePO,
+                  onPressed: _saveExpense,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.textOnPrimary,

@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 
-enum POStatus {
-  payed,
-  unpayed,
+enum ExpenseStatus {
+  paid,
+  unpaid,
 }
 
-class PurchaseOrderItemModel {
+class ExpenseItemModel {
   final String id;
   final String name;
   final double quantity;
@@ -13,7 +13,7 @@ class PurchaseOrderItemModel {
   final double gstRate;
   final double lineTotal;
 
-  const PurchaseOrderItemModel({
+  const ExpenseItemModel({
     required this.id,
     required this.name,
     required this.quantity,
@@ -22,8 +22,8 @@ class PurchaseOrderItemModel {
     required this.lineTotal,
   });
 
-  factory PurchaseOrderItemModel.fromJson(Map<String, dynamic> json) {
-    return PurchaseOrderItemModel(
+  factory ExpenseItemModel.fromJson(Map<String, dynamic> json) {
+    return ExpenseItemModel(
       id: json['id']?.toString() ?? '',
       name: json['name'] as String? ?? '',
       quantity: (json['quantity'] as num?)?.toDouble() ?? 0.0,
@@ -34,23 +34,23 @@ class PurchaseOrderItemModel {
   }
 }
 
-class PurchaseOrderModel {
+class ExpenseModel {
   final String id;
-  final String poNumber;
+  final String expenseNumber;
   final String title;
   final String description;
   final String vendorId;
   final String vendorName;
   final DateTime date;
   final double totalAmount;
-  final POStatus status;
+  final ExpenseStatus status;
   final double gstAmount;
   final String? receiptImage;
-  final List<PurchaseOrderItemModel> items;
+  final List<ExpenseItemModel> items;
 
-  const PurchaseOrderModel({
+  const ExpenseModel({
     required this.id,
-    required this.poNumber,
+    required this.expenseNumber,
     required this.title,
     this.description = '',
     required this.vendorId,
@@ -63,23 +63,23 @@ class PurchaseOrderModel {
     this.items = const [],
   });
 
-  PurchaseOrderModel copyWith({
+  ExpenseModel copyWith({
     String? id,
-    String? poNumber,
+    String? expenseNumber,
     String? title,
     String? description,
     String? vendorId,
     String? vendorName,
     DateTime? date,
     double? totalAmount,
-    POStatus? status,
+    ExpenseStatus? status,
     double? gstAmount,
     String? receiptImage,
-    List<PurchaseOrderItemModel>? items,
+    List<ExpenseItemModel>? items,
   }) {
-    return PurchaseOrderModel(
+    return ExpenseModel(
       id: id ?? this.id,
-      poNumber: poNumber ?? this.poNumber,
+      expenseNumber: expenseNumber ?? this.expenseNumber,
       title: title ?? this.title,
       description: description ?? this.description,
       vendorId: vendorId ?? this.vendorId,
@@ -95,7 +95,7 @@ class PurchaseOrderModel {
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'poNumber': poNumber,
+        'expenseNumber': expenseNumber,
         'title': title,
         'description': description,
         'vendorId': vendorId,
@@ -115,20 +115,22 @@ class PurchaseOrderModel {
         }).toList(),
       };
 
-  factory PurchaseOrderModel.fromJson(Map<String, dynamic> json) {
+  factory ExpenseModel.fromJson(Map<String, dynamic> json) {
     try {
-      return PurchaseOrderModel(
+      return ExpenseModel(
         id: json['id']?.toString() ?? '',
-        poNumber: json['poNumber'] as String? ?? json['po_number'] as String? ?? '',
+        expenseNumber: json['expenseNumber'] as String? ?? json['expense_number'] as String? ?? '',
         title: json['title'] as String? ?? '',
         description: json['description'] as String? ?? '',
         vendorId: json['vendorId']?.toString() ?? json['vendor_id']?.toString() ?? '',
         vendorName: json['vendorName'] as String? ?? json['vendor_name'] as String? ?? '',
         date: json['date'] != null
             ? DateTime.parse(json['date'] as String)
-            : (json['po_date'] != null
-                ? DateTime.parse(json['po_date'] as String)
-                : DateTime.now()),
+            : (json['expenseDate'] != null
+                ? DateTime.parse(json['expenseDate'] as String)
+                : (json['expense_date'] != null
+                    ? DateTime.parse(json['expense_date'] as String)
+                    : DateTime.now())),
         totalAmount: json['totalAmount'] != null
             ? (json['totalAmount'] as num).toDouble()
             : (json['total_amount'] != null
@@ -136,7 +138,7 @@ class PurchaseOrderModel {
                 : 0.0),
         status: json['status'] != null
             ? _parseStatus(json['status'] as String)
-            : POStatus.unpayed,
+            : ExpenseStatus.unpaid,
         gstAmount: json['gstAmount'] != null
             ? (json['gstAmount'] as num).toDouble()
             : (json['gst_amount'] != null
@@ -144,30 +146,30 @@ class PurchaseOrderModel {
                 : 0.0),
         receiptImage: json['receiptImage'] as String? ?? json['receipt_image'] as String?,
         items: (json['items'] as List?)
-                ?.map((i) => PurchaseOrderItemModel.fromJson(i as Map<String, dynamic>))
+                ?.map((i) => ExpenseItemModel.fromJson(i as Map<String, dynamic>))
                 .toList() ??
             const [],
       );
     } catch (e) {
-      debugPrint('Error parsing PurchaseOrderModel from JSON: $e');
+      debugPrint('Error parsing ExpenseModel from JSON: $e');
       rethrow;
     }
   }
 
-  static POStatus _parseStatus(String status) {
+  static ExpenseStatus _parseStatus(String status) {
     switch (status.toLowerCase()) {
       case 'paid':
       case 'payed':
       case 'completed':
-        return POStatus.payed;
+        return ExpenseStatus.paid;
       default:
-        return POStatus.unpayed;
+        return ExpenseStatus.unpaid;
     }
   }
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || (other is PurchaseOrderModel && other.id == id);
+      identical(this, other) || (other is ExpenseModel && other.id == id);
 
   @override
   int get hashCode => id.hashCode;

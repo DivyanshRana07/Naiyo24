@@ -12,7 +12,7 @@ export 'customer_model.dart';
 export 'invoice_model.dart';
 export 'line_item_model.dart';
 export 'item_model.dart';
-export 'purchase_order_model.dart';
+export 'expense_model.dart';
 export 'quotation_model.dart';
 export 'service_model.dart';
 export 'vendor_model.dart';

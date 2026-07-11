@@ -4,7 +4,8 @@ import 'package:naiyo24_business_tool/api_services/api_routes.dart';
 import 'package:naiyo24_business_tool/models/quotation_model.dart';
 
 class QuotationService {
-  static Future<List<QuotationModel>> getQuotations() async {
+  const QuotationService();
+  Future<List<QuotationModel>> getQuotations() async {
     try {
       final response = await http.get(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.quotationsList}'),
@@ -23,7 +24,7 @@ class QuotationService {
     }
   }
 
-  static Future<QuotationModel> createQuotation(Map<String, dynamic> quotationData) async {
+  Future<QuotationModel> createQuotation(Map<String, dynamic> quotationData) async {
     try {
       final response = await http.post(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.quotationsCreate}'),
@@ -43,7 +44,7 @@ class QuotationService {
     }
   }
 
-  static Future<QuotationModel> updateQuotation(int id, Map<String, dynamic> updates) async {
+  Future<QuotationModel> updateQuotation(int id, Map<String, dynamic> updates) async {
     try {
       final response = await http.put(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.quotationUpdate(id.toString())}'),
@@ -62,7 +63,7 @@ class QuotationService {
     }
   }
 
-  static Future<void> deleteQuotation(int id) async {
+  Future<void> deleteQuotation(int id) async {
     try {
       final response = await http.delete(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.quotationDelete(id.toString())}'),
@@ -77,7 +78,7 @@ class QuotationService {
     }
   }
 
-  static Future<List<int>> downloadQuotationPdf(String id) async {
+  Future<List<int>> downloadQuotationPdf(String id) async {
     try {
       final response = await http.get(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.quotationDownloadPdf(id)}'),
@@ -93,7 +94,7 @@ class QuotationService {
     }
   }
 
-  static Future<List<int>> exportQuotationListPdf() async {
+  Future<List<int>> exportQuotationListPdf() async {
     try {
       final response = await http.get(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.quotationExportListPdf}'),

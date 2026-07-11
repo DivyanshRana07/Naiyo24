@@ -126,7 +126,7 @@ class VendorsScreen extends ConsumerWidget {
               icon: Icons.store_outlined,
               title: 'No vendors added yet',
               message:
-                  'Add your first vendor to start creating purchase orders.',
+                  'Add your first vendor to start creating expenses.',
               actionLabel: 'Add New Vendor',
               onAction: () => context.push(AppRoutes.newVendor),
             );

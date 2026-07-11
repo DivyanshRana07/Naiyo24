@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import 'package:naiyo24_business_tool/models/purchase_order_model.dart';
+import 'package:naiyo24_business_tool/models/expense_model.dart';
 import 'package:naiyo24_business_tool/notifiers/auth_notifier.dart';
-import 'package:naiyo24_business_tool/notifiers/purchase_order_notifier.dart';
+import 'package:naiyo24_business_tool/notifiers/expense_notifier.dart';
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
 import 'package:naiyo24_business_tool/widgets/common/dashboard_app_bar.dart';
@@ -17,12 +17,12 @@ class ExpenseDetailScreen extends ConsumerWidget {
 
   final String expenseId;
 
-  void _confirmDelete(BuildContext context, WidgetRef ref, PurchaseOrderModel po) {
+  void _confirmDelete(BuildContext context, WidgetRef ref, ExpenseModel expense) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Expense'),
-        content: Text('Are you sure you want to delete this expense ref: ${po.poNumber}? This cannot be undone.'),
+        content: Text('Are you sure you want to delete this expense ref: ${expense.expenseNumber}? This cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -34,7 +34,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
               foregroundColor: AppColors.textOnPrimary,
             ),
             onPressed: () {
-              ref.read(purchaseOrderNotifierProvider.notifier).deletePurchaseOrder(po.id);
+              ref.read(expenseNotifierProvider.notifier).deleteExpense(expense.id);
               Navigator.pop(ctx);
               context.go(AppRoutes.expenses);
             },
@@ -79,10 +79,10 @@ class ExpenseDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
-    final asyncPos = ref.watch(purchaseOrderNotifierProvider);
+    final asyncExpenses = ref.watch(expenseNotifierProvider);
     final isDesktop = MediaQuery.of(context).size.width >= 900;
 
-    return asyncPos.when(
+    return asyncExpenses.when(
       loading: () => Scaffold(
         backgroundColor: AppColors.background,
         appBar: DashboardAppBar(email: authState.userEmail, showBackButton: true),
@@ -93,9 +93,9 @@ class ExpenseDetailScreen extends ConsumerWidget {
         appBar: DashboardAppBar(email: authState.userEmail, showBackButton: true),
         body: Center(child: Text('Error loading expense: $err')),
       ),
-      data: (pos) {
-        final po = pos.cast<PurchaseOrderModel?>().firstWhere((p) => p?.id == expenseId, orElse: () => null);
-        if (po == null) {
+      data: (expenses) {
+        final expense = expenses.cast<ExpenseModel?>().firstWhere((e) => e?.id == expenseId, orElse: () => null);
+        if (expense == null) {
           return Scaffold(
             backgroundColor: AppColors.background,
             appBar: DashboardAppBar(email: authState.userEmail, showBackButton: true),
@@ -120,14 +120,14 @@ class ExpenseDetailScreen extends ConsumerWidget {
           );
         }
 
-        final isPaid = po.status == POStatus.payed;
-        final subtotal = po.items.fold(0.0, (sum, item) => sum + item.lineTotal);
+        final isPaid = expense.status == ExpenseStatus.paid;
+        final subtotal = expense.items.fold(0.0, (sum, item) => sum + item.lineTotal);
 
         final actionButtons = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             FilledButton.icon(
-              onPressed: () => ref.read(purchaseOrderNotifierProvider.notifier).toggleStatus(po.id),
+              onPressed: () => ref.read(expenseNotifierProvider.notifier).toggleStatus(expense.id),
               style: FilledButton.styleFrom(
                 backgroundColor: isPaid ? AppColors.warning : AppColors.success,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -145,7 +145,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             OutlinedButton.icon(
-              onPressed: () => _confirmDelete(context, ref, po),
+              onPressed: () => _confirmDelete(context, ref, expense),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: AppColors.error),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -199,10 +199,10 @@ class ExpenseDetailScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  _buildDetailRow('Reference Number:', po.poNumber),
-                  _buildDetailRow('Expense Date:', DateFormat('MMMM dd, yyyy').format(po.date)),
-                  _buildDetailRow('Title:', po.title),
-                  if (po.description.isNotEmpty) _buildDetailRow('Description:', po.description),
+                  _buildDetailRow('Reference Number:', expense.expenseNumber),
+                  _buildDetailRow('Expense Date:', DateFormat('MMMM dd, yyyy').format(expense.date)),
+                  _buildDetailRow('Title:', expense.title),
+                  if (expense.description.isNotEmpty) _buildDetailRow('Description:', expense.description),
                 ],
               ),
             ),
@@ -224,9 +224,9 @@ class ExpenseDetailScreen extends ConsumerWidget {
                     style: AppTextStyles.sectionTitle.copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  Text(po.vendorName, style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700)),
+                  Text(expense.vendorName, style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700)),
                   const SizedBox(height: AppSpacing.xs),
-                  Text('ID: ${po.vendorId}', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary)),
+                  Text('ID: ${expense.vendorId}', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary)),
                 ],
               ),
             ),
@@ -248,7 +248,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
                     style: AppTextStyles.sectionTitle.copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  if (po.items.isEmpty)
+                  if (expense.items.isEmpty)
                     Text('No specific line items listed.', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary))
                   else
                     Table(
@@ -282,7 +282,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        ...po.items.map((item) => TableRow(
+                        ...expense.items.map((item) => TableRow(
                               decoration: BoxDecoration(
                                 border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5)),
                               ),
@@ -334,11 +334,11 @@ class ExpenseDetailScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.lg),
                   _buildSummaryRow('Subtotal', '₹${subtotal.toStringAsFixed(2)}'),
                   const SizedBox(height: AppSpacing.sm),
-                  _buildSummaryRow('Associated GST', '₹${po.gstAmount.toStringAsFixed(2)}'),
+                  _buildSummaryRow('Associated GST', '₹${expense.gstAmount.toStringAsFixed(2)}'),
                   Divider(color: AppColors.border, height: AppSpacing.lg),
                   _buildSummaryRow(
                     'Grand Total',
-                    '₹${po.totalAmount.toStringAsFixed(2)}',
+                    '₹${expense.totalAmount.toStringAsFixed(2)}',
                     highlight: true,
                   ),
                 ],
@@ -362,9 +362,9 @@ class ExpenseDetailScreen extends ConsumerWidget {
                     style: AppTextStyles.sectionTitle.copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  if (po.receiptImage != null && po.receiptImage!.trim().isNotEmpty)
+                  if (expense.receiptImage != null && expense.receiptImage!.trim().isNotEmpty)
                     GestureDetector(
-                      onTap: () => _showZoomedReceipt(context, po.receiptImage!),
+                      onTap: () => _showZoomedReceipt(context, expense.receiptImage!),
                       child: MouseRegion(
                         cursor: SystemMouseCursors.click,
                         child: Container(
@@ -377,7 +377,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
                           ),
                           clipBehavior: Clip.hardEdge,
                           child: Image.memory(
-                            base64Decode(po.receiptImage!.contains(',') ? po.receiptImage!.split(',').last : po.receiptImage!),
+                            base64Decode(expense.receiptImage!.contains(',') ? expense.receiptImage!.split(',').last : expense.receiptImage!),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -407,7 +407,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
 
         return ScreenShell(
           currentRoute: AppRoutes.expenses,
-          title: po.poNumber,
+          title: expense.expenseNumber,
           icon: Icons.account_balance_wallet_rounded,
           onBack: () => context.go(AppRoutes.expenses),
           actions: actionButtons,

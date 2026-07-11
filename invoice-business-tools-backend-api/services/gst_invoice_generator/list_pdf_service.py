@@ -618,8 +618,8 @@ class ListPDFService:
         return output
 
     @staticmethod
-    def render_purchase_order_list_pdf(purchase_orders: list) -> bytes:
-        """Generate a PDF list of all purchase orders (expenses)"""
+    def render_expense_list_pdf(expenses: list) -> bytes:
+        """Generate a PDF list of all expenses"""
         pdf = ListPDF("Expense Report")
         pdf.set_margins(10, 15, 10)
         pdf.set_auto_page_break(auto=True, margin=20)
@@ -631,7 +631,7 @@ class ListPDFService:
         pdf.set_draw_color(60, 60, 60)
         pdf.set_text_color(255, 255, 255)
         
-        headers = ["#", "PO Number", "Date", "Vendor", "Title", "Amount", "Status"]
+        headers = ["#", "Expense No", "Date", "Vendor", "Title", "Amount", "Status"]
         col_widths = [12, 35, 30, 60, 70, 35, 25]
         
         for width, header in zip(col_widths, headers):
@@ -646,7 +646,7 @@ class ListPDFService:
         
         total_amount = 0
         
-        for idx, po in enumerate(purchase_orders, 1):
+        for idx, expense in enumerate(expenses, 1):
             if pdf.get_y() > 170:
                 pdf.add_page()
                 pdf.set_font("Helvetica", "B", 9)
@@ -660,19 +660,19 @@ class ListPDFService:
             
             fill_row = idx % 2 == 0
             
-            po_number = po.po_number if hasattr(po, 'po_number') else f"PO-{po.id:04d}"
-            po_date = po.date.strftime('%d/%m/%Y') if hasattr(po, 'date') and po.date else '-'
-            vendor_name = po.vendor_name[:30] if hasattr(po, 'vendor_name') else 'N/A'
-            title = po.title[:35] if hasattr(po, 'title') and po.title else '-'
-            amount = float(po.total_amount) if hasattr(po, 'total_amount') else 0.0
-            status = po.status.upper() if hasattr(po, 'status') else 'PENDING'
+            expense_number = expense.expense_number if hasattr(expense, 'expense_number') else f"EXP-{expense.id:04d}"
+            expense_date = expense.expense_date.strftime('%d/%m/%Y') if hasattr(expense, 'expense_date') and expense.expense_date else '-'
+            vendor_name = expense.vendor_name[:30] if hasattr(expense, 'vendor_name') else 'N/A'
+            title = expense.title[:35] if hasattr(expense, 'title') and expense.title else '-'
+            amount = float(expense.total_amount) if hasattr(expense, 'total_amount') else 0.0
+            status = expense.status.upper() if hasattr(expense, 'status') else 'PENDING'
             
             total_amount += amount
             
             row_data = [
                 str(idx),
-                po_number[:25],
-                po_date,
+                expense_number[:25],
+                expense_date,
                 vendor_name,
                 title,
                 f"Rs {amount:.2f}",
@@ -696,7 +696,7 @@ class ListPDFService:
         pdf.set_fill_color(245, 245, 245)
         
         summary_data = [
-            ("Total Expenses:", str(len(purchase_orders))),
+            ("Total Expenses:", str(len(expenses))),
             ("Total Amount:", f"Rs {total_amount:.2f}"),
         ]
         

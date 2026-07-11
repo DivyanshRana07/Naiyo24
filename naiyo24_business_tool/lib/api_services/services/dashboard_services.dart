@@ -4,7 +4,8 @@ import 'package:naiyo24_business_tool/api_services/api_routes.dart';
 import 'package:naiyo24_business_tool/models/dashboard_stats_model.dart';
 
 class DashboardService {
-  static Future<DashboardStatsModel> getDashboardStats() async {
+  const DashboardService();
+  Future<DashboardStatsModel> getDashboardStats() async {
     try {
       final url = Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.dashboardStats}');
       

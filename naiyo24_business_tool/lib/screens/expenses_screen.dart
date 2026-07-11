@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:naiyo24_business_tool/notifiers/purchase_order_notifier.dart';
-import 'package:naiyo24_business_tool/models/purchase_order_model.dart';
+import 'package:naiyo24_business_tool/notifiers/expense_notifier.dart';
+import 'package:naiyo24_business_tool/models/expense_model.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
 import 'package:naiyo24_business_tool/widgets/common/empty_state_placeholder.dart';
@@ -15,35 +15,35 @@ import 'package:naiyo24_business_tool/widgets/common/screen_shell.dart';
 import 'package:naiyo24_business_tool/api_services/api_routes.dart';
 import 'package:naiyo24_business_tool/utils/export_helper.dart';
 
-class PurchaseOrdersScreen extends ConsumerStatefulWidget {
-  const PurchaseOrdersScreen({super.key});
+class ExpensesScreen extends ConsumerStatefulWidget {
+  const ExpensesScreen({super.key});
 
   @override
-  ConsumerState<PurchaseOrdersScreen> createState() =>
-      _PurchaseOrdersScreenState();
+  ConsumerState<ExpensesScreen> createState() =>
+      _ExpensesScreenState();
 }
 
-class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
-  POStatus? _filterStatus;
+class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
+  ExpenseStatus? _filterStatus;
 
-  void _handleExport(BuildContext context, List<PurchaseOrderModel> pos) {
+  void _handleExport(BuildContext context, List<ExpenseModel> expenses) {
     final csvContent = [
       'Ref Number,Date,Vendor,Title,Amount,Status',
-      ...pos.map((p) =>
-          '${p.poNumber},${p.date.toIso8601String().split('T')[0]},"${p.vendorName}","${p.title}",${p.totalAmount},${p.status.name}')
+      ...expenses.map((e) =>
+          '${e.expenseNumber},${e.date.toIso8601String().split('T')[0]},"${e.vendorName}","${e.title}",${e.totalAmount},${e.status.name}')
     ].join('\n');
     final waContent = [
       '*Naiyo24 Expense Export*',
-      'Total Expenses: ${pos.length}',
-      ...pos.map((p) =>
-          '- ${p.poNumber} | ${p.vendorName} | ₹${p.totalAmount} (${p.status.name.toUpperCase()})')
+      'Total Expenses: ${expenses.length}',
+      ...expenses.map((e) =>
+          '- ${e.expenseNumber} | ${e.vendorName} | ₹${e.totalAmount} (${e.status.name.toUpperCase()})')
     ].join('\n');
     final pdfContent = [
       'Naiyo24 Business Tool - Expenses Report',
       '==============================================',
       'Ref Number\tDate\tVendor\tTotal\tStatus',
-      ...pos.map((p) =>
-          '${p.poNumber}\t${p.date.toIso8601String().split('T')[0]}\t${p.vendorName}\t₹${p.totalAmount}\t${p.status.name}')
+      ...expenses.map((e) =>
+          '${e.expenseNumber}\t${e.date.toIso8601String().split('T')[0]}\t${e.vendorName}\t₹${e.totalAmount}\t${e.status.name}')
     ].join('\n');
     showDialog(
       context: context,
@@ -55,7 +55,7 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
         filenamePrefix: 'expenses',
         onExportPdf: () async {
           final response = await http.get(
-            Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.purchaseOrderExportListPdf}'),
+            Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.expenseExportListPdf}'),
           );
           if (response.statusCode == 200) {
             downloadBytes(
@@ -73,7 +73,7 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final asyncPos = ref.watch(purchaseOrderNotifierProvider);
+    final asyncExpenses = ref.watch(expenseNotifierProvider);
 
     return ScreenShell(
       currentRoute: AppRoutes.expenses,
@@ -84,11 +84,11 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
           final isBounded = constraints.hasBoundedWidth;
           final exportBtn = OutlinedButton.icon(
             onPressed: () {
-              final asyncPosData = ref.read(purchaseOrderNotifierProvider);
-              asyncPosData.whenData((pos) {
+              final asyncExpensesData = ref.read(expenseNotifierProvider);
+              asyncExpensesData.whenData((expenses) {
                 final filtered = _filterStatus == null
-                    ? pos
-                    : pos.where((p) => p.status == _filterStatus).toList();
+                    ? expenses
+                    : expenses.where((e) => e.status == _filterStatus).toList();
                 _handleExport(context, filtered);
               });
             },
@@ -142,26 +142,26 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
               Text('Filter by Status: ', style: AppTextStyles.bodyMedium),
               _filterChip('All', _filterStatus == null,
                   () => setState(() => _filterStatus = null)),
-              _filterChip('Unpaid', _filterStatus == POStatus.unpayed,
-                  () => setState(() => _filterStatus = POStatus.unpayed)),
-              _filterChip('Paid', _filterStatus == POStatus.payed,
-                  () => setState(() => _filterStatus = POStatus.payed)),
+              _filterChip('Unpaid', _filterStatus == ExpenseStatus.unpaid,
+                  () => setState(() => _filterStatus = ExpenseStatus.unpaid)),
+              _filterChip('Paid', _filterStatus == ExpenseStatus.paid,
+                  () => setState(() => _filterStatus = ExpenseStatus.paid)),
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          asyncPos.when(
+          asyncExpenses.when(
             loading: () => const LoadingPlaceholder(
-                message: 'Loading purchase orders...'),
+                message: 'Loading expenses...'),
             error: (err, _) => Center(child: Text('Error: $err')),
-            data: (pos) {
-              final filteredPos = _filterStatus == null
-                  ? pos
-                  : pos.where((p) => p.status == _filterStatus).toList();
-              final totalUnpayed = pos
-                  .where((p) => p.status == POStatus.unpayed)
-                  .fold(0.0, (sum, p) => sum + p.totalAmount);
+            data: (expenses) {
+              final filteredExpenses = _filterStatus == null
+                  ? expenses
+                  : expenses.where((e) => e.status == _filterStatus).toList();
+              final totalUnpaid = expenses
+                  .where((e) => e.status == ExpenseStatus.unpaid)
+                  .fold(0.0, (sum, e) => sum + e.totalAmount);
 
-              if (pos.isEmpty) {
+              if (expenses.isEmpty) {
                 return EmptyStatePlaceholder(
                   icon: Icons.account_balance_wallet_outlined,
                   title: 'No expenses found',
@@ -209,18 +209,18 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
                                 DataColumn(label: Text('TOTAL AMOUNT')),
                                 DataColumn(label: Text('STATUS')),
                               ],
-                              rows: filteredPos.map((po) {
-                                final isPayed =
-                                    po.status == POStatus.payed;
+                              rows: filteredExpenses.map((expense) {
+                                final isPaid =
+                                    expense.status == ExpenseStatus.paid;
                                 return DataRow(cells: [
                                   DataCell(
                                     InkWell(
                                       onTap: () => context.push(
-                                          AppRoutes.expenseDetailPath(po.id)),
+                                          AppRoutes.expenseDetailPath(expense.id)),
                                       borderRadius: BorderRadius.circular(
                                           AppBorderRadius.sm),
                                       child: Text(
-                                        po.poNumber,
+                                        expense.expenseNumber,
                                         style: AppTextStyles.bodyMedium
                                             .copyWith(
                                                 fontWeight: FontWeight.w700,
@@ -230,12 +230,12 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
                                   ),
                                   DataCell(Text(
                                       DateFormat('MMM dd, yyyy')
-                                          .format(po.date),
+                                          .format(expense.date),
                                       style: AppTextStyles.bodyMedium)),
-                                  DataCell(Text(po.vendorName,
+                                  DataCell(Text(expense.vendorName,
                                       style: AppTextStyles.bodyMedium)),
                                   DataCell(Text(
-                                      '₹${po.totalAmount.toStringAsFixed(2)}',
+                                      '₹${expense.totalAmount.toStringAsFixed(2)}',
                                       style: AppTextStyles.bodyMedium
                                           .copyWith(
                                               fontWeight:
@@ -246,16 +246,16 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
                                       child: InkWell(
                                         onTap: () => ref
                                             .read(
-                                                purchaseOrderNotifierProvider
+                                                expenseNotifierProvider
                                                     .notifier)
-                                            .toggleStatus(po.id),
+                                            .toggleStatus(expense.id),
                                         borderRadius:
                                             BorderRadius.circular(100),
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 12, vertical: 6),
                                           decoration: BoxDecoration(
-                                            color: isPayed
+                                            color: isPaid
                                                 ? AppColors.success
                                                     .withValues(alpha: 0.1)
                                                 : AppColors.error
@@ -263,7 +263,7 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(100),
                                             border: Border.all(
-                                              color: isPayed
+                                              color: isPaid
                                                   ? AppColors.success
                                                   : AppColors.error,
                                             ),
@@ -272,22 +272,22 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Icon(
-                                                isPayed
+                                                isPaid
                                                     ? Icons
                                                         .check_circle_rounded
                                                     : Icons.warning_rounded,
                                                 size: 14,
-                                                color: isPayed
+                                                color: isPaid
                                                     ? AppColors.success
                                                     : AppColors.error,
                                               ),
                                               const SizedBox(width: 6),
                                               Text(
-                                                isPayed ? 'Paid' : 'Unpaid',
+                                                isPaid ? 'Paid' : 'Unpaid',
                                                 style: AppTextStyles
                                                     .labelLarge
                                                     .copyWith(
-                                                  color: isPayed
+                                                  color: isPaid
                                                       ? AppColors.success
                                                       : AppColors.error,
                                                   fontSize: 12,
@@ -347,7 +347,7 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
                                         .withValues(alpha: 0.8))),
                             const SizedBox(height: 4),
                             Text(
-                              '₹${totalUnpayed.toStringAsFixed(2)}',
+                              '₹${totalUnpaid.toStringAsFixed(2)}',
                               style: AppTextStyles.h1.copyWith(
                                   color: Colors.white, fontSize: 32),
                             ),

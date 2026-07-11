@@ -10,9 +10,14 @@ Fully integrated with database persistence, relational schemas, validation middl
 
 - **User Authentication**: Secure JWT-based registration, login, and authorization. All business data is linked to specific users.
 - **GST Invoice Generator**: Supports intra-state (CGST + SGST) and inter-state (IGST) tax calculation logic. Generates database-persisted invoices and renders premium downloadable PDF documents.
-- **Expense Tracker**: Full CRUD endpoints for managing user expenses with category and date tracking.
-- **Quotation System**: Generates customized quotations for clients, calculates totals automatically, and manages quotation state (Draft, etc.).
-- **Salary Manager**: Computes employee net salaries based on base pay and bonuses, keeping detailed payroll logs.
+- **Customer Management**: Full CRUD operations for customer records with contact details and GST information.
+- **Vendor Management**: Manage vendor records with contact persons and GST details.
+- **Item & Service Catalog**: Track products and services with pricing, stock levels, and categories.
+- **Expense Tracking**: Complete expense management with vendor linkage, line items, receipt attachments, and PDF export.
+- **Quotation System**: Generate customized quotations for clients, calculates totals automatically, and manages quotation state (Draft, Sent, etc.).
+- **Lead Management**: Track leads through pipeline stages (New, Contacted, Qualified, Converted, Lost).
+- **Activity Logging**: Comprehensive activity tracking with PDF export functionality.
+- **Dashboard Analytics**: Real-time statistics for revenue, expenses, and business metrics.
 - **Robust Error Handling**: Standardized central validation, HTTP, and global exceptions with clean JSON responses.
 - **Detailed Logging**: Middleware logging system recording latency, endpoints, and error metrics.
 
@@ -48,27 +53,41 @@ Fully integrated with database persistence, relational schemas, validation middl
 │   └── logging_middleware.py   # Latency and Request ID middleware
 ├── models/
 │   ├── db_models.py            # Persisted SQLAlchemy tables (User, Invoice, Expense, etc.)
-│   ├── expense_tracker.py      # Expense-specific validators
 │   ├── invoice_generator.py    # Invoice calculation schemas and functions
-│   ├── quotation.py            # Quotation calculations
-│   └── salary.py               # Salary calculation types
+│   └── quotation.py            # Quotation calculations
 ├── routes/                     # Router controllers exposing CRUD endpoints
 │   ├── auth.py
-│   ├── expense_tracker.py
+│   ├── activity.py
+│   ├── customer.py
+│   ├── dashboard.py
+│   ├── expense.py
 │   ├── invoice_generator.py
+│   ├── item.py
+│   ├── lead.py
 │   ├── quotation.py
-│   └── salary.py
+│   ├── service.py
+│   └── vendor.py
 ├── schemas/                    # Pydantic serializer/deserializer schemas
 │   ├── auth.py
+│   ├── activity_schema.py
+│   ├── customer_schema.py
 │   ├── expense_schema.py
 │   ├── invoice_schema.py
+│   ├── item_schema.py
+│   ├── lead_schema.py
 │   ├── quotation_schema.py
-│   └── salary_schema.py
+│   ├── service_schema.py
+│   └── vendor_schema.py
 ├── services/                   # Business logic layer
+│   ├── activity_service.py
+│   ├── customer_service.py
 │   ├── expense_service.py
 │   ├── invoice_service.py
+│   ├── item_service.py
+│   ├── lead_service.py
 │   ├── quotation_service.py
-│   ├── salary_service.py
+│   ├── service_service.py
+│   ├── vendor_service.py
 │   └── gst_invoice_generator/  # Specific GST math calculations and PDF renderer
 └── tests/                      # Pytest unit and integration files
 ```
@@ -164,11 +183,12 @@ This starts both PostgreSQL and FastAPI in containers.
 * `GET /api/v1/invoices/{id}/download-pdf` - Renders and downloads a professional invoice PDF file
 
 ### 💰 Expenses
-* `POST /api/v1/expenses/add` - Log a new expense (title, category, date, and amount)
-* `GET /api/v1/expenses/list` - Retrieve user-specific expenses
+* `POST /api/v1/expenses/create` - Create a new expense with vendor, items, and receipt
+* `GET /api/v1/expenses/list` - Retrieve all user expenses
 * `GET /api/v1/expenses/{id}` - Fetch single expense details
 * `PUT /api/v1/expenses/{id}` - Update expense information
 * `DELETE /api/v1/expenses/{id}` - Delete an expense record
+* `GET /api/v1/expenses/export-list-pdf` - Export all expenses as PDF report
 
 ### 📋 Quotations
 * `POST /api/v1/quotation/create` - Draft a client quotation
@@ -176,13 +196,52 @@ This starts both PostgreSQL and FastAPI in containers.
 * `GET /api/v1/quotation/{id}` - Retrieve a single quotation record
 * `PUT /api/v1/quotation/{id}` - Update quotation details
 * `DELETE /api/v1/quotation/{id}` - Delete a quotation record
+* `GET /api/v1/quotation/{id}/download-pdf` - Download quotation as PDF
+* `GET /api/v1/quotation/export-list-pdf` - Export all quotations as PDF report
 
-### 💵 Salaries
-* `POST /api/v1/salary/generate` - Generate salary payout details (Base + Bonus)
-* `GET /api/v1/salary/list` - View all generated salary slips
-* `GET /api/v1/salary/{id}` - View single salary transaction
-* `PUT /api/v1/salary/{id}` - Update salary details
-* `DELETE /api/v1/salary/{id}` - Delete a salary record
+### 👥 Customers
+* `POST /api/v1/customers` - Create a new customer
+* `GET /api/v1/customers` - List all customers
+* `GET /api/v1/customers/{id}` - Get customer details
+* `PUT /api/v1/customers/{id}` - Update customer information
+* `DELETE /api/v1/customers/{id}` - Delete a customer
+* `GET /api/v1/customers/export-list-pdf` - Export customers as PDF
+
+### 🏢 Vendors
+* `POST /api/v1/vendors/add` - Create a new vendor
+* `GET /api/v1/vendors/list` - List all vendors
+* `GET /api/v1/vendors/{id}` - Get vendor details
+* `PUT /api/v1/vendors/{id}` - Update vendor information
+* `DELETE /api/v1/vendors/{id}` - Delete a vendor
+* `GET /api/v1/vendors/export-list-pdf` - Export vendors as PDF
+
+### 📦 Items & Services
+* `POST /api/v1/items` - Create a new item/product
+* `GET /api/v1/items` - List all items
+* `GET /api/v1/items/{id}` - Get item details
+* `PUT /api/v1/items/{id}` - Update item information
+* `DELETE /api/v1/items/{id}` - Delete an item
+* `PUT /api/v1/items/{id}/stock` - Update item stock level
+* `GET /api/v1/items/export-list-pdf` - Export items as PDF
+* `POST /api/v1/services` - Create a new service
+* `GET /api/v1/services` - List all services
+* `PUT /api/v1/services/{id}` - Update service information
+* `DELETE /api/v1/services/{id}` - Delete a service
+* `GET /api/v1/services/export-list-pdf` - Export services as PDF
+
+### 🎯 Leads
+* `POST /api/v1/leads/create` - Create a new lead
+* `GET /api/v1/leads/list` - List all leads
+* `GET /api/v1/leads/{id}` - Get lead details
+* `PUT /api/v1/leads/{id}` - Update lead information
+* `DELETE /api/v1/leads/{id}` - Delete a lead
+* `POST /api/v1/leads/{id}/convert` - Convert lead to customer
+
+### 📊 Activity & Dashboard
+* `GET /api/v1/activity` - Get activity log
+* `DELETE /api/v1/activity/{id}` - Delete an activity entry
+* `GET /api/v1/activity/export-list-pdf` - Export activity log as PDF
+* `GET /api/v1/dashboard/stats` - Get dashboard statistics
 
 ---
 

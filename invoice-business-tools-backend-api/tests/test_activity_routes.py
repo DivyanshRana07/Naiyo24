@@ -6,7 +6,7 @@ Endpoints under test:
 
 Strategy:
   - Reuses the existing conftest.py fixtures (auth_client, db_session, test_user).
-  - Activities are triggered via other business endpoints (expenses, customers, etc.)
+  - Activities are triggered via other business endpoints (vendors, customers, etc.)
     to exercise the automatic creation path end-to-end.
   - Direct DB assertions verify persistence and ordering.
   - User isolation is verified with a second test user fixture.
@@ -17,15 +17,15 @@ import pytest
 
 
 # ---------------------------------------------------------------------------
-# Helpers — seed minimal expenses/customers to produce activity records
+# Helpers — seed minimal vendors/customers to produce activity records
 # ---------------------------------------------------------------------------
 
-def _add_expense(auth_client, title: str = "Test Expense", amount: float = 100.0) -> int:
+def _add_vendor(auth_client, name: str = "Test Vendor") -> int:
     resp = auth_client.post(
-        "/api/v1/expenses/add",
-        json={"title": title, "amount": amount, "category": "Test"},
+        "/api/v1/vendors/add",
+        json={"name": name, "email": "vendor@test.com", "phone": "9999999999"},
     )
-    assert resp.status_code == 200, f"Expense creation failed: {resp.text}"
+    assert resp.status_code == 200, f"Vendor creation failed: {resp.text}"
     return resp.json()["data"]["id"]
 
 
@@ -66,65 +66,65 @@ class TestActivityList:
 
 
 # ---------------------------------------------------------------------------
-# 2. Automatic activity creation — expenses
+# 2. Automatic activity creation - vendors
 # ---------------------------------------------------------------------------
 
 class TestActivityAutoCreate:
 
     def test_creating_expense_creates_activity(self, auth_client):
-        _add_expense(auth_client, title="Office Supplies")
+        _add_vendor(auth_client, name="Office Supplies")
         resp = auth_client.get("/api/v1/activity")
         assert len(resp.json()["data"]) >= 1
 
     def test_activity_has_required_camel_case_fields(self, auth_client):
-        _add_expense(auth_client)
+        _add_vendor(auth_client)
         resp = auth_client.get("/api/v1/activity")
         item = resp.json()["data"][0]
         for field in ("id", "action", "entityType", "entityId", "title", "description", "createdAt"):
             assert field in item, f"Missing required field: {field}"
 
     def test_expense_activity_action_is_created(self, auth_client):
-        _add_expense(auth_client)
+        _add_vendor(auth_client)
         resp = auth_client.get("/api/v1/activity")
         assert resp.json()["data"][0]["action"] == "Created"
 
     def test_expense_activity_entity_type(self, auth_client):
-        _add_expense(auth_client)
+        _add_vendor(auth_client)
         resp = auth_client.get("/api/v1/activity")
-        assert resp.json()["data"][0]["entityType"] == "Expense"
+        assert resp.json()["data"][0]["entityType"] == "Vendor"
 
     def test_expense_activity_title(self, auth_client):
-        _add_expense(auth_client)
+        _add_vendor(auth_client)
         resp = auth_client.get("/api/v1/activity")
-        assert resp.json()["data"][0]["title"] == "Expense Added"
+        assert resp.json()["data"][0]["title"] == "Vendor Added"
 
     def test_expense_activity_description_contains_title(self, auth_client):
-        _add_expense(auth_client, title="Unique Expense Name")
+        _add_vendor(auth_client, name="Unique Expense Name")
         resp = auth_client.get("/api/v1/activity")
         desc = resp.json()["data"][0]["description"]
         assert "Unique Expense Name" in desc
 
     def test_expense_entity_id_is_string(self, auth_client):
-        _add_expense(auth_client)
+        _add_vendor(auth_client)
         resp = auth_client.get("/api/v1/activity")
         entity_id = resp.json()["data"][0]["entityId"]
         assert isinstance(entity_id, str)
 
     def test_created_at_is_present(self, auth_client):
-        _add_expense(auth_client)
+        _add_vendor(auth_client)
         resp = auth_client.get("/api/v1/activity")
         assert resp.json()["data"][0]["createdAt"] is not None
 
     def test_updating_expense_creates_updated_activity(self, auth_client):
-        expense_id = _add_expense(auth_client, title="To Update")
-        auth_client.put(f"/api/v1/expenses/{expense_id}", json={"title": "Updated"})
+        vendor_id = _add_vendor(auth_client, name="To Update")
+        auth_client.put(f"/api/v1/expenses/{vendor_id}", json={"title": "Updated"})
         resp = auth_client.get("/api/v1/activity")
         actions = [a["action"] for a in resp.json()["data"]]
         assert "Updated" in actions
 
     def test_deleting_expense_creates_deleted_activity(self, auth_client):
-        expense_id = _add_expense(auth_client, title="To Delete")
-        auth_client.delete(f"/api/v1/expenses/{expense_id}")
+        vendor_id = _add_vendor(auth_client, name="To Delete")
+        auth_client.delete(f"/api/v1/expenses/{vendor_id}")
         resp = auth_client.get("/api/v1/activity")
         actions = [a["action"] for a in resp.json()["data"]]
         assert "Deleted" in actions
@@ -151,9 +151,9 @@ class TestActivityAutoCreate:
 class TestActivityOrdering:
 
     def test_activities_returned_newest_first(self, auth_client):
-        _add_expense(auth_client, title="First Expense")
-        _add_expense(auth_client, title="Second Expense")
-        _add_expense(auth_client, title="Third Expense")
+        _add_vendor(auth_client, name="First Expense")
+        _add_vendor(auth_client, name="Second Expense")
+        _add_vendor(auth_client, name="Third Expense")
 
         resp = auth_client.get("/api/v1/activity")
         data = resp.json()["data"]
@@ -164,8 +164,8 @@ class TestActivityOrdering:
         assert ids == sorted(ids, reverse=True), "Activities are not ordered newest-first (id desc)"
 
     def test_multiple_operations_ordering(self, auth_client):
-        expense_id = _add_expense(auth_client, title="Order Test")
-        auth_client.put(f"/api/v1/expenses/{expense_id}", json={"title": "Order Test Updated"})
+        vendor_id = _add_vendor(auth_client, name="Order Test")
+        auth_client.put(f"/api/v1/expenses/{vendor_id}", json={"title": "Order Test Updated"})
 
         resp = auth_client.get("/api/v1/activity")
         data = resp.json()["data"]
@@ -183,7 +183,7 @@ class TestActivityPagination:
 
     def test_limit_parameter_respected(self, auth_client):
         for i in range(5):
-            _add_expense(auth_client, title=f"Paginate Expense {i}")
+            _add_vendor(auth_client, name=f"Paginate Expense {i}")
 
         resp = auth_client.get("/api/v1/activity?limit=3")
         assert resp.status_code == 200
@@ -191,7 +191,7 @@ class TestActivityPagination:
 
     def test_offset_parameter_respected(self, auth_client):
         for i in range(4):
-            _add_expense(auth_client, title=f"Offset Expense {i}")
+            _add_vendor(auth_client, name=f"Offset Expense {i}")
 
         resp_all = auth_client.get("/api/v1/activity?limit=4")
         resp_offset = auth_client.get("/api/v1/activity?limit=4&offset=2")
@@ -204,7 +204,7 @@ class TestActivityPagination:
 
     def test_limit_defaults_to_50(self, auth_client):
         # With fewer than 50 items this just confirms the endpoint works
-        _add_expense(auth_client)
+        _add_vendor(auth_client)
         resp = auth_client.get("/api/v1/activity")
         assert resp.status_code == 200
 
@@ -221,7 +221,7 @@ class TestActivityPagination:
         assert resp.status_code == 422
 
     def test_large_offset_returns_empty_list(self, auth_client):
-        _add_expense(auth_client)
+        _add_vendor(auth_client)
         resp = auth_client.get("/api/v1/activity?offset=99999")
         assert resp.status_code == 200
         assert resp.json()["data"] == []
@@ -241,7 +241,7 @@ class TestActivityUserOwnership:
     """
 
     def test_user_sees_only_own_activities(self, auth_client, db_session):
-        """User 1 creates an expense; a row planted for user 99 must not appear."""
+        """User 1 creates a vendor; a row planted for user 99 must not appear."""
         from models.db_models import ActivityLog
 
         # Seed an activity for a completely different user (user_id=99)
@@ -257,7 +257,7 @@ class TestActivityUserOwnership:
         db_session.commit()
 
         # Current user (user 1) creates their own expense
-        _add_expense(auth_client, title="User 1 Expense")
+        _add_vendor(auth_client, name="User 1 Expense")
 
         resp = auth_client.get("/api/v1/activity")
         assert resp.status_code == 200
@@ -273,8 +273,8 @@ class TestActivityUserOwnership:
         """Directly seed activities for two different user IDs and confirm isolation."""
         from models.db_models import ActivityLog
 
-        # User 1 creates an expense via the API
-        _add_expense(auth_client, title="User A Private Expense")
+        # User 1 creates a vendor via the API
+        _add_vendor(auth_client, name="User A Private Expense")
 
         # Directly seed an activity for user_id=2 (a different user)
         user2_log = ActivityLog(
@@ -303,25 +303,25 @@ class TestActivityUserOwnership:
 class TestActivitySchema:
 
     def test_id_is_integer(self, auth_client):
-        _add_expense(auth_client)
+        _add_vendor(auth_client)
         resp = auth_client.get("/api/v1/activity")
         item = resp.json()["data"][0]
         assert isinstance(item["id"], int)
 
     def test_entity_id_is_string_or_null(self, auth_client):
-        _add_expense(auth_client)
+        _add_vendor(auth_client)
         resp = auth_client.get("/api/v1/activity")
         entity_id = resp.json()["data"][0]["entityId"]
         assert entity_id is None or isinstance(entity_id, str)
 
     def test_description_field_present(self, auth_client):
-        _add_expense(auth_client)
+        _add_vendor(auth_client)
         resp = auth_client.get("/api/v1/activity")
         assert "description" in resp.json()["data"][0]
 
     def test_created_at_format_is_iso(self, auth_client):
         from datetime import datetime
-        _add_expense(auth_client)
+        _add_vendor(auth_client)
         resp = auth_client.get("/api/v1/activity")
         created_at_str = resp.json()["data"][0]["createdAt"]
         # Should be parseable as ISO-8601
