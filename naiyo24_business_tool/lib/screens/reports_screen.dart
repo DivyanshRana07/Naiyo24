@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:naiyo24_business_tool/notifiers/activity_notifier.dart';
 import 'package:naiyo24_business_tool/notifiers/auth_notifier.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
+import 'package:naiyo24_business_tool/theme/responsive.dart';
 import 'package:naiyo24_business_tool/widgets/dashboard/dashboard_widgets.dart';
 import 'package:naiyo24_business_tool/widgets/common/dashboard_app_bar.dart';
 import 'package:naiyo24_business_tool/widgets/common/side_navigation.dart';
@@ -142,7 +143,7 @@ class ReportsScreen extends ConsumerWidget {
             ),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.xl)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -150,97 +151,101 @@ class ReportsScreen extends ConsumerWidget {
                     children: [
                       InkWell(
                         onTap: () => context.go(AppRoutes.dashboard),
-                        borderRadius: BorderRadius.circular(AppBorderRadius.sm),
+                        borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.sm)),
                         child: Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.all(context.responsive.spacing(8)),
                           decoration: BoxDecoration(
                             color: AppColors.surfaceVariant,
                             borderRadius:
-                                BorderRadius.circular(AppBorderRadius.sm),
+                                BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.sm)),
                           ),
                           child: Icon(Icons.arrow_back_rounded,
-                              size: 20, color: AppColors.textSecondary),
+                              size: context.responsive.iconSize(20), color: AppColors.textSecondary),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.md),
+                      SizedBox(width: context.responsive.spacing(AppSpacing.md)),
                       Icon(Icons.history_rounded,
-                          color: AppColors.primary, size: 28),
-                      const SizedBox(width: AppSpacing.sm),
+                          color: AppColors.primary, size: context.responsive.iconSize(28)),
+                      SizedBox(width: context.responsive.spacing(AppSpacing.sm)),
                       Flexible(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'History',
-                              style: AppTextStyles.h1,
+                              style: AppTextStyles.h1.copyWith(fontSize: context.responsive.fontSize(24)),
                             ),
                             Text(
                               'All activities completed on the platform.',
-                              style: AppTextStyles.bodyMedium,
+                              style: AppTextStyles.bodyMedium.copyWith(fontSize: context.responsive.fontSize(14)),
                             ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.xxl),
+                  SizedBox(height: context.responsive.spacing(AppSpacing.xxl)),
                   Wrap(
                     alignment: WrapAlignment.spaceBetween,
                     crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: AppSpacing.md,
-                    runSpacing: AppSpacing.sm,
+                    spacing: context.responsive.spacing(AppSpacing.md),
+                    runSpacing: context.responsive.spacing(AppSpacing.sm),
                     children: [
                       Text(
                         'Recent Activity',
-                        style: AppTextStyles.h2,
+                        style: AppTextStyles.h2.copyWith(fontSize: context.responsive.fontSize(20)),
                       ),
                       asyncActivities.when(
                         data: (activities) => OutlinedButton.icon(
                           onPressed: () => _handleExport(context, activities),
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(color: AppColors.border),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: context.responsive.spacing(16), 
+                                vertical: context.responsive.spacing(8)),
                             shape: RoundedRectangleBorder(
                               borderRadius:
-                                  BorderRadius.circular(AppBorderRadius.md),
+                                  BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.md)),
                             ),
                           ),
                           icon: Icon(Icons.download_rounded,
-                              size: 16, color: AppColors.textPrimary),
+                              size: context.responsive.iconSize(16), color: AppColors.textPrimary),
                           label: Text('Export',
                               style: AppTextStyles.labelMedium
-                                  .copyWith(color: AppColors.textPrimary)),
+                                  .copyWith(
+                                    color: AppColors.textPrimary,
+                                    fontSize: context.responsive.fontSize(14),
+                                  )),
                         ),
                         loading: () => const SizedBox.shrink(),
                         error: (_, __) => const SizedBox.shrink(),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  SizedBox(height: context.responsive.spacing(AppSpacing.md)),
                   asyncActivities.when(
-                    loading: () => const Center(
+                    loading: () => Center(
                       child: Padding(
-                        padding: EdgeInsets.all(AppSpacing.xxl),
-                        child: CircularProgressIndicator(),
+                        padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.xxl)),
+                        child: const CircularProgressIndicator(),
                       ),
                     ),
                     error: (err, _) => Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(AppSpacing.xl),
+                      padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.xl)),
                       decoration: BoxDecoration(
                         color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+                        borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
                         border: Border.all(color: AppColors.border),
                       ),
                       child: Center(
                         child: Column(
                           children: [
                             Icon(Icons.error_outline,
-                                size: 48, color: AppColors.error),
-                            const SizedBox(height: AppSpacing.md),
+                                size: context.responsive.iconSize(48), color: AppColors.error),
+                            SizedBox(height: context.responsive.spacing(AppSpacing.md)),
                             Text('Error loading activities: $err',
-                                style: AppTextStyles.bodyMedium),
+                                style: AppTextStyles.bodyMedium.copyWith(fontSize: context.responsive.fontSize(14))),
                           ],
                         ),
                       ),
@@ -249,15 +254,15 @@ class ReportsScreen extends ConsumerWidget {
                       if (activities.isEmpty) {
                         return Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(AppSpacing.xl),
+                          padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.xl)),
                           decoration: BoxDecoration(
                             color: AppColors.surface,
                             borderRadius:
-                                BorderRadius.circular(AppBorderRadius.lg),
+                                BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
                             border: Border.all(color: AppColors.border),
                           ),
-                          child: const Center(
-                            child: Text('No recent activity found.'),
+                          child: Center(
+                            child: Text('No recent activity found.', style: TextStyle(fontSize: context.responsive.fontSize(14))),
                           ),
                         );
                       }
@@ -267,7 +272,7 @@ class ReportsScreen extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: AppColors.surface,
                             borderRadius:
-                                BorderRadius.circular(AppBorderRadius.lg),
+                                BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
                             border: Border.all(color: AppColors.border),
                           ),
                           child: ListView.separated(

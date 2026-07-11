@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
+import 'package:naiyo24_business_tool/theme/responsive.dart';
 import 'package:naiyo24_business_tool/notifiers/index.dart';
 import 'package:naiyo24_business_tool/widgets/common/dashboard_app_bar.dart';
 import 'package:naiyo24_business_tool/widgets/common/side_navigation.dart';
@@ -103,7 +104,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.xl)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -111,40 +112,40 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       InkWell(
                         onTap: () => context.go(AppRoutes.dashboard),
-                        borderRadius: BorderRadius.circular(AppBorderRadius.sm),
+                        borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.sm)),
                         child: Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.all(context.responsive.spacing(8)),
                           decoration: BoxDecoration(
                             color: AppColors.surfaceVariant,
                             borderRadius:
-                                BorderRadius.circular(AppBorderRadius.sm),
+                                BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.sm)),
                           ),
                           child: Icon(Icons.arrow_back_rounded,
-                              size: 20, color: AppColors.textSecondary),
+                              size: context.responsive.iconSize(20), color: AppColors.textSecondary),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.md),
+                      SizedBox(width: context.responsive.spacing(AppSpacing.md)),
                       Icon(Icons.settings_rounded,
-                          color: AppColors.primary, size: 28),
-                      const SizedBox(width: AppSpacing.sm),
+                          color: AppColors.primary, size: context.responsive.iconSize(28)),
+                      SizedBox(width: context.responsive.spacing(AppSpacing.sm)),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Settings',
-                              style: AppTextStyles.h1,
+                              style: AppTextStyles.h1.copyWith(fontSize: context.responsive.fontSize(24)),
                             ),
                             Text(
                               'Manage your account settings, business configurations, and taxes.',
-                              style: AppTextStyles.bodyMedium,
+                              style: AppTextStyles.bodyMedium.copyWith(fontSize: context.responsive.fontSize(14)),
                             ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.xxl),
+                  SizedBox(height: context.responsive.spacing(AppSpacing.xxl)),
                   isDesktop ? _buildDesktopLayout() : _buildMobileLayout(),
                 ],
               ),
@@ -160,28 +161,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 200,
+          width: context.responsive.spacing(200),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: List.generate(_tabs.length, (index) {
               final isSelected = _activeTab == index;
               return Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                padding: EdgeInsets.only(bottom: context.responsive.spacing(AppSpacing.xs)),
                 child: InkWell(
                   onTap: () => setState(() => _activeTab = index),
-                  borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                  borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.md)),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.md,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.responsive.spacing(AppSpacing.md),
+                      vertical: context.responsive.spacing(AppSpacing.md),
                     ),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.primary.withValues(alpha: 0.08)
                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                      borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.md)),
                     ),
                     child: Text(
                       _tabs[index],
@@ -191,6 +192,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             : AppColors.textSecondary,
                         fontWeight:
                             isSelected ? FontWeight.w400 : FontWeight.w400,
+                        fontSize: context.responsive.fontSize(14),
                       ),
                     ),
                   ),
@@ -199,13 +201,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             }),
           ),
         ),
-        const SizedBox(width: AppSpacing.xxl),
+        SizedBox(width: context.responsive.spacing(AppSpacing.xxl)),
         Expanded(
           child: Container(
-            padding: const EdgeInsets.all(AppSpacing.xl),
+            padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.xl)),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppBorderRadius.xl),
+              borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.xl)),
               border: Border.all(color: AppColors.border),
             ),
             child: _buildActiveTabContent(),
@@ -224,7 +226,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             children: List.generate(_tabs.length, (index) {
               final isSelected = _activeTab == index;
               return Padding(
-                padding: const EdgeInsets.only(right: AppSpacing.sm),
+                padding: EdgeInsets.only(right: context.responsive.spacing(AppSpacing.sm)),
                 child: ChoiceChip(
                   label: Text(_tabs[index]),
                   selected: isSelected,
@@ -234,6 +236,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     color: isSelected
                         ? AppColors.primary
                         : AppColors.textSecondary,
+                    fontSize: context.responsive.fontSize(14),
                   ),
                   backgroundColor: AppColors.surface,
                   side: BorderSide(
@@ -244,12 +247,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             }),
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),
+        SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
         Container(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.lg)),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+            borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
             border: Border.all(color: AppColors.border),
           ),
           child: _buildActiveTabContent(),
@@ -280,13 +283,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('App Preferences', style: AppTextStyles.h2),
-        const SizedBox(height: AppSpacing.sm),
+        Text('App Preferences', style: AppTextStyles.h2.copyWith(fontSize: context.responsive.fontSize(20))),
+        SizedBox(height: context.responsive.spacing(AppSpacing.sm)),
         Text('Customize your interface theme and visual preferences.',
-            style: AppTextStyles.bodyMedium),
-        const SizedBox(height: AppSpacing.xl),
-        Text('Appearance', style: AppTextStyles.h3),
-        const SizedBox(height: AppSpacing.md),
+            style: AppTextStyles.bodyMedium.copyWith(fontSize: context.responsive.fontSize(14))),
+        SizedBox(height: context.responsive.spacing(AppSpacing.xl)),
+        Text('Appearance', style: AppTextStyles.h3.copyWith(fontSize: context.responsive.fontSize(18))),
+        SizedBox(height: context.responsive.spacing(AppSpacing.md)),
         Row(
           children: [
             Expanded(
@@ -294,9 +297,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onTap: () {
                   ref.read(themeNotifierProvider.notifier).setLightMode();
                 },
-                borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+                borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
                 child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.lg)),
                   decoration: BoxDecoration(
                     color: !isDark
                         ? AppColors.primary.withValues(alpha: 0.05)
@@ -305,20 +308,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       color: !isDark ? AppColors.primary : AppColors.border,
                       width: 2,
                     ),
-                    borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+                    borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
                   ),
                   child: Column(
                     children: [
                       Icon(
                         Icons.light_mode_rounded,
-                        size: 32,
+                        size: context.responsive.iconSize(32),
                         color: !isDark ? AppColors.primary : AppColors.textSecondary,
                       ),
-                      const SizedBox(height: AppSpacing.sm),
+                      SizedBox(height: context.responsive.spacing(AppSpacing.sm)),
                       Text(
                         'Light Mode',
                         style: AppTextStyles.labelLarge.copyWith(
                           color: !isDark ? AppColors.primary : AppColors.textPrimary,
+                          fontSize: context.responsive.fontSize(14),
                         ),
                       ),
                     ],
@@ -326,15 +330,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
             ),
-            const SizedBox(width: AppSpacing.lg),
+            SizedBox(width: context.responsive.spacing(AppSpacing.lg)),
             Expanded(
               child: InkWell(
                 onTap: () {
                   ref.read(themeNotifierProvider.notifier).setDarkMode();
                 },
-                borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+                borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
                 child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.lg)),
                   decoration: BoxDecoration(
                     color: isDark
                         ? AppColors.primary.withValues(alpha: 0.05)
@@ -343,20 +347,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       color: isDark ? AppColors.primary : AppColors.border,
                       width: 2,
                     ),
-                    borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+                    borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
                   ),
                   child: Column(
                     children: [
                       Icon(
                         Icons.dark_mode_rounded,
-                        size: 32,
+                        size: context.responsive.iconSize(32),
                         color: isDark ? AppColors.primary : AppColors.textSecondary,
                       ),
-                      const SizedBox(height: AppSpacing.sm),
+                      SizedBox(height: context.responsive.spacing(AppSpacing.sm)),
                       Text(
                         'Dark Mode',
                         style: AppTextStyles.labelLarge.copyWith(
                           color: isDark ? AppColors.primary : AppColors.textPrimary,
+                          fontSize: context.responsive.fontSize(14),
                         ),
                       ),
                     ],
