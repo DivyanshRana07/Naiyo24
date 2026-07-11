@@ -216,7 +216,7 @@ class _CreatePurchaseOrderScreenState
         ),
       );
       if (!mounted) return;
-      context.go(AppRoutes.purchaseOrders);
+      context.go(AppRoutes.expenses);
     } catch (error) {
       if (!mounted) return;
       
@@ -296,7 +296,7 @@ class _CreatePurchaseOrderScreenState
                 child: SideNavigation(
                   email: authState.userEmail,
                   onLogout: () => _logout(context),
-                  currentRoute: AppRoutes.purchaseOrders,
+                  currentRoute: AppRoutes.expenses,
                 ),
               )
             : null,
@@ -307,7 +307,7 @@ class _CreatePurchaseOrderScreenState
               SideNavigation(
                 email: authState.userEmail,
                 onLogout: () => _logout(context),
-                currentRoute: AppRoutes.purchaseOrders,
+                currentRoute: AppRoutes.expenses,
               ),
             Expanded(
               child: SingleChildScrollView(

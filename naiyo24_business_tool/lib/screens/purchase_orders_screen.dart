@@ -76,7 +76,7 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
     final asyncPos = ref.watch(purchaseOrderNotifierProvider);
 
     return ScreenShell(
-      currentRoute: AppRoutes.purchaseOrders,
+      currentRoute: AppRoutes.expenses,
       title: 'Expenses',
       icon: Icons.account_balance_wallet_rounded,
       actions: LayoutBuilder(
@@ -105,7 +105,7 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
                     .copyWith(color: AppColors.textPrimary)),
           );
           final newBtn = FilledButton.icon(
-            onPressed: () => context.push(AppRoutes.newPurchaseOrder),
+            onPressed: () => context.push(AppRoutes.newExpense),
             icon: const Icon(Icons.add_rounded, size: 18),
             label: const Text('Record Expense'),
             style: FilledButton.styleFrom(
@@ -167,7 +167,7 @@ class _PurchaseOrdersScreenState extends ConsumerState<PurchaseOrdersScreen> {
                   title: 'No expenses found',
                   message: 'Record a new expense to track your outgoing money.',
                   actionLabel: 'Record Expense',
-                  onAction: () => context.push(AppRoutes.newPurchaseOrder),
+                  onAction: () => context.push(AppRoutes.newExpense),
                 );
               }
 

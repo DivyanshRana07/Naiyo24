@@ -156,6 +156,7 @@ class _CreateLeadScreenState extends ConsumerState<CreateLeadScreen> {
           const SizedBox(height: AppSpacing.lg),
           DropdownButtonFormField<String>(
             initialValue: _source,
+            isExpanded: true,
             decoration: const InputDecoration(
               labelText: 'Source',
               prefixIcon: Icon(Icons.source_outlined),

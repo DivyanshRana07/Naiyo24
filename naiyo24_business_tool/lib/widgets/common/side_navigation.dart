@@ -59,7 +59,7 @@ class _SideNavigationState extends ConsumerState<SideNavigation> {
     NavItem(
         icon: Icons.shopping_bag_rounded,
         label: 'Expenses',
-        route: AppRoutes.purchaseOrders),
+        route: AppRoutes.expenses),
   ];
 
   static const List<NavItem> _bottomItems = [

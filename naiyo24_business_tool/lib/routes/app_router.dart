@@ -268,8 +268,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(
-        path: AppRoutes.purchaseOrders,
-        name: 'purchase-orders',
+        path: AppRoutes.expenses,
+        name: 'expenses',
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: DeferredWidget(
@@ -281,7 +281,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: 'new',
-            name: 'new-purchase-order',
+            name: 'new-expense',
             pageBuilder: (context, state) => CustomTransitionPage(
               key: state.pageKey,
               child: DeferredWidget(
@@ -441,15 +441,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           transitionsBuilder: _fadeTransition,
         ),
       ),
-      GoRoute(
-        path: AppRoutes.expenses,
-        name: 'expenses',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: const _PlaceholderScreen(title: 'Expenses'),
-          transitionsBuilder: _fadeTransition,
-        ),
-      ),
+
       GoRoute(
         path: '/leads',
         name: 'leads',

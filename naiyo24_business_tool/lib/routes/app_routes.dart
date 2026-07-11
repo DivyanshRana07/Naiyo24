@@ -7,7 +7,7 @@ abstract final class AppRoutes {
   static const String dashboard = '/dashboard';
   static const String invoices = '/invoices';
   static const String quotations = '/quotations';
-  static const String purchaseOrders = '/purchase-orders';
+  static const String expenses = '/expenses';
   static const String vendors = '/vendors';
   static const String clients = '/clients';
   static const String items = '/items';
@@ -19,13 +19,12 @@ abstract final class AppRoutes {
   static const String returnItems = '/invoices/:id/return';
   static const String newQuotation = '/quotations/new';
   static const String quotationDetail = '/quotations/:id';
-  static const String newPurchaseOrder = '/purchase-orders/new';
+  static const String newExpense = '/expenses/new';
   static const String newVendor = '/vendors/new';
   static const String newClient = '/clients/new';
   static const String newItem = '/items/new';
   static const String newService = '/items/new-service';
   static const String sendReminder = '/reminders/new';
-  static const String expenses = '/expenses';
   static const String leads = '/leads';
   static const String newLead = '/leads/new';
 
@@ -36,7 +35,7 @@ abstract final class AppRoutes {
     onboarding,
     invoices,
     quotations,
-    purchaseOrders,
+    expenses,
     vendors,
     clients,
     items,
@@ -55,7 +54,7 @@ abstract final class AppRoutes {
 
   static String quotationDetailPath(String id) => '/quotations/$id';
 
-  static String expenseDetailPath(String id) => '/purchase-orders/$id';
+  static String expenseDetailPath(String id) => '/expenses/$id';
 
   AppRoutes._();
 }

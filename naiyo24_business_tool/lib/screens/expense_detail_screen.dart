@@ -36,7 +36,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
             onPressed: () {
               ref.read(purchaseOrderNotifierProvider.notifier).deletePurchaseOrder(po.id);
               Navigator.pop(ctx);
-              context.go(AppRoutes.purchaseOrders);
+              context.go(AppRoutes.expenses);
             },
             child: const Text('Delete'),
           ),
@@ -111,7 +111,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   FilledButton(
-                    onPressed: () => context.go(AppRoutes.purchaseOrders),
+                    onPressed: () => context.go(AppRoutes.expenses),
                     child: const Text('Back to Expenses'),
                   ),
                 ],
@@ -406,10 +406,10 @@ class ExpenseDetailScreen extends ConsumerWidget {
         );
 
         return ScreenShell(
-          currentRoute: AppRoutes.purchaseOrders,
+          currentRoute: AppRoutes.expenses,
           title: po.poNumber,
           icon: Icons.account_balance_wallet_rounded,
-          onBack: () => context.go(AppRoutes.purchaseOrders),
+          onBack: () => context.go(AppRoutes.expenses),
           actions: actionButtons,
           body: isDesktop
               ? Row(

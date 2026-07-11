@@ -351,8 +351,8 @@ class _GettingStartedGrid extends StatelessWidget {
         description:
             'Record day-to-day expenses, vendor bills, and outgoing payments to keep your books accurate.',
         actionLabel: 'Record New Expense',
-        route: AppRoutes.newPurchaseOrder,
-        listRoute: AppRoutes.purchaseOrders,
+        route: AppRoutes.newExpense,
+        listRoute: AppRoutes.expenses,
       ),
       _BlockData(
         icon: Icons.people_rounded,
