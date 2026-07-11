@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:naiyo24_business_tool/notifiers/activity_notifier.dart';
 import 'package:naiyo24_business_tool/notifiers/auth_notifier.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
-import 'package:naiyo24_business_tool/theme/responsive.dart';
 import 'package:naiyo24_business_tool/widgets/dashboard/dashboard_widgets.dart';
 import 'package:naiyo24_business_tool/widgets/common/dashboard_app_bar.dart';
 import 'package:naiyo24_business_tool/widgets/common/side_navigation.dart';

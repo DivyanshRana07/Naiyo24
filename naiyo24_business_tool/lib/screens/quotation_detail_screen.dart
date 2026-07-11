@@ -9,7 +9,6 @@ import 'package:naiyo24_business_tool/notifiers/auth_notifier.dart';
 import 'package:naiyo24_business_tool/notifiers/quotation_notifier.dart';
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
-import 'package:naiyo24_business_tool/theme/responsive.dart';
 import 'package:naiyo24_business_tool/widgets/common/dashboard_app_bar.dart';
 import 'package:naiyo24_business_tool/widgets/common/screen_shell.dart';
 import 'package:naiyo24_business_tool/widgets/invoice/send_options_dialog.dart';
@@ -610,13 +609,13 @@ class _FinancialSummary extends StatelessWidget {
           SizedBox(height: context.responsive.spacing(AppSpacing.md)),
           _row('Sub Total', _formatCurrency(quotation.subTotal, quotation.settings), context),
           if (quotation.totalDiscount > 0)
-            _row('Discount', '- ${_formatCurrency(quotation.totalDiscount, quotation.settings)}',
-                color: AppColors.success, context: context),
+            _row('Discount', '- ${_formatCurrency(quotation.totalDiscount, quotation.settings)}', context,
+                color: AppColors.success),
           if (quotation.settings?['gst']?['enabled'] != false)
             _row('GST', _formatCurrency(quotation.totalGst, quotation.settings), context),
           Divider(color: AppColors.border, height: context.responsive.spacing(AppSpacing.xl)),
-          _row('Grand Total', _formatCurrency(quotation.grandTotal, quotation.settings),
-              bold: true, color: AppColors.primary, context: context),
+          _row('Grand Total', _formatCurrency(quotation.grandTotal, quotation.settings), context,
+              bold: true, color: AppColors.primary),
         ],
       ),
     );

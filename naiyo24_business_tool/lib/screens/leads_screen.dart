@@ -5,7 +5,6 @@ import 'package:naiyo24_business_tool/models/lead_model.dart';
 import 'package:naiyo24_business_tool/notifiers/lead_notifier.dart';
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
-import 'package:naiyo24_business_tool/theme/responsive.dart';
 import 'package:naiyo24_business_tool/widgets/common/screen_shell.dart';
 
 class LeadsScreen extends ConsumerWidget {

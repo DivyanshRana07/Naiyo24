@@ -204,8 +204,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
                 ],
               );
             }
-          }
-        );
+          },
         );
 
         final leftColumn = Column(
