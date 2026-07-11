@@ -92,6 +92,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final r = context.responsive;
     final asyncCustomers = ref.watch(asyncCustomersProvider);
     final query = _searchCtrl.text;
 
@@ -107,39 +108,39 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                 context, ref.read(customerNotifierProvider)),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: AppColors.border),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: r.padding(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                  borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md))),
             ),
             icon: Icon(Icons.download_rounded,
-                size: 18, color: AppColors.textPrimary),
+                size: r.iconSize(18), color: AppColors.textPrimary),
             label: Text('Export',
                 style: AppTextStyles.labelLarge
-                    .copyWith(color: AppColors.textPrimary)),
+                    .copyWith(color: AppColors.textPrimary, fontSize: r.fontSize(15))),
           );
           final newBtn = FilledButton.icon(
             onPressed: () => context.push(AppRoutes.newClient),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: r.padding(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                  borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md))),
             ),
-            icon: Icon(Icons.add, size: 18, color: AppColors.textOnPrimary),
+            icon: Icon(Icons.add, size: r.iconSize(18), color: AppColors.textOnPrimary),
             label: Text('Add Client',
                 style: AppTextStyles.labelLarge
-                    .copyWith(color: AppColors.textOnPrimary)),
+                    .copyWith(color: AppColors.textOnPrimary, fontSize: r.fontSize(15))),
           );
           if (isBounded) {
             return Row(children: [
               Expanded(child: exportBtn),
-              const SizedBox(width: 8),
+              SizedBox(width: r.spacing(8)),
               Expanded(child: newBtn),
             ]);
           }
           return Row(mainAxisSize: MainAxisSize.min, children: [
             exportBtn,
-            const SizedBox(width: AppSpacing.md),
+            SizedBox(width: r.spacing(AppSpacing.md)),
             newBtn,
           ]);
         },
@@ -149,13 +150,14 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         children: [
           TextField(
             controller: _searchCtrl,
+            style: TextStyle(fontSize: r.fontSize(14)),
             decoration: InputDecoration(
               hintText: 'Search by name, mobile or customer code...',
               prefixIcon:
-                  Icon(Icons.search, color: AppColors.textSecondary),
+                  Icon(Icons.search, color: AppColors.textSecondary, size: r.iconSize(20)),
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: r.spacing(AppSpacing.lg)),
           asyncCustomers.when(
             loading: () =>
                 const LoadingPlaceholder(message: 'Loading clients...'),
@@ -185,11 +187,11 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                     onDelete: _confirmDelete,
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(top: AppSpacing.sm),
+                    padding: EdgeInsets.only(top: r.spacing(AppSpacing.sm)),
                     child: Text(
                       'Total Customers: ${customers.length}',
                       style: AppTextStyles.caption
-                          .copyWith(color: AppColors.textSecondary),
+                          .copyWith(color: AppColors.textSecondary, fontSize: r.fontSize(11)),
                     ),
                   ),
                 ],

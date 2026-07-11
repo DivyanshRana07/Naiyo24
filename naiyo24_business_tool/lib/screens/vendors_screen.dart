@@ -62,6 +62,7 @@ class VendorsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final r = context.responsive;
     final asyncVendors = ref.watch(vendorNotifierProvider);
 
     return ScreenShell(
@@ -78,40 +79,40 @@ class VendorsScreen extends ConsumerWidget {
               onPressed: () => _handleExport(context, vendors),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: AppColors.border),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: r.padding(horizontal: 16, vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                  borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md)),
                 ),
               ),
               icon: Icon(Icons.download_rounded,
-                  size: 18, color: AppColors.textPrimary),
+                  size: r.iconSize(18), color: AppColors.textPrimary),
               label: Text('Export',
                   style: AppTextStyles.labelLarge
-                      .copyWith(color: AppColors.textPrimary)),
+                      .copyWith(color: AppColors.textPrimary, fontSize: r.fontSize(15))),
             );
             final newBtn = FilledButton.icon(
               onPressed: () => context.push(AppRoutes.newVendor),
-              icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('Add Vendor'),
+              icon: Icon(Icons.add_rounded, size: r.iconSize(18)),
+              label: Text('Add Vendor', style: TextStyle(fontSize: r.fontSize(14))),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.textOnPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: r.padding(horizontal: 16, vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                  borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md)),
                 ),
               ),
             );
             if (isBounded) {
               return Row(children: [
                 Expanded(child: exportBtn),
-                const SizedBox(width: 8),
+                SizedBox(width: r.spacing(8)),
                 Expanded(child: newBtn),
               ]);
             }
             return Row(mainAxisSize: MainAxisSize.min, children: [
               exportBtn,
-              const SizedBox(width: AppSpacing.md),
+              SizedBox(width: r.spacing(AppSpacing.md)),
               newBtn,
             ]);
           },
@@ -135,7 +136,7 @@ class VendorsScreen extends ConsumerWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppBorderRadius.xl),
+              borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.xl)),
               border: Border.all(color: AppColors.border),
             ),
             clipBehavior: Clip.hardEdge,
