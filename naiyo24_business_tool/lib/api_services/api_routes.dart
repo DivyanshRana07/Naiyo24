@@ -67,14 +67,14 @@ class ApiRoutes {
   static String quotationDownloadPdf(String id) => '/quotation/$id/download-pdf';
 
 
-  // Purchase Orders Endpoints
-  static const String purchaseOrders = '/purchase-orders';
-  static const String purchaseOrdersList = '/purchase-orders/list';
-  static const String purchaseOrdersCreate = '/purchase-orders/create';
-  static const String purchaseOrderExportListPdf = '/purchase-orders/export-list-pdf';
-  static String purchaseOrderDetail(String id) => '/purchase-orders/$id';
-  static String purchaseOrderUpdate(String id) => '/purchase-orders/$id';
-  static String purchaseOrderDelete(String id) => '/purchase-orders/$id';
+  // Expenses Endpoints
+  static const String expenses = '/expenses';
+  static const String expensesList = '/expenses/list';
+  static const String expensesCreate = '/expenses/create';
+  static const String expenseExportListPdf = '/expenses/export-list-pdf';
+  static String expenseDetail(String id) => '/expenses/$id';
+  static String expenseUpdate(String id) => '/expenses/$id';
+  static String expenseDelete(String id) => '/expenses/$id';
 
   // Activity Endpoints
   static const String activityList = '/activity';

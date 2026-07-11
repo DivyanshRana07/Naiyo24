@@ -69,21 +69,9 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_purchase_order_items_id'), 'purchase_order_items', ['id'], unique=False)
 
-    # Alter expenses table to add vendor_id and purchase_order_id
-    with op.batch_alter_table('expenses', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('vendor_id', sa.Integer(), nullable=True))
-        batch_op.add_column(sa.Column('purchase_order_id', sa.Integer(), nullable=True))
-        batch_op.create_foreign_key('fk_expenses_vendors', 'vendors', ['vendor_id'], ['id'])
-        batch_op.create_foreign_key('fk_expenses_purchase_orders', 'purchase_orders', ['purchase_order_id'], ['id'])
 
 
 def downgrade() -> None:
-    with op.batch_alter_table('expenses', schema=None) as batch_op:
-        batch_op.drop_constraint('fk_expenses_purchase_orders', type_='foreignkey')
-        batch_op.drop_constraint('fk_expenses_vendors', type_='foreignkey')
-        batch_op.drop_column('purchase_order_id')
-        batch_op.drop_column('vendor_id')
-
     op.drop_index(op.f('ix_purchase_order_items_id'), table_name='purchase_order_items')
     op.drop_table('purchase_order_items')
     

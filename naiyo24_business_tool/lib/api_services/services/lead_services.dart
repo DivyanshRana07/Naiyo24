@@ -5,7 +5,8 @@ import 'package:naiyo24_business_tool/models/lead_model.dart';
 import 'package:naiyo24_business_tool/models/customer_model.dart';
 
 class LeadService {
-  static Future<List<LeadModel>> getLeads({String? status}) async {
+  const LeadService();
+  Future<List<LeadModel>> getLeads({String? status}) async {
     try {
       var url = '${ApiRoutes.baseUrl}${ApiRoutes.leadsList}';
       if (status != null) {
@@ -29,7 +30,7 @@ class LeadService {
     }
   }
 
-  static Future<LeadModel> createLead({
+  Future<LeadModel> createLead({
     required String name,
     String? email,
     String? phone,
@@ -63,7 +64,7 @@ class LeadService {
     }
   }
 
-  static Future<LeadModel> updateLead(int id, Map<String, dynamic> updates) async {
+  Future<LeadModel> updateLead(int id, Map<String, dynamic> updates) async {
     try {
       final response = await http.put(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.leadUpdate(id.toString())}'),
@@ -82,7 +83,7 @@ class LeadService {
     }
   }
 
-  static Future<void> deleteLead(int id) async {
+  Future<void> deleteLead(int id) async {
     try {
       final response = await http.delete(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.leadDelete(id.toString())}'),
@@ -97,7 +98,7 @@ class LeadService {
     }
   }
 
-  static Future<CustomerModel> convertToCustomer(int id) async {
+  Future<CustomerModel> convertToCustomer(int id) async {
     try {
       final response = await http.post(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.leadConvert(id.toString())}'),

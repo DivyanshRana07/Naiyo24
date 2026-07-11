@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:naiyo24_business_tool/api_services/services/dashboard_services.dart';
 import 'package:naiyo24_business_tool/models/dashboard_stats_model.dart';
+import 'package:naiyo24_business_tool/providers/api_providers.dart';
 
 class DashboardState {
   const DashboardState({
@@ -27,17 +28,19 @@ class DashboardState {
 }
 
 class DashboardNotifier extends StateNotifier<DashboardState> {
-  DashboardNotifier()
+  DashboardNotifier(this._service)
       : super(DashboardState(
           stats: DashboardStatsModel.empty(),
           isLoading: false,
         ));
 
+  final DashboardService _service;
+
   Future<void> loadStats() async {
     state = state.copyWith(isLoading: true, error: null);
     
     try {
-      final stats = await DashboardService.getDashboardStats();
+      final stats = await _service.getDashboardStats();
       state = state.copyWith(
         stats: stats,
         isLoading: false,
@@ -58,7 +61,8 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
 
 final dashboardNotifierProvider =
     StateNotifierProvider.autoDispose<DashboardNotifier, DashboardState>((ref) {
-  final notifier = DashboardNotifier();
+  final service = ref.watch(dashboardApiServiceProvider);
+  final notifier = DashboardNotifier(service);
   notifier.loadStats(); // Auto-load on init
   return notifier;
 });

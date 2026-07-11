@@ -4,7 +4,8 @@ import 'package:naiyo24_business_tool/api_services/api_routes.dart';
 import 'package:naiyo24_business_tool/models/vendor_model.dart';
 
 class VendorService {
-  static Future<List<VendorModel>> getVendors() async {
+  const VendorService();
+  Future<List<VendorModel>> getVendors() async {
     try {
       final response = await http.get(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.vendorsList}'),
@@ -23,7 +24,7 @@ class VendorService {
     }
   }
 
-  static Future<VendorModel> createVendor({
+  Future<VendorModel> createVendor({
     required String name,
     String? contactPerson,
     String? email,
@@ -54,7 +55,7 @@ class VendorService {
     }
   }
 
-  static Future<VendorModel> updateVendor(int id, Map<String, dynamic> updates) async {
+  Future<VendorModel> updateVendor(int id, Map<String, dynamic> updates) async {
     try {
       final response = await http.put(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.vendorUpdate(id.toString())}'),
@@ -73,7 +74,7 @@ class VendorService {
     }
   }
 
-  static Future<void> deleteVendor(int id) async {
+  Future<void> deleteVendor(int id) async {
     try {
       final response = await http.delete(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.vendorDelete(id.toString())}'),

@@ -1,19 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:naiyo24_business_tool/api_services/services/quotation_services.dart';
 import 'package:naiyo24_business_tool/models/quotation_model.dart';
+import 'package:naiyo24_business_tool/providers/api_providers.dart';
 import 'package:naiyo24_business_tool/utils/logger.dart';
 import 'package:naiyo24_business_tool/utils/export_helper.dart';
 
 /// Quotation state fetched from backend API
 class QuotationNotifier extends AutoDisposeAsyncNotifier<List<QuotationModel>> {
+  late final QuotationService _service;
+
   @override
   Future<List<QuotationModel>> build() async {
+    _service = ref.watch(quotationApiServiceProvider);
     return await loadQuotations();
   }
 
   Future<List<QuotationModel>> loadQuotations() async {
     try {
-      return await QuotationService.getQuotations();
+      return await _service.getQuotations();
     } catch (e) {
       AppLogger.error('Failed to load quotations', error: e);
       return [];
@@ -22,7 +26,7 @@ class QuotationNotifier extends AutoDisposeAsyncNotifier<List<QuotationModel>> {
 
   Future<QuotationModel> addQuotation(Map<String, dynamic> quotationData) async {
     try {
-      final newQuotation = await QuotationService.createQuotation(quotationData);
+      final newQuotation = await _service.createQuotation(quotationData);
       
       state = AsyncData([newQuotation, ...?state.value]);
       AppLogger.info('Quotation added', data: {
@@ -42,7 +46,7 @@ class QuotationNotifier extends AutoDisposeAsyncNotifier<List<QuotationModel>> {
       // Parse ID to int if it's a string
       final id = int.tryParse(quotation.id) ?? 0;
       
-      final updatedQuotation = await QuotationService.updateQuotation(id, {
+      final updatedQuotation = await _service.updateQuotation(id, {
         'customer_id': int.tryParse(quotation.customerId) ?? 0,
         'quotation_date': quotation.quotationDate.toIso8601String(),
         'valid_until': quotation.validUntil.toIso8601String(),
@@ -63,7 +67,7 @@ class QuotationNotifier extends AutoDisposeAsyncNotifier<List<QuotationModel>> {
   Future<void> deleteQuotation(String id) async {
     try {
       final quotationId = int.tryParse(id) ?? 0;
-      await QuotationService.deleteQuotation(quotationId);
+      await _service.deleteQuotation(quotationId);
       
       state = AsyncData(
         (state.value ?? []).where((q) => q.id != id).toList()
@@ -85,7 +89,7 @@ class QuotationNotifier extends AutoDisposeAsyncNotifier<List<QuotationModel>> {
 
   Future<void> downloadQuotationPdf(String id, String quotationNo) async {
     try {
-      final bytes = await QuotationService.downloadQuotationPdf(id);
+      final bytes = await _service.downloadQuotationPdf(id);
       downloadBytes(
         filename: 'Quotation-$quotationNo.pdf',
         bytes: bytes,

@@ -44,10 +44,10 @@ import 'package:naiyo24_business_tool/screens/vendors_screen.dart'
     deferred as vendors;
 import 'package:naiyo24_business_tool/screens/add_vendor_screen.dart'
     deferred as add_vendor_screen;
-import 'package:naiyo24_business_tool/screens/purchase_orders_screen.dart'
-    deferred as purchase_orders;
-import 'package:naiyo24_business_tool/screens/create_purchase_order_screen.dart'
-    deferred as create_purchase_order;
+import 'package:naiyo24_business_tool/screens/expenses_screen.dart'
+    deferred as expenses_screen;
+import 'package:naiyo24_business_tool/screens/create_expense_screen.dart'
+    deferred as create_expense_screen;
 import 'package:naiyo24_business_tool/screens/leads_screen.dart'
     deferred as leads;
 import 'package:naiyo24_business_tool/screens/create_lead_screen.dart'
@@ -273,8 +273,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: DeferredWidget(
-            load: purchase_orders.loadLibrary,
-            builder: (context) => purchase_orders.PurchaseOrdersScreen(),
+            load: expenses_screen.loadLibrary,
+            builder: (context) => expenses_screen.ExpensesScreen(),
           ),
           transitionsBuilder: _fadeTransition,
         ),
@@ -285,9 +285,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => CustomTransitionPage(
               key: state.pageKey,
               child: DeferredWidget(
-                load: create_purchase_order.loadLibrary,
+                load: create_expense_screen.loadLibrary,
                 builder: (context) =>
-                    create_purchase_order.CreatePurchaseOrderScreen(),
+                    create_expense_screen.CreateExpenseScreen(),
               ),
               transitionsBuilder: _slideTransition,
             ),

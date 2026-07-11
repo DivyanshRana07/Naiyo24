@@ -20,7 +20,7 @@ class StorageKeys {
   static const String itemsList = 'products_list';
   static const String servicesList = 'services_list';
   static const String vendorsList = 'vendors_list';
-  static const String purchaseOrdersList = 'purchase_orders_list';
+  static const String expensesList = 'expenses_list';
 }
 
 /// Demo credentials for testing
@@ -93,7 +93,7 @@ class SuccessMessages {
   static const String itemAdded = 'Item added successfully';
   static const String invoiceCreated = 'Invoice created successfully';
   static const String quotationCreated = 'Quotation created successfully';
-  static const String purchaseOrderCreated = 'Purchase order created successfully';
+  static const String expenseCreated = 'Expense created successfully';
   static const String changesSaved = 'Changes saved successfully';
   static const String itemDeleted = 'Item deleted successfully';
 }
@@ -173,7 +173,7 @@ class ApiEndpoints {
   static const String invoices = '/invoices';
   static const String quotations = '/quotations';
   static const String vendors = '/vendors';
-  static const String purchaseOrders = '/purchase-orders';
+  static const String expenses = '/expenses';
 }
 
 /// Asset Paths

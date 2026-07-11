@@ -4,7 +4,8 @@ import 'package:naiyo24_business_tool/api_services/api_routes.dart';
 import 'package:naiyo24_business_tool/models/activity_model.dart';
 
 class ActivityService {
-  static Future<List<ActivityModel>> getActivities({int limit = 50, int offset = 0}) async {
+  const ActivityService();
+  Future<List<ActivityModel>> getActivities({int limit = 50, int offset = 0}) async {
     try {
       final response = await http.get(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.activityList}?limit=$limit&offset=$offset'),
@@ -24,7 +25,7 @@ class ActivityService {
     }
   }
 
-  static Future<void> deleteActivity(int activityId) async {
+  Future<void> deleteActivity(int activityId) async {
     try {
       final response = await http.delete(
         Uri.parse('${ApiRoutes.baseUrl}${ApiRoutes.activityDelete(activityId.toString())}?user_id=1'),

@@ -8,9 +8,7 @@ from db import get_db
 from models.db_models import (
     Invoice,
     InvoiceItem,
-    Expense,
     Quotation,
-    Salary,
     Customer,
     Lead,
 )
@@ -50,12 +48,8 @@ def get_dashboard_stats(
         for item in invoice.items
     )
 
-    total_expenses = db.query(Expense).count()
-
-    expense_amount = (
-        db.query(func.sum(Expense.amount))
-        .scalar()
-    ) or 0
+    total_expenses = 0
+    expense_amount = 0.0
 
     total_quotations = db.query(Quotation).count()
 
@@ -64,12 +58,8 @@ def get_dashboard_stats(
         .scalar()
     ) or 0
 
-    total_salaries = db.query(Salary).count()
-
-    salary_amount = (
-        db.query(func.sum(Salary.total_salary))
-        .scalar()
-    ) or 0
+    total_salaries = 0
+    salary_amount = 0.0
     
     # Customer metrics
     active_customers = db.query(Customer).filter(Customer.status == 'active').count()

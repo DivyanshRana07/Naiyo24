@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:naiyo24_business_tool/notifiers/theme_notifier.dart';
+import 'package:naiyo24_business_tool/notifiers/index.dart';
 import 'package:naiyo24_business_tool/routes/app_router.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
 

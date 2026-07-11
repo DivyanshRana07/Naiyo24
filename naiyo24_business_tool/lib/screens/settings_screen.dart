@@ -4,9 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
-import 'package:naiyo24_business_tool/notifiers/auth_notifier.dart';
-import 'package:naiyo24_business_tool/notifiers/business_profile_notifier.dart';
-import 'package:naiyo24_business_tool/notifiers/theme_notifier.dart';
+import 'package:naiyo24_business_tool/notifiers/index.dart';
 import 'package:naiyo24_business_tool/widgets/common/dashboard_app_bar.dart';
 import 'package:naiyo24_business_tool/widgets/common/side_navigation.dart';
 import 'package:naiyo24_business_tool/widgets/common/custom_text_field.dart';

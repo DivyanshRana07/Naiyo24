@@ -95,18 +95,9 @@ class User(Base):
         back_populates="user"
     )
 
-    expenses = relationship(
-        "Expense",
-        back_populates="user"
-    )
 
     quotations = relationship(
         "Quotation",
-        back_populates="user"
-    )
-
-    salaries = relationship(
-        "Salary",
         back_populates="user"
     )
 
@@ -115,8 +106,8 @@ class User(Base):
         back_populates="user"
     )
 
-    purchase_orders = relationship(
-        "PurchaseOrder",
+    expenses = relationship(
+        "Expense",
         back_populates="user"
     )
 
@@ -143,7 +134,6 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan"
     )
-
 
     leads = relationship(
         "Lead",
@@ -178,53 +168,6 @@ class Lead(Base):
     converted_customer = relationship("Customer", foreign_keys=[converted_to_customer_id])
 
 
-class Expense(Base):
-    __tablename__ = "expenses"
-
-    id = Column(Integer, primary_key=True, index=True)
-
-    user_id = Column(
-        Integer,
-        ForeignKey("users.id"),
-        nullable=False
-    )
-
-    title = Column(String(150), nullable=False)
-    amount = Column(Numeric(12, 2), nullable=False)
-    category = Column(String(100), nullable=True)
-    expense_date = Column(Date, nullable=True)
-
-    created_at = Column(
-        DateTime(timezone=True),
-        server_default=func.now()
-    )
-
-    vendor_id = Column(
-        Integer,
-        ForeignKey("vendors.id"),
-        nullable=True
-    )
-
-    purchase_order_id = Column(
-        Integer,
-        ForeignKey("purchase_orders.id"),
-        nullable=True
-    )
-
-    user = relationship(
-        "User",
-        back_populates="expenses"
-    )
-
-    vendor = relationship(
-        "Vendor",
-        back_populates="expenses"
-    )
-
-    purchase_order = relationship(
-        "PurchaseOrder",
-        back_populates="expenses"
-    )
 class Quotation(Base):
     __tablename__ = "quotations"
 
@@ -290,32 +233,6 @@ class QuotationItem(Base):
     
     quotation = relationship("Quotation", back_populates="items")
 
-class Salary(Base):
-    __tablename__ = "salaries"
-
-    id = Column(Integer, primary_key=True, index=True)
-
-    user_id = Column(
-        Integer,
-        ForeignKey("users.id"),
-        nullable=False
-    )
-
-    employee_name = Column(String(150), nullable=False)
-    base_salary = Column(Numeric(12, 2), nullable=False)
-    bonus = Column(Numeric(12, 2), nullable=False)
-    total_salary = Column(Numeric(12, 2), nullable=False)
-
-    created_at = Column(
-        DateTime(timezone=True),
-        server_default=func.now()
-    )
-
-    user = relationship(
-        "User",
-        back_populates="salaries"
-    )
-
 class Vendor(Base):
     __tablename__ = "vendors"
 
@@ -331,16 +248,15 @@ class Vendor(Base):
 
     user = relationship("User", back_populates="vendors")
     expenses = relationship("Expense", back_populates="vendor")
-    purchase_orders = relationship("PurchaseOrder", back_populates="vendor")
 
-class PurchaseOrder(Base):
-    __tablename__ = "purchase_orders"
+class Expense(Base):
+    __tablename__ = "expenses"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
-    po_number = Column(String(50), unique=True, index=True, nullable=False)
-    po_date = Column(Date, nullable=False)
+    expense_number = Column(String(50), unique=True, index=True, nullable=False)
+    expense_date = Column(Date, nullable=False)
     expected_delivery_date = Column(Date, nullable=True)
     status = Column(String(50), default="Draft")
     notes = Column(String(500), nullable=True)
@@ -351,23 +267,22 @@ class PurchaseOrder(Base):
     receipt_image = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    user = relationship("User", back_populates="purchase_orders")
-    vendor = relationship("Vendor", back_populates="purchase_orders")
-    items = relationship("PurchaseOrderItem", back_populates="purchase_order", cascade="all, delete-orphan")
-    expenses = relationship("Expense", back_populates="purchase_order")
+    user = relationship("User", back_populates="expenses")
+    vendor = relationship("Vendor", back_populates="expenses")
+    items = relationship("ExpenseItem", back_populates="expense", cascade="all, delete-orphan")
 
-class PurchaseOrderItem(Base):
-    __tablename__ = "purchase_order_items"
+class ExpenseItem(Base):
+    __tablename__ = "expense_items"
 
     id = Column(Integer, primary_key=True, index=True)
-    po_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=False)
+    expense_id = Column(Integer, ForeignKey("expenses.id"), nullable=False)
     name = Column(String(150), nullable=False)
     quantity = Column(Numeric(10, 2), nullable=False)
     price = Column(Numeric(12, 2), nullable=False)
     gst_rate = Column(Numeric(5, 2), default=0.00)
     line_total = Column(Numeric(12, 2), nullable=False)
 
-    purchase_order = relationship("PurchaseOrder", back_populates="items")
+    expense = relationship("Expense", back_populates="items")
 
 class Customer(Base):
     __tablename__ = "customers"
@@ -448,4 +363,5 @@ class ActivityLog(Base):
         index=True
     )
 
-    user = relationship("User", back_populates="activity_logs")
+    user = relationship("User", back_populates="activity_logs")
+
