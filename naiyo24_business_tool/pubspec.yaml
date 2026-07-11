@@ -59,6 +59,11 @@ flutter_native_splash:
   android_12:
     color: "#000000"
     image: assets/images/BusinessToolLogo.png
+  # Center the image without stretching to prevent cropping
+  android_gravity: center
+  ios_content_mode: scaleAspectFit
+  web_image_mode: center
+  fullscreen: true
 
 flutter:
   uses-material-design: true
