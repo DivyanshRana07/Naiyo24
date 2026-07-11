@@ -38,31 +38,31 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/BusinessToolLogo.png"
+  image_path: "assets/images/LaunchScreen.png"
   min_sdk_android: 21
   web:
     generate: true
-    image_path: "assets/images/BusinessToolLogo.png"
+    image_path: "assets/images/LaunchScreen.png"
     background_color: "#000000"
     theme_color: "#000000"
   windows:
     generate: true
-    image_path: "assets/images/BusinessToolLogo.png"
+    image_path: "assets/images/LaunchScreen.png"
     icon_size: 256
 
 flutter_native_splash:
   color: "#000000"
-  image: assets/images/BTL.png
+  image: assets/images/LaunchScreen.png
   android: true
   ios: true
   web: true
-  image_dark: assets/images/BTL.png
+  image_dark: assets/images/LaunchScreen.png
   color_dark: "#000000"
   android_12:
     color: "#000000"
-    image: assets/images/BTL.png
+    image: assets/images/LaunchScreen.png
     color_dark: "#000000"
-    image_dark: assets/images/BTL.png
+    image_dark: assets/images/LaunchScreen.png
   android_gravity: center
   ios_content_mode: scaleAspectFit
   web_image_mode: center
