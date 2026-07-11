@@ -37,7 +37,6 @@ from routes.item import router as item_router
 from routes.service import router as service_router
 
 from routes.activity import router as activity_router
-from routes.account import accounts_router, groups_router
 from routes.lead import router as lead_router
 
 
@@ -150,16 +149,6 @@ app.include_router(
 
 app.include_router(
     activity_router,
-    prefix="/api/v1"
-)
-
-app.include_router(
-    accounts_router,
-    prefix="/api/v1"
-)
-
-app.include_router(
-    groups_router,
     prefix="/api/v1"
 )
 

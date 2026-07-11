@@ -144,17 +144,6 @@ class User(Base):
         cascade="all, delete-orphan"
     )
 
-    account_groups = relationship(
-        "AccountGroup",
-        back_populates="user",
-        cascade="all, delete-orphan"
-    )
-
-    accounts = relationship(
-        "Account",
-        back_populates="user",
-        cascade="all, delete-orphan"
-    )
 
     leads = relationship(
         "Lead",
@@ -459,50 +448,4 @@ class ActivityLog(Base):
         index=True
     )
 
-    user = relationship("User", back_populates="activity_logs")
-
-
-class AccountGroup(Base):
-    __tablename__ = "account_groups"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    group_id_str = Column(String(50), nullable=False, unique=True, index=True)
-    name = Column(String(150), nullable=False)
-    type = Column(String(50), nullable=False)  # Asset, Liability, Equity, Income, Expense, Capital
-    parent_group_id = Column(String(50), nullable=True)
-    category = Column(String(100), nullable=False)
-    description = Column(String(300), nullable=True)
-    is_system = Column(Boolean, default=False, nullable=False)
-    created_at = Column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        index=True
-    )
-
-    user = relationship("User", back_populates="account_groups")
-    accounts = relationship("Account", back_populates="group", cascade="all, delete-orphan")
-
-
-class Account(Base):
-    __tablename__ = "accounts"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    account_id_str = Column(String(50), nullable=False, unique=True, index=True)
-    name = Column(String(150), nullable=False)
-    code = Column(String(50), nullable=False, index=True)
-    account_group_id = Column(String(50), ForeignKey("account_groups.group_id_str"), nullable=False)
-    type = Column(String(50), nullable=False)  # Asset, Liability, Equity, Income, Expense, Capital
-    opening_balance = Column(Numeric(12, 2), default=0.00, nullable=False)
-    current_balance = Column(Numeric(12, 2), default=0.00, nullable=False)
-    is_active = Column(Boolean, default=True, nullable=False)
-    currency = Column(String(10), default="INR", nullable=False)
-    created_at = Column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        index=True
-    )
-
-    user = relationship("User", back_populates="accounts")
-    group = relationship("AccountGroup", back_populates="accounts")
+    user = relationship("User", back_populates="activity_logs")
