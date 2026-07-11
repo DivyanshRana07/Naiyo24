@@ -10,6 +10,7 @@ import 'package:naiyo24_business_tool/models/item_model.dart';
 import 'package:naiyo24_business_tool/models/service_model.dart';
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
+import 'package:naiyo24_business_tool/theme/responsive.dart';
 import 'package:naiyo24_business_tool/widgets/common/side_navigation.dart';
 import 'package:naiyo24_business_tool/widgets/common/dashboard_app_bar.dart';
 import 'package:naiyo24_business_tool/widgets/common/export_dialog.dart';
@@ -173,14 +174,14 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen>
           Expanded(
             child: Container(
               constraints: const BoxConstraints(maxWidth: 1400),
-              margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+              margin: EdgeInsets.symmetric(horizontal: context.responsive.spacing(AppSpacing.xl)),
               child: Column(
                 children: [
                   Container(
                     color: AppColors.surface,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xl,
-                      vertical: AppSpacing.md,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.responsive.spacing(AppSpacing.xl),
+                      vertical: context.responsive.spacing(AppSpacing.md),
                     ),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
@@ -190,12 +191,12 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.inventory_2_rounded,
-                                color: AppColors.primary, size: 28),
-                            const SizedBox(width: AppSpacing.sm),
+                                color: AppColors.primary, size: context.responsive.iconSize(28)),
+                            SizedBox(width: context.responsive.spacing(AppSpacing.sm)),
                             Flexible(
                               child: Text(
                                 'Inventory & Catalog',
-                                style: AppTextStyles.h1,
+                                style: AppTextStyles.h1.copyWith(fontSize: context.responsive.fontSize(24)),
                               ),
                             ),
                           ],
@@ -226,21 +227,25 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen>
                           },
                           style: FilledButton.styleFrom(
                             backgroundColor: AppColors.primary,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: context.responsive.spacing(16), 
+                                vertical: context.responsive.spacing(12)),
                             shape: RoundedRectangleBorder(
                               borderRadius:
-                                  BorderRadius.circular(AppBorderRadius.md),
+                                  BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.md)),
                             ),
                           ),
                           icon: Icon(Icons.add,
-                              size: 18, color: AppColors.textOnPrimary),
+                              size: context.responsive.iconSize(18), color: AppColors.textOnPrimary),
                           label: Text(
                             _tabController.index == 0
                                 ? 'Add Item'
                                 : 'Add Service',
                             style: AppTextStyles.labelLarge
-                                .copyWith(color: AppColors.textOnPrimary),
+                                .copyWith(
+                                  color: AppColors.textOnPrimary,
+                                  fontSize: context.responsive.fontSize(14),
+                                ),
                           ),
                         );
 
@@ -250,12 +255,12 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Flexible(child: titleRow),
-                              const SizedBox(width: AppSpacing.md),
+                              SizedBox(width: context.responsive.spacing(AppSpacing.md)),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   exportBtn,
-                                  const SizedBox(width: AppSpacing.sm),
+                                  SizedBox(width: context.responsive.spacing(AppSpacing.sm)),
                                   addBtn,
                                 ],
                               ),
@@ -268,11 +273,11 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen>
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             titleRow,
-                            const SizedBox(height: AppSpacing.md),
+                            SizedBox(height: context.responsive.spacing(AppSpacing.md)),
                             Row(
                               children: [
                                 exportBtn,
-                                const SizedBox(width: 8),
+                                SizedBox(width: context.responsive.spacing(8)),
                                 Expanded(child: addBtn),
                               ],
                             ),
@@ -289,9 +294,15 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen>
                       isScrollable: true,
                       tabAlignment: TabAlignment.start,
                       labelStyle: AppTextStyles.labelLarge
-                          .copyWith(fontWeight: FontWeight.w400),
+                          .copyWith(
+                            fontWeight: FontWeight.w400,
+                            fontSize: context.responsive.fontSize(14),
+                          ),
                       unselectedLabelStyle: AppTextStyles.labelLarge
-                          .copyWith(fontWeight: FontWeight.w400),
+                          .copyWith(
+                            fontWeight: FontWeight.w400,
+                            fontSize: context.responsive.fontSize(14),
+                          ),
                       labelColor: AppColors.primary,
                       unselectedLabelColor: AppColors.textSecondary,
                       indicatorColor: AppColors.primary,

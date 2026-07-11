@@ -5,6 +5,7 @@ import 'package:naiyo24_business_tool/models/lead_model.dart';
 import 'package:naiyo24_business_tool/notifiers/lead_notifier.dart';
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
+import 'package:naiyo24_business_tool/theme/responsive.dart';
 import 'package:naiyo24_business_tool/widgets/common/screen_shell.dart';
 
 class LeadsScreen extends ConsumerWidget {
@@ -41,18 +42,27 @@ class LeadsScreen extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.people_outline_rounded,
-              size: 80, color: AppColors.textSecondary.withValues(alpha: 0.5)),
-          const SizedBox(height: AppSpacing.lg),
-          Text('No leads yet', style: AppTextStyles.h2),
-          const SizedBox(height: AppSpacing.sm),
+              size: context.responsive.iconSize(80), color: AppColors.textSecondary.withValues(alpha: 0.5)),
+          SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
+          Text('No leads yet', style: AppTextStyles.h2.copyWith(fontSize: context.responsive.fontSize(20))),
+          SizedBox(height: context.responsive.spacing(AppSpacing.sm)),
           Text('Start adding leads to track your sales pipeline',
               style: AppTextStyles.bodyMedium
-                  .copyWith(color: AppColors.textSecondary)),
-          const SizedBox(height: AppSpacing.xl),
+                  .copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: context.responsive.fontSize(14),
+                  )),
+          SizedBox(height: context.responsive.spacing(AppSpacing.xl)),
           FilledButton.icon(
             onPressed: () => context.push(AppRoutes.newLead),
-            icon: const Icon(Icons.add),
-            label: const Text('Add Your First Lead'),
+            style: FilledButton.styleFrom(
+              padding: EdgeInsets.symmetric(
+                horizontal: context.responsive.spacing(16),
+                vertical: context.responsive.spacing(12),
+              ),
+            ),
+            icon: Icon(Icons.add, size: context.responsive.iconSize(18)),
+            label: Text('Add Your First Lead', style: TextStyle(fontSize: context.responsive.fontSize(14))),
           ),
         ],
       ),
@@ -73,27 +83,27 @@ class LeadsScreen extends ConsumerWidget {
   Widget _buildDesktopPipeline(
       BuildContext context, List<LeadModel> leads, WidgetRef ref) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.xl)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildPipelineHeader(context, leads, ref),
-          const SizedBox(height: AppSpacing.xl),
+          SizedBox(height: context.responsive.spacing(AppSpacing.xl)),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                   child: _buildPipelineColumn(
                       context, LeadStatus.newLead, leads, ref)),
-              const SizedBox(width: AppSpacing.md),
+              SizedBox(width: context.responsive.spacing(AppSpacing.md)),
               Expanded(
                   child: _buildPipelineColumn(
                       context, LeadStatus.contacted, leads, ref)),
-              const SizedBox(width: AppSpacing.md),
+              SizedBox(width: context.responsive.spacing(AppSpacing.md)),
               Expanded(
                   child: _buildPipelineColumn(
                       context, LeadStatus.qualified, leads, ref)),
-              const SizedBox(width: AppSpacing.md),
+              SizedBox(width: context.responsive.spacing(AppSpacing.md)),
               Expanded(
                   child: _buildPipelineColumn(
                       context, LeadStatus.converted, leads, ref)),
@@ -107,18 +117,18 @@ class LeadsScreen extends ConsumerWidget {
   Widget _buildMobilePipeline(
       BuildContext context, List<LeadModel> leads, WidgetRef ref) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.lg)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildPipelineHeader(context, leads, ref),
-          const SizedBox(height: AppSpacing.xl),
+          SizedBox(height: context.responsive.spacing(AppSpacing.xl)),
           _buildPipelineColumn(context, LeadStatus.newLead, leads, ref),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
           _buildPipelineColumn(context, LeadStatus.contacted, leads, ref),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
           _buildPipelineColumn(context, LeadStatus.qualified, leads, ref),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
           _buildPipelineColumn(context, LeadStatus.converted, leads, ref),
         ],
       ),
@@ -133,17 +143,20 @@ class LeadsScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Sales Pipeline', style: AppTextStyles.h1),
-              const SizedBox(height: AppSpacing.xs),
+              Text('Sales Pipeline', style: AppTextStyles.h1.copyWith(fontSize: context.responsive.fontSize(24))),
+              SizedBox(height: context.responsive.spacing(AppSpacing.xs)),
               Text('${leads.length} total leads',
                   style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppColors.textSecondary)),
+                      .copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: context.responsive.fontSize(14),
+                      )),
             ],
           ),
         ),
         IconButton(
           onPressed: () => ref.read(leadNotifierProvider.notifier).loadLeads(),
-          icon: const Icon(Icons.refresh_rounded),
+          icon: Icon(Icons.refresh_rounded, size: context.responsive.iconSize(24)),
           tooltip: 'Refresh',
         ),
       ],
@@ -172,53 +185,56 @@ class LeadsScreen extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppBorderRadius.md),
+        borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.md)),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.md)),
             decoration: BoxDecoration(
               color: getStatusColor().withValues(alpha: 0.1),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(AppBorderRadius.md),
-                topRight: Radius.circular(AppBorderRadius.md),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(context.responsive.borderRadius(AppBorderRadius.md)),
+                topRight: Radius.circular(context.responsive.borderRadius(AppBorderRadius.md)),
               ),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 8,
-                  height: 8,
+                  width: context.responsive.spacing(8),
+                  height: context.responsive.spacing(8),
                   decoration: BoxDecoration(
                     color: getStatusColor(),
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
+                SizedBox(width: context.responsive.spacing(AppSpacing.sm)),
                 Expanded(
                   child: Text(
                     status.label,
                     style: AppTextStyles.labelLarge.copyWith(
                       color: getStatusColor(),
                       fontWeight: FontWeight.w400,
+                      fontSize: context.responsive.fontSize(14),
                     ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 2),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: context.responsive.spacing(8), 
+                      vertical: context.responsive.spacing(2)),
                   decoration: BoxDecoration(
                     color: getStatusColor().withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(context.responsive.borderRadius(12)),
                   ),
                   child: Text(
                     '${columnLeads.length}',
                     style: AppTextStyles.caption.copyWith(
                       color: getStatusColor(),
                       fontWeight: FontWeight.w400,
+                      fontSize: context.responsive.fontSize(12),
                     ),
                   ),
                 ),
@@ -227,12 +243,15 @@ class LeadsScreen extends ConsumerWidget {
           ),
           if (columnLeads.isEmpty)
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.xl)),
               child: Center(
                 child: Text(
                   'No leads',
                   style: AppTextStyles.bodySmall
-                      .copyWith(color: AppColors.textSecondary),
+                      .copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: context.responsive.fontSize(12),
+                      ),
                 ),
               ),
             )
@@ -240,9 +259,9 @@ class LeadsScreen extends ConsumerWidget {
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(AppSpacing.sm),
+              padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.sm)),
               itemCount: columnLeads.length,
-              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+              separatorBuilder: (_, __) => SizedBox(height: context.responsive.spacing(AppSpacing.sm)),
               itemBuilder: (context, index) {
                 final lead = columnLeads[index];
                 return _buildLeadCard(context, lead, ref);
@@ -258,9 +277,9 @@ class LeadsScreen extends ConsumerWidget {
       margin: EdgeInsets.zero,
       child: InkWell(
         onTap: () => _showLeadDetails(context, lead, ref),
-        borderRadius: BorderRadius.circular(AppBorderRadius.sm),
+        borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.sm)),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.md)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -269,13 +288,13 @@ class LeadsScreen extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       lead.name,
-                      style: AppTextStyles.labelLarge,
+                      style: AppTextStyles.labelLarge.copyWith(fontSize: context.responsive.fontSize(14)),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert, size: 18),
+                    icon: Icon(Icons.more_vert, size: context.responsive.iconSize(18)),
                     onSelected: (value) async {
                       switch (value) {
                         case 'edit':
@@ -290,34 +309,34 @@ class LeadsScreen extends ConsumerWidget {
                       }
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit, size: 18),
-                            SizedBox(width: 8),
-                            Text('Edit'),
+                            Icon(Icons.edit, size: context.responsive.iconSize(18)),
+                            SizedBox(width: context.responsive.spacing(8)),
+                            const Text('Edit'),
                           ],
                         ),
                       ),
                       if (lead.status != LeadStatus.converted)
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'convert',
                           child: Row(
                             children: [
-                              Icon(Icons.check_circle, size: 18),
-                              SizedBox(width: 8),
-                              Text('Convert to Customer'),
+                              Icon(Icons.check_circle, size: context.responsive.iconSize(18)),
+                              SizedBox(width: context.responsive.spacing(8)),
+                              const Text('Convert to Customer'),
                             ],
                           ),
                         ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete, size: 18),
-                            SizedBox(width: 8),
-                            Text('Delete'),
+                            Icon(Icons.delete, size: context.responsive.iconSize(18)),
+                            SizedBox(width: context.responsive.spacing(8)),
+                            const Text('Delete'),
                           ],
                         ),
                       ),
@@ -326,26 +345,32 @@ class LeadsScreen extends ConsumerWidget {
                 ],
               ),
               if (lead.company != null) ...[
-                const SizedBox(height: 4),
+                SizedBox(height: context.responsive.spacing(4)),
                 Text(
                   lead.company!,
                   style: AppTextStyles.caption
-                      .copyWith(color: AppColors.textSecondary),
+                      .copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: context.responsive.fontSize(12),
+                      ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
               if (lead.phone != null) ...[
-                const SizedBox(height: 4),
+                SizedBox(height: context.responsive.spacing(4)),
                 Row(
                   children: [
-                    Icon(Icons.phone, size: 12, color: AppColors.textSecondary),
-                    const SizedBox(width: 4),
+                    Icon(Icons.phone, size: context.responsive.iconSize(12), color: AppColors.textSecondary),
+                    SizedBox(width: context.responsive.spacing(4)),
                     Expanded(
                       child: Text(
                         lead.phone!,
                         style: AppTextStyles.caption
-                            .copyWith(color: AppColors.textSecondary),
+                            .copyWith(
+                              color: AppColors.textSecondary,
+                              fontSize: context.responsive.fontSize(12),
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

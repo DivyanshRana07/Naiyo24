@@ -9,6 +9,7 @@ import 'package:naiyo24_business_tool/notifiers/auth_notifier.dart';
 import 'package:naiyo24_business_tool/notifiers/quotation_notifier.dart';
 import 'package:naiyo24_business_tool/routes/app_routes.dart';
 import 'package:naiyo24_business_tool/theme/theme.dart';
+import 'package:naiyo24_business_tool/theme/responsive.dart';
 import 'package:naiyo24_business_tool/widgets/common/dashboard_app_bar.dart';
 import 'package:naiyo24_business_tool/widgets/common/screen_shell.dart';
 import 'package:naiyo24_business_tool/widgets/invoice/send_options_dialog.dart';
@@ -76,35 +77,47 @@ class QuotationDetailScreen extends ConsumerWidget {
       );
     }
 
-    final actionButtons = Row(
-      mainAxisSize: MainAxisSize.min,
+    final actionButtons = Wrap(
+      spacing: context.responsive.spacing(AppSpacing.sm),
+      runSpacing: context.responsive.spacing(AppSpacing.sm),
       children: [
         FilledButton.icon(
           onPressed: () => _showSendOptionsDialog(context, quotation),
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.primary,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: EdgeInsets.symmetric(
+              horizontal: context.responsive.spacing(20), 
+              vertical: context.responsive.spacing(12),
+            ),
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.md))),
           ),
           icon: Icon(Icons.send_rounded,
-              size: 18, color: AppColors.textOnPrimary),
+              size: context.responsive.iconSize(18), color: AppColors.textOnPrimary),
           label: Text('Send Quotation',
-              style: AppTextStyles.labelLarge.copyWith(color: AppColors.textOnPrimary)),
+              style: AppTextStyles.labelLarge.copyWith(
+                color: AppColors.textOnPrimary,
+                fontSize: context.responsive.fontSize(14),
+              )),
         ),
-        const SizedBox(width: AppSpacing.sm),
         OutlinedButton.icon(
           onPressed: () => _confirmDelete(context, ref, quotation),
           style: OutlinedButton.styleFrom(
             side: BorderSide(color: AppColors.error),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(
+              horizontal: context.responsive.spacing(16), 
+              vertical: context.responsive.spacing(12),
+            ),
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppBorderRadius.md)),
+                borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.md))),
           ),
           icon: Icon(Icons.delete_rounded,
-              size: 18, color: AppColors.error),
+              size: context.responsive.iconSize(18), color: AppColors.error),
           label: Text('Delete',
-              style: AppTextStyles.labelLarge.copyWith(color: AppColors.error)),
+              style: AppTextStyles.labelLarge.copyWith(
+                color: AppColors.error,
+                fontSize: context.responsive.fontSize(14),
+              )),
         ),
       ],
     );
@@ -124,20 +137,20 @@ class QuotationDetailScreen extends ConsumerWidget {
                   child: Column(
                     children: [
                       _QuotationHeader(quotation: quotation),
-                      const SizedBox(height: AppSpacing.lg),
+                      SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
                       _QuotationMeta(quotation: quotation, statusLabel: _getStatusLabel(quotation.status), statusColor: _getStatusColor(quotation.status)),
-                      const SizedBox(height: AppSpacing.lg),
+                      SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
                       _CustomerCard(quotation: quotation),
-                      const SizedBox(height: AppSpacing.lg),
+                      SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
                       _LineItemsTable(quotation: quotation),
                       if (quotation.terms != null || quotation.notes != null) ...[
-                        const SizedBox(height: AppSpacing.lg),
+                        SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
                         _NotesCard(quotation: quotation),
                       ],
                     ],
                   ),
                 ),
-                const SizedBox(width: AppSpacing.xl),
+                SizedBox(width: context.responsive.spacing(AppSpacing.xl)),
                 SizedBox(
                   width: 300,
                   child: Column(
@@ -151,16 +164,16 @@ class QuotationDetailScreen extends ConsumerWidget {
           : Column(
               children: [
                 _QuotationHeader(quotation: quotation),
-                const SizedBox(height: AppSpacing.lg),
+                SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
                 _QuotationMeta(quotation: quotation, statusLabel: _getStatusLabel(quotation.status), statusColor: _getStatusColor(quotation.status)),
-                const SizedBox(height: AppSpacing.lg),
+                SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
                 _CustomerCard(quotation: quotation),
-                const SizedBox(height: AppSpacing.lg),
+                SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
                 _LineItemsTable(quotation: quotation),
-                const SizedBox(height: AppSpacing.lg),
+                SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
                 _FinancialSummary(quotation: quotation),
                 if (quotation.terms != null || quotation.notes != null) ...[
-                  const SizedBox(height: AppSpacing.lg),
+                  SizedBox(height: context.responsive.spacing(AppSpacing.lg)),
                   _NotesCard(quotation: quotation),
                 ],
               ],
@@ -247,10 +260,10 @@ class _QuotationHeader extends StatelessWidget {
     final hasSubtitle = quotation.subtitle != null && quotation.subtitle!.isNotEmpty;
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.lg)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
         border: Border.all(color: AppColors.border),
       ),
       child: Row(
@@ -266,35 +279,45 @@ class _QuotationHeader extends StatelessWidget {
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.0,
+                    fontSize: context.responsive.fontSize(10),
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: context.responsive.spacing(4)),
                 Text(
                   quotation.quotationNo,
-                  style: AppTextStyles.h1.copyWith(fontSize: 24),
+                  style: AppTextStyles.h1.copyWith(fontSize: context.responsive.fontSize(24)),
                 ),
                 if (hasSubtitle) ...[
-                  const SizedBox(height: 4),
+                  SizedBox(height: context.responsive.spacing(4)),
                   Text(
                     quotation.subtitle!,
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
+                      fontSize: context.responsive.fontSize(14),
+                    ),
                   ),
                 ],
                 if (quotation.settings?['gst']?['gstin'] != null &&
                     quotation.settings?['gst']?['gstin'].toString().isNotEmpty == true) ...[
-                  const SizedBox(height: 8),
+                  SizedBox(height: context.responsive.spacing(8)),
                   Text(
                     'GSTIN: ${quotation.settings?['gst']?['gstin']}',
-                    style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold),
+                    style: AppTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: context.responsive.fontSize(10),
+                    ),
                   ),
                 ],
               ],
             ),
           ),
           if (imageProvider != null) ...[
-            const SizedBox(width: AppSpacing.md),
+            SizedBox(width: context.responsive.spacing(AppSpacing.md)),
             Container(
-              constraints: const BoxConstraints(maxHeight: 70, maxWidth: 120),
+              constraints: BoxConstraints(
+                maxHeight: context.responsive.spacing(70), 
+                maxWidth: context.responsive.spacing(120),
+              ),
               child: Image(image: imageProvider, fit: BoxFit.contain),
             ),
           ],
@@ -321,44 +344,52 @@ class _QuotationMeta extends StatelessWidget {
         '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.lg)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
         border: Border.all(color: AppColors.border),
       ),
       child: Wrap(
-        spacing: AppSpacing.xl,
-        runSpacing: AppSpacing.md,
+        spacing: context.responsive.spacing(AppSpacing.xl),
+        runSpacing: context.responsive.spacing(AppSpacing.md),
         children: [
           _metaTile('Quotation Date', fmt(quotation.quotationDate),
-              Icons.calendar_today_rounded, AppColors.textSecondary),
+              Icons.calendar_today_rounded, AppColors.textSecondary, context),
           _metaTile('Valid Until', fmt(quotation.validUntil), Icons.event_rounded,
-              AppColors.textSecondary),
+              AppColors.textSecondary, context),
           if (quotation.paymentTerms.isNotEmpty)
             _metaTile('Payment Terms', quotation.paymentTerms,
-                Icons.description_rounded, AppColors.textSecondary),
+                Icons.description_rounded, AppColors.textSecondary, context),
           if (quotation.reference != null && quotation.reference!.isNotEmpty)
             _metaTile('Reference No.', quotation.reference!,
-                Icons.tag_rounded, AppColors.textSecondary),
+                Icons.tag_rounded, AppColors.textSecondary, context),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Status',
                   style: AppTextStyles.caption
-                      .copyWith(color: AppColors.textSecondary)),
-              const SizedBox(height: 4),
+                      .copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: context.responsive.fontSize(10),
+                      )),
+              SizedBox(height: context.responsive.spacing(4)),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.responsive.spacing(12), 
+                  vertical: context.responsive.spacing(6),
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppBorderRadius.full),
+                  borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.full)),
                   border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                 ),
                 child: Text(statusLabel,
                     style: AppTextStyles.labelLarge.copyWith(
-                        color: statusColor, fontWeight: FontWeight.w400)),
+                      color: statusColor, 
+                      fontWeight: FontWeight.w400,
+                      fontSize: context.responsive.fontSize(14),
+                    )),
               ),
             ],
           ),
@@ -367,24 +398,30 @@ class _QuotationMeta extends StatelessWidget {
     );
   }
 
-  Widget _metaTile(String label, String value, IconData icon, Color iconColor) {
+  Widget _metaTile(String label, String value, IconData icon, Color iconColor, BuildContext context) {
     return SizedBox(
-      width: 160,
+      width: context.responsive.spacing(160),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label,
               style: AppTextStyles.caption
-                  .copyWith(color: AppColors.textSecondary)),
-          const SizedBox(height: 4),
+                  .copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: context.responsive.fontSize(10),
+                  )),
+          SizedBox(height: context.responsive.spacing(4)),
           Row(
             children: [
-              Icon(icon, size: 14, color: iconColor),
-              const SizedBox(width: 5),
+              Icon(icon, size: context.responsive.iconSize(14), color: iconColor),
+              SizedBox(width: context.responsive.spacing(5)),
               Flexible(
                 child: Text(value,
                     style: AppTextStyles.bodyMedium
-                        .copyWith(fontWeight: FontWeight.w400)),
+                        .copyWith(
+                          fontWeight: FontWeight.w400,
+                          fontSize: context.responsive.fontSize(14),
+                        )),
               ),
             ],
           ),
@@ -401,41 +438,47 @@ class _CustomerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.lg)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
         border: Border.all(color: AppColors.border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            radius: 26,
+            radius: context.responsive.spacing(26),
             backgroundColor: AppColors.primary,
             child: Text(
               quotation.customerName[0].toUpperCase(),
               style:
-                  AppTextStyles.h2.copyWith(color: AppColors.textOnPrimary, fontSize: 20),
+                  AppTextStyles.h2.copyWith(
+                    color: AppColors.textOnPrimary, 
+                    fontSize: context.responsive.fontSize(20),
+                  ),
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          SizedBox(width: context.responsive.spacing(AppSpacing.md)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Client Detail',
                     style: AppTextStyles.caption
-                        .copyWith(color: AppColors.textSecondary)),
-                const SizedBox(height: 2),
-                Text(quotation.customerName, style: AppTextStyles.h2),
-                const SizedBox(height: 4),
-                _row(Icons.phone_rounded, quotation.customerMobile),
+                        .copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: context.responsive.fontSize(10),
+                        )),
+                SizedBox(height: context.responsive.spacing(2)),
+                Text(quotation.customerName, style: AppTextStyles.h2.copyWith(fontSize: context.responsive.fontSize(18))),
+                SizedBox(height: context.responsive.spacing(4)),
+                _row(Icons.phone_rounded, quotation.customerMobile, context),
                 if (quotation.customerAddress != null && quotation.customerAddress!.isNotEmpty)
-                  _row(Icons.location_on_rounded, quotation.customerAddress!),
+                  _row(Icons.location_on_rounded, quotation.customerAddress!, context),
                 if (quotation.customerGst != null && quotation.customerGst!.isNotEmpty)
                   _row(
-                      Icons.business_rounded, 'GSTIN: ${quotation.customerGst!}'),
+                      Icons.business_rounded, 'GSTIN: ${quotation.customerGst!}', context),
               ],
             ),
           ),
@@ -444,16 +487,19 @@ class _CustomerCard extends StatelessWidget {
     );
   }
 
-  Widget _row(IconData icon, String text) => Padding(
-        padding: const EdgeInsets.only(top: 3),
+  Widget _row(IconData icon, String text, BuildContext context) => Padding(
+        padding: EdgeInsets.only(top: context.responsive.spacing(3)),
         child: Row(
           children: [
-            Icon(icon, size: 14, color: AppColors.textSecondary),
-            const SizedBox(width: 5),
+            Icon(icon, size: context.responsive.iconSize(14), color: AppColors.textSecondary),
+            SizedBox(width: context.responsive.spacing(5)),
             Expanded(
               child: Text(text,
                   style: AppTextStyles.caption
-                      .copyWith(color: AppColors.textSecondary)),
+                      .copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: context.responsive.fontSize(10),
+                      )),
             ),
           ],
         ),
@@ -469,26 +515,29 @@ class _LineItemsTable extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.lg)),
             child: Text('Line Items',
                 style: AppTextStyles.labelLarge
-                    .copyWith(fontWeight: FontWeight.w400)),
+                    .copyWith(
+                      fontWeight: FontWeight.w400,
+                      fontSize: context.responsive.fontSize(14),
+                    )),
           ),
           Divider(height: 1, color: AppColors.border),
-          _buildTable(),
+          _buildTable(context),
         ],
       ),
     );
   }
 
-  Widget _buildTable() {
+  Widget _buildTable(BuildContext context) {
     final columnsSettings = quotation.settings?['columns'] as Map<String, dynamic>? ?? {
       'hsn': true,
       'discount': true,
@@ -543,10 +592,10 @@ class _FinancialSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.lg)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
@@ -554,36 +603,42 @@ class _FinancialSummary extends StatelessWidget {
         children: [
           Text('Financial Summary',
               style: AppTextStyles.labelLarge
-                  .copyWith(fontWeight: FontWeight.w400)),
-          const SizedBox(height: AppSpacing.md),
-          _row('Sub Total', _formatCurrency(quotation.subTotal, quotation.settings)),
+                  .copyWith(
+                    fontWeight: FontWeight.w400,
+                    fontSize: context.responsive.fontSize(14),
+                  )),
+          SizedBox(height: context.responsive.spacing(AppSpacing.md)),
+          _row('Sub Total', _formatCurrency(quotation.subTotal, quotation.settings), context),
           if (quotation.totalDiscount > 0)
             _row('Discount', '- ${_formatCurrency(quotation.totalDiscount, quotation.settings)}',
-                color: AppColors.success),
+                color: AppColors.success, context: context),
           if (quotation.settings?['gst']?['enabled'] != false)
-            _row('GST', _formatCurrency(quotation.totalGst, quotation.settings)),
-          Divider(color: AppColors.border, height: AppSpacing.xl),
+            _row('GST', _formatCurrency(quotation.totalGst, quotation.settings), context),
+          Divider(color: AppColors.border, height: context.responsive.spacing(AppSpacing.xl)),
           _row('Grand Total', _formatCurrency(quotation.grandTotal, quotation.settings),
-              bold: true, color: AppColors.primary),
+              bold: true, color: AppColors.primary, context: context),
         ],
       ),
     );
   }
 
-  Widget _row(String label, String value, {bool bold = false, Color? color}) {
+  Widget _row(String label, String value, BuildContext context, {bool bold = false, Color? color}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: EdgeInsets.symmetric(vertical: context.responsive.spacing(5)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label,
               style: AppTextStyles.bodyMedium
-                  .copyWith(color: AppColors.textSecondary)),
+                  .copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: context.responsive.fontSize(14),
+                  )),
           Text(value,
               style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: bold ? FontWeight.bold : FontWeight.normal,
                   color: color ?? AppColors.textPrimary,
-                  fontSize: bold ? 16 : 14)),
+                  fontSize: context.responsive.fontSize(bold ? 16 : 14))),
         ],
       ),
     );
@@ -597,10 +652,10 @@ class _NotesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.all(context.responsive.spacing(AppSpacing.lg)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        borderRadius: BorderRadius.circular(context.responsive.borderRadius(AppBorderRadius.lg)),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
@@ -609,22 +664,34 @@ class _NotesCard extends StatelessWidget {
           if (quotation.terms != null && quotation.terms!.isNotEmpty) ...[
             Text('Terms & Conditions',
                 style: AppTextStyles.labelLarge
-                    .copyWith(fontWeight: FontWeight.w400)),
-            const SizedBox(height: AppSpacing.xs),
+                    .copyWith(
+                      fontWeight: FontWeight.w400,
+                      fontSize: context.responsive.fontSize(14),
+                    )),
+            SizedBox(height: context.responsive.spacing(AppSpacing.xs)),
             Text(quotation.terms!,
                 style: AppTextStyles.bodyMedium
-                    .copyWith(color: AppColors.textSecondary)),
+                    .copyWith(
+                      color: AppColors.textSecondary,
+                      fontSize: context.responsive.fontSize(14),
+                    )),
             if (quotation.notes != null && quotation.notes!.isNotEmpty)
-              const Divider(height: AppSpacing.xl),
+              Divider(height: context.responsive.spacing(AppSpacing.xl)),
           ],
           if (quotation.notes != null && quotation.notes!.isNotEmpty) ...[
             Text('Notes',
                 style: AppTextStyles.labelLarge
-                    .copyWith(fontWeight: FontWeight.w400)),
-            const SizedBox(height: AppSpacing.xs),
+                    .copyWith(
+                      fontWeight: FontWeight.w400,
+                      fontSize: context.responsive.fontSize(14),
+                    )),
+            SizedBox(height: context.responsive.spacing(AppSpacing.xs)),
             Text(quotation.notes!,
                 style: AppTextStyles.bodyMedium
-                    .copyWith(color: AppColors.textSecondary)),
+                    .copyWith(
+                      color: AppColors.textSecondary,
+                      fontSize: context.responsive.fontSize(14),
+                    )),
           ],
         ],
       ),

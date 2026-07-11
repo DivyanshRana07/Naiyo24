@@ -123,41 +123,89 @@ class ExpenseDetailScreen extends ConsumerWidget {
         final isPaid = expense.status == ExpenseStatus.paid;
         final subtotal = expense.items.fold(0.0, (sum, item) => sum + item.lineTotal);
 
-        final actionButtons = Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FilledButton.icon(
-              onPressed: () => ref.read(expenseNotifierProvider.notifier).toggleStatus(expense.id),
-              style: FilledButton.styleFrom(
-                backgroundColor: isPaid ? AppColors.warning : AppColors.success,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppBorderRadius.md)),
-              ),
-              icon: Icon(
-                isPaid ? Icons.warning_rounded : Icons.check_circle_rounded,
-                size: 18,
-                color: Colors.white,
-              ),
-              label: Text(
-                isPaid ? 'Mark Unpaid' : 'Mark Paid',
-                style: AppTextStyles.labelLarge.copyWith(color: Colors.white),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            OutlinedButton.icon(
-              onPressed: () => _confirmDelete(context, ref, expense),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppColors.error),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppBorderRadius.md)),
-              ),
-              icon: Icon(Icons.delete_rounded, size: 18, color: AppColors.error),
-              label: Text(
-                'Delete',
-                style: AppTextStyles.labelLarge.copyWith(color: AppColors.error),
-              ),
-            ),
-          ],
+        final actionButtons = Builder(
+          builder: (context) {
+            final r = context.responsive;
+            final isDesktop = MediaQuery.of(context).size.width >= 900;
+            
+            if (isDesktop) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FilledButton.icon(
+                    onPressed: () => ref.read(expenseNotifierProvider.notifier).toggleStatus(expense.id),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: isPaid ? AppColors.warning : AppColors.success,
+                      padding: r.padding(horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md))),
+                    ),
+                    icon: Icon(
+                      isPaid ? Icons.warning_rounded : Icons.check_circle_rounded,
+                      size: r.iconSize(18),
+                      color: Colors.white,
+                    ),
+                    label: Text(
+                      isPaid ? 'Mark Unpaid' : 'Mark Paid',
+                      style: AppTextStyles.labelLarge.copyWith(color: Colors.white, fontSize: r.fontSize(15)),
+                    ),
+                  ),
+                  SizedBox(width: r.spacing(AppSpacing.sm)),
+                  OutlinedButton.icon(
+                    onPressed: () => _confirmDelete(context, ref, expense),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: AppColors.error),
+                      padding: r.padding(horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md))),
+                    ),
+                    icon: Icon(Icons.delete_rounded, size: r.iconSize(18), color: AppColors.error),
+                    label: Text(
+                      'Delete',
+                      style: AppTextStyles.labelLarge.copyWith(color: AppColors.error, fontSize: r.fontSize(15)),
+                    ),
+                  ),
+                ],
+              );
+            } else {
+              return Wrap(
+                spacing: r.spacing(AppSpacing.sm),
+                runSpacing: r.spacing(AppSpacing.sm),
+                alignment: WrapAlignment.end,
+                children: [
+                  FilledButton.icon(
+                    onPressed: () => ref.read(expenseNotifierProvider.notifier).toggleStatus(expense.id),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: isPaid ? AppColors.warning : AppColors.success,
+                      padding: r.padding(horizontal: 12, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md))),
+                    ),
+                    icon: Icon(
+                      isPaid ? Icons.warning_rounded : Icons.check_circle_rounded,
+                      size: r.iconSize(16),
+                      color: Colors.white,
+                    ),
+                    label: Text(
+                      isPaid ? 'Mark Unpaid' : 'Mark Paid',
+                      style: AppTextStyles.labelLarge.copyWith(color: Colors.white, fontSize: r.fontSize(13)),
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => _confirmDelete(context, ref, expense),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: AppColors.error),
+                      padding: r.padding(horizontal: 12, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(r.borderRadius(AppBorderRadius.md))),
+                    ),
+                    icon: Icon(Icons.delete_rounded, size: r.iconSize(16), color: AppColors.error),
+                    label: Text(
+                      'Delete',
+                      style: AppTextStyles.labelLarge.copyWith(color: AppColors.error, fontSize: r.fontSize(13)),
+                    ),
+                  ),
+                ],
+              );
+            }
+          }
+        );
         );
 
         final leftColumn = Column(
