@@ -12,7 +12,6 @@ Strategy:
   - User isolation is verified with a second test user fixture.
 """
 
-import pytest
 
 
 
