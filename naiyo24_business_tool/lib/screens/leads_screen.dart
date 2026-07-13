@@ -287,7 +287,7 @@ class LeadsScreen extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       lead.name,
-                      style: AppTextStyles.labelLarge.copyWith(fontSize: context.responsive.fontSize(14)),
+                      style: AppTextStyles.labelLarge.copyWith(fontSize: context.responsive.fontSize(14), color: AppColors.textPrimary),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

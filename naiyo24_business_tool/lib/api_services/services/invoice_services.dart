@@ -187,9 +187,9 @@ class InvoiceService {
           ? DateTime.parse(json['due_date'] as String)
           : DateTime.parse(json['invoice_date'] as String).add(const Duration(days: 15)),
       lineItems: lineItems,
-      paymentMethod: json['payment_method'] as String? ?? 'Cash',
-      paidAmount: toDouble(json['paid_amount']),
-      roundOff: toDouble(json['round_off']),
+      paymentMethod: json['paymentMethod'] as String? ?? json['payment_method'] as String? ?? 'Cash',
+      paidAmount: toDouble(json['paidAmount'] ?? json['paid_amount']),
+      roundOff: toDouble(json['roundOff'] ?? json['round_off']),
       notes: json['notes'] as String?,
       status: InvoiceStatus.values.byName(json['status'] as String? ?? 'due'),
       subtitle: json['subtitle'] as String?,

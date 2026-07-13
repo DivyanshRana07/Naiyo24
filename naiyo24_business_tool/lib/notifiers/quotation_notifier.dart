@@ -47,9 +47,9 @@ class QuotationNotifier extends AutoDisposeAsyncNotifier<List<QuotationModel>> {
       final id = int.tryParse(quotation.id) ?? 0;
       
       final updatedQuotation = await _service.updateQuotation(id, {
-        'customer_id': int.tryParse(quotation.customerId) ?? 0,
-        'quotation_date': quotation.quotationDate.toIso8601String(),
-        'valid_until': quotation.validUntil.toIso8601String(),
+        if (quotation.customerId.isNotEmpty) 'customer_id': quotation.customerId,
+        'quotation_date': quotation.quotationDate.toIso8601String().split('T').first,
+        'valid_until': quotation.validUntil.toIso8601String().split('T').first,
         'status': quotation.status.name,
       });
       
