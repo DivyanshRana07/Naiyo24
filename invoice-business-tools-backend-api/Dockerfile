@@ -16,8 +16,8 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install psycopg2-binary for PostgreSQL support
-RUN pip install --no-cache-dir psycopg2-binary
+# Install psycopg[binary] for PostgreSQL support
+RUN pip install --no-cache-dir "psycopg[binary]"
 
 # Copy the entire application
 COPY . .

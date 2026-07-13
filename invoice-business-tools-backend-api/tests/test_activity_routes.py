@@ -117,14 +117,14 @@ class TestActivityAutoCreate:
 
     def test_updating_expense_creates_updated_activity(self, auth_client):
         vendor_id = _add_vendor(auth_client, name="To Update")
-        auth_client.put(f"/api/v1/expenses/{vendor_id}", json={"title": "Updated"})
+        auth_client.put(f"/api/v1/vendors/{vendor_id}", json={"name": "Updated"})
         resp = auth_client.get("/api/v1/activity")
         actions = [a["action"] for a in resp.json()["data"]]
         assert "Updated" in actions
 
     def test_deleting_expense_creates_deleted_activity(self, auth_client):
         vendor_id = _add_vendor(auth_client, name="To Delete")
-        auth_client.delete(f"/api/v1/expenses/{vendor_id}")
+        auth_client.delete(f"/api/v1/vendors/{vendor_id}")
         resp = auth_client.get("/api/v1/activity")
         actions = [a["action"] for a in resp.json()["data"]]
         assert "Deleted" in actions
@@ -165,7 +165,7 @@ class TestActivityOrdering:
 
     def test_multiple_operations_ordering(self, auth_client):
         vendor_id = _add_vendor(auth_client, name="Order Test")
-        auth_client.put(f"/api/v1/expenses/{vendor_id}", json={"title": "Order Test Updated"})
+        auth_client.put(f"/api/v1/vendors/{vendor_id}", json={"name": "Order Test Updated"})
 
         resp = auth_client.get("/api/v1/activity")
         data = resp.json()["data"]

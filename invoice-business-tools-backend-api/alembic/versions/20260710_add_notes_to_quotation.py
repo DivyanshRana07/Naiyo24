@@ -1,7 +1,7 @@
 """add notes to quotation
 
 Revision ID: 20260710_add_notes
-Revises: 596024e80bff
+Revises: b1b2c3d4e5f6
 Create Date: 2026-07-10 23:07:00.000000
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '20260710_add_notes'
-down_revision: Union[str, None] = '596024e80bff'
+down_revision: Union[str, None] = 'b1b2c3d4e5f6'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -45,6 +45,49 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_quotations_id'), 'quotations', ['id'], unique=False)
+    
+    op.create_table('users',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('username', sa.String(length=50), nullable=False),
+    sa.Column('email', sa.String(length=120), nullable=False),
+    sa.Column('full_name', sa.String(length=150), nullable=True),
+    sa.Column('hashed_password', sa.String(length=255), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+    op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
+    op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
+
+    op.create_table('invoice_items',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('invoice_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=150), nullable=False),
+    sa.Column('quantity', sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.Column('price', sa.Numeric(precision=12, scale=2), nullable=False),
+    sa.Column('gst_rate', sa.Numeric(precision=5, scale=2), nullable=False),
+    sa.Column('taxable_amount', sa.Numeric(precision=12, scale=2), nullable=False),
+    sa.Column('cgst_rate', sa.Numeric(precision=5, scale=2), nullable=False),
+    sa.Column('cgst_amount', sa.Numeric(precision=12, scale=2), nullable=False),
+    sa.Column('sgst_rate', sa.Numeric(precision=5, scale=2), nullable=False),
+    sa.Column('sgst_amount', sa.Numeric(precision=12, scale=2), nullable=False),
+    sa.Column('igst_rate', sa.Numeric(precision=5, scale=2), nullable=False),
+    sa.Column('igst_amount', sa.Numeric(precision=12, scale=2), nullable=False),
+    sa.Column('line_total', sa.Numeric(precision=12, scale=2), nullable=False),
+    sa.ForeignKeyConstraint(['invoice_id'], ['invoices.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_invoice_items_id'), 'invoice_items', ['id'], unique=False)
+
+    op.create_table('quotation_items',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('quotation_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=150), nullable=False),
+    sa.Column('price', sa.Numeric(precision=12, scale=2), nullable=False),
+    sa.Column('quantity', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['quotation_id'], ['quotations.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_index(op.f('ix_quotation_items_id'), 'quotation_items', ['id'], unique=False)
     # ### end Alembic commands ###
 

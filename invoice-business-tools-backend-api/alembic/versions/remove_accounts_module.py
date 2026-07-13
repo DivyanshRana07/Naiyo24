@@ -20,20 +20,25 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # 1. Drop accounts table
-    op.drop_index('ix_accounts_user_id', table_name='accounts')
-    op.drop_index('ix_accounts_code', table_name='accounts')
-    op.drop_index('ix_accounts_account_id_str', table_name='accounts')
-    op.drop_index('ix_accounts_id', table_name='accounts')
-    op.drop_index('ix_accounts_created_at', table_name='accounts')
-    op.drop_table('accounts')
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    tables = inspector.get_table_names()
 
-    # 2. Drop account_groups table
-    op.drop_index('ix_account_groups_user_id', table_name='account_groups')
-    op.drop_index('ix_account_groups_group_id_str', table_name='account_groups')
-    op.drop_index('ix_account_groups_id', table_name='account_groups')
-    op.drop_index('ix_account_groups_created_at', table_name='account_groups')
-    op.drop_table('account_groups')
+    # 1. Drop accounts table if it exists
+    if 'accounts' in tables:
+        indexes = [idx['name'] for idx in inspector.get_indexes('accounts')]
+        for idx in ['ix_accounts_user_id', 'ix_accounts_code', 'ix_accounts_account_id_str', 'ix_accounts_id', 'ix_accounts_created_at']:
+            if idx in indexes:
+                op.drop_index(idx, table_name='accounts')
+        op.drop_table('accounts')
+
+    # 2. Drop account_groups table if it exists
+    if 'account_groups' in tables:
+        indexes = [idx['name'] for idx in inspector.get_indexes('account_groups')]
+        for idx in ['ix_account_groups_user_id', 'ix_account_groups_group_id_str', 'ix_account_groups_id', 'ix_account_groups_created_at']:
+            if idx in indexes:
+                op.drop_index(idx, table_name='account_groups')
+        op.drop_table('account_groups')
 
 
 def downgrade() -> None:

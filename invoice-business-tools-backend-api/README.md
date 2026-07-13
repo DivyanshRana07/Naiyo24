@@ -107,7 +107,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 
 # Database Configuration (Defaults to local SQLite or PostgreSQL connection string)
 DATABASE_URL=sqlite:///./business_tools.db
-# DATABASE_URL=postgresql+psycopg2://invoice_user:invoice_password_2026@localhost:5432/invoice_business_tools
+# DATABASE_URL=postgresql+psycopg://invoice_user:invoice_password_2026@localhost:5432/invoice_business_tools
 ```
 
 ---

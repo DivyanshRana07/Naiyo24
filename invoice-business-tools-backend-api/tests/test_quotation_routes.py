@@ -26,14 +26,14 @@ from models.db_models import Quotation, QuotationItem
 def _seed_quotation(
     db_session,
     user,
-    client_name: str = "Test Client Pvt Ltd",
+    customer_name: str = "Test Client Pvt Ltd",
     total: float = 5000.0,
     status: str = "Draft",
     items: list[dict] | None = None,
 ) -> Quotation:
     """Insert a Quotation (with optional items) and return it."""
     q = Quotation(
-        client_name=client_name,
+        customer_name=customer_name,
         total=total,
         status=status,
         user_id=user.id,
@@ -62,7 +62,7 @@ class TestQuotationCreate:
 
     def test_returns_200(self, auth_client):
         payload = {
-            "client_name": "Test Client",
+            "customer_name": "Test Client",
             "items": [{"name": "Widget", "price": 100.0, "quantity": 5}],
         }
         resp = auth_client.post("/api/v1/quotation/create", json=payload)
@@ -70,7 +70,7 @@ class TestQuotationCreate:
 
     def test_success_flag_true(self, auth_client):
         payload = {
-            "client_name": "Test Client",
+            "customer_name": "Test Client",
             "items": [{"name": "Widget", "price": 100.0, "quantity": 5}],
         }
         resp = auth_client.post("/api/v1/quotation/create", json=payload)
@@ -78,7 +78,7 @@ class TestQuotationCreate:
 
     def test_response_contains_id(self, auth_client):
         payload = {
-            "client_name": "Test Client",
+            "customer_name": "Test Client",
             "items": [{"name": "Widget", "price": 100.0, "quantity": 5}],
         }
         resp = auth_client.post("/api/v1/quotation/create", json=payload)
@@ -86,15 +86,15 @@ class TestQuotationCreate:
 
     def test_client_name_persisted(self, auth_client):
         payload = {
-            "client_name": "Unique Client ABC",
+            "customer_name": "Unique Client ABC",
             "items": [{"name": "Widget", "price": 100.0, "quantity": 5}],
         }
         resp = auth_client.post("/api/v1/quotation/create", json=payload)
-        assert resp.json()["data"]["client_name"] == "Unique Client ABC"
+        assert resp.json()["data"]["customer_name"] == "Unique Client ABC"
 
     def test_total_calculated_single_item(self, auth_client):
         payload = {
-            "client_name": "Test",
+            "customer_name": "Test",
             "items": [{"name": "Widget", "price": 200.0, "quantity": 3}],
         }
         resp = auth_client.post("/api/v1/quotation/create", json=payload)
@@ -102,7 +102,7 @@ class TestQuotationCreate:
 
     def test_total_calculated_multiple_items(self, auth_client):
         payload = {
-            "client_name": "Test",
+            "customer_name": "Test",
             "items": [
                 {"name": "A", "price": 100.0, "quantity": 2},
                 {"name": "B", "price": 50.0, "quantity": 4},
@@ -114,7 +114,7 @@ class TestQuotationCreate:
 
     def test_default_status_is_draft(self, auth_client):
         payload = {
-            "client_name": "Test",
+            "customer_name": "Test",
             "items": [{"name": "Widget", "price": 100.0, "quantity": 1}],
         }
         resp = auth_client.post("/api/v1/quotation/create", json=payload)
@@ -126,7 +126,7 @@ class TestQuotationCreate:
         assert resp.status_code == 422
 
     def test_missing_items_returns_422(self, auth_client):
-        payload = {"client_name": "Test"}
+        payload = {"customer_name": "Test"}
         resp = auth_client.post("/api/v1/quotation/create", json=payload)
         assert resp.status_code == 422
 
@@ -157,7 +157,7 @@ class TestQuotationList:
 
     def test_multiple_quotations_appear_in_list(self, auth_client, db_session, test_user):
         for i in range(3):
-            _seed_quotation(db_session, test_user, client_name=f"Client {i}")
+            _seed_quotation(db_session, test_user, customer_name=f"Client {i}")
         resp = auth_client.get("/api/v1/quotation/list")
         assert len(resp.json()["data"]) == 3
 
@@ -165,7 +165,7 @@ class TestQuotationList:
         _seed_quotation(db_session, test_user)
         resp = auth_client.get("/api/v1/quotation/list")
         item = resp.json()["data"][0]
-        for field in ("id", "client_name", "total", "status"):
+        for field in ("id", "customer_name", "total", "status"):
             assert field in item, f"Missing field: {field}"
 
     def test_success_flag_in_list_response(self, auth_client):
@@ -185,9 +185,9 @@ class TestQuotationGetById:
         assert resp.status_code == 200
 
     def test_returns_correct_quotation(self, auth_client, db_session, test_user):
-        q = _seed_quotation(db_session, test_user, client_name="Unique Client XYZ")
+        q = _seed_quotation(db_session, test_user, customer_name="Unique Client XYZ")
         resp = auth_client.get(f"/api/v1/quotation/{q.id}")
-        assert resp.json()["data"]["client_name"] == "Unique Client XYZ"
+        assert resp.json()["data"]["customer_name"] == "Unique Client XYZ"
 
     def test_returns_correct_id(self, auth_client, db_session, test_user):
         q = _seed_quotation(db_session, test_user)
@@ -229,16 +229,16 @@ class TestQuotationUpdate:
         assert resp.json()["data"]["status"] == "Approved"
 
     def test_client_name_updated_in_response(self, auth_client, db_session, test_user):
-        q = _seed_quotation(db_session, test_user, client_name="Old Name")
-        resp = auth_client.put(f"/api/v1/quotation/{q.id}", json={"client_name": "New Name"})
-        assert resp.json()["data"]["client_name"] == "New Name"
+        q = _seed_quotation(db_session, test_user, customer_name="Old Name")
+        resp = auth_client.put(f"/api/v1/quotation/{q.id}", json={"customer_name": "New Name"})
+        assert resp.json()["data"]["customer_name"] == "New Name"
 
     def test_partial_update_preserves_other_fields(self, auth_client, db_session, test_user):
-        q = _seed_quotation(db_session, test_user, client_name="Preserve Me", status="Draft")
+        q = _seed_quotation(db_session, test_user, customer_name="Preserve Me", status="Draft")
         auth_client.put(f"/api/v1/quotation/{q.id}", json={"status": "Sent"})
         resp = auth_client.get(f"/api/v1/quotation/{q.id}")
         data = resp.json()["data"]
-        assert data["client_name"] == "Preserve Me"
+        assert data["customer_name"] == "Preserve Me"
         assert data["status"] == "Sent"
 
     def test_update_persists_to_db(self, auth_client, db_session, test_user):
@@ -280,7 +280,7 @@ class TestQuotationDelete:
         assert resp.status_code == 404
 
     def test_deleted_record_absent_from_list(self, auth_client, db_session, test_user):
-        q = _seed_quotation(db_session, test_user, client_name="To Be Deleted")
+        q = _seed_quotation(db_session, test_user, customer_name="To Be Deleted")
         auth_client.delete(f"/api/v1/quotation/{q.id}")
         resp = auth_client.get("/api/v1/quotation/list")
         ids = [item["id"] for item in resp.json()["data"]]
@@ -295,12 +295,12 @@ class TestQuotationDelete:
         assert resp.json()["success"] is False
 
     def test_other_quotations_unaffected_after_delete(self, auth_client, db_session, test_user):
-        q1 = _seed_quotation(db_session, test_user, client_name="Keep Me")
-        q2 = _seed_quotation(db_session, test_user, client_name="Delete Me")
+        q1 = _seed_quotation(db_session, test_user, customer_name="Keep Me")
+        q2 = _seed_quotation(db_session, test_user, customer_name="Delete Me")
         auth_client.delete(f"/api/v1/quotation/{q2.id}")
         resp = auth_client.get(f"/api/v1/quotation/{q1.id}")
         assert resp.status_code == 200
-        assert resp.json()["data"]["client_name"] == "Keep Me"
+        assert resp.json()["data"]["customer_name"] == "Keep Me"
 
     def test_cascade_deletes_quotation_items(self, auth_client, db_session, test_user):
         """Deleting a quotation must also remove its QuotationItem rows."""
@@ -334,7 +334,7 @@ class TestQuotationCRUDLifecycle:
     def test_full_lifecycle(self, auth_client, db_session, test_user):
         # Create via API
         payload = {
-            "client_name": "Lifecycle Client",
+            "customer_name": "Lifecycle Client",
             "items": [{"name": "Service", "price": 500.0, "quantity": 2}],
         }
         create_resp = auth_client.post("/api/v1/quotation/create", json=payload)
@@ -344,7 +344,7 @@ class TestQuotationCRUDLifecycle:
         # Read back by ID
         get_resp = auth_client.get(f"/api/v1/quotation/{q_id}")
         assert get_resp.status_code == 200
-        assert get_resp.json()["data"]["client_name"] == "Lifecycle Client"
+        assert get_resp.json()["data"]["customer_name"] == "Lifecycle Client"
 
         # Appears in list
         list_resp = auth_client.get("/api/v1/quotation/list")
@@ -353,14 +353,14 @@ class TestQuotationCRUDLifecycle:
         # Update status
         update_resp = auth_client.put(
             f"/api/v1/quotation/{q_id}",
-            json={"status": "Approved", "client_name": "Updated Client"},
+            json={"status": "Approved", "customer_name": "Updated Client"},
         )
         assert update_resp.status_code == 200
 
         # Verify update persisted
         verify_resp = auth_client.get(f"/api/v1/quotation/{q_id}")
         assert verify_resp.json()["data"]["status"] == "Approved"
-        assert verify_resp.json()["data"]["client_name"] == "Updated Client"
+        assert verify_resp.json()["data"]["customer_name"] == "Updated Client"
 
         # Delete
         delete_resp = auth_client.delete(f"/api/v1/quotation/{q_id}")

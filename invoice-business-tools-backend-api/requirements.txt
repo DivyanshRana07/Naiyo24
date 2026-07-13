@@ -12,5 +12,6 @@ email-validator
 python-jose[cryptography]==3.3.0
 bcrypt==4.1.2
 python-multipart
-psycopg2-binary==2.9.9
+psycopg[binary]
+
 requests==2.31.0

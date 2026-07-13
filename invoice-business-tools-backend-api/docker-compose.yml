@@ -34,7 +34,7 @@ services:
         condition: service_healthy
     environment:
       # Database configuration
-      DATABASE_URL: postgresql+psycopg2://invoice_user:invoice_password_2026@db:5432/invoice_business_tools
+      DATABASE_URL: postgresql+psycopg://invoice_user:invoice_password_2026@db:5432/invoice_business_tools
       
       # App configuration
       APP_HOST: 0.0.0.0

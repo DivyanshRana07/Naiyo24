@@ -30,6 +30,22 @@ class PartyDetails(BaseModel):
     phone: Optional[str] = None
     email: Optional[str] = None
 
+    @field_validator("state_code")
+    @classmethod
+    def validate_state_code(cls, value: str | None) -> str | None:
+        if value is not None:
+            if not (len(value) == 2 and value.isdigit()):
+                raise ValueError("state_code must be exactly 2 digits")
+        return value
+
+    @field_validator("gstin")
+    @classmethod
+    def validate_gstin(cls, value: str | None) -> str | None:
+        if value is not None:
+            if len(value) != 15 or not value.isalnum():
+                raise ValueError("gstin must be exactly 15 alphanumeric characters")
+        return value
+
 
 
 class InvoiceItemInput(BaseModel):
@@ -62,7 +78,7 @@ class InvoiceCreateRequest(BaseModel):
     settings: Optional[dict] = None
     business: PartyDetails
     customer: PartyDetails
-    items: list[InvoiceItemInput]
+    items: list[InvoiceItemInput] = Field(..., min_length=1)
     paymentMethod: Optional[str] = Field(None, validation_alias="payment_method")
     paidAmount: float = Field(0.00, validation_alias="paid_amount")
     roundOff: float = Field(0.00, validation_alias="round_off")

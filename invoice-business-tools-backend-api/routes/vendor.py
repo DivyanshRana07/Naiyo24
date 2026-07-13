@@ -15,10 +15,18 @@ from services.vendor_service import (
 )
 from services.gst_invoice_generator.list_pdf_service import ListPDFService
 
+from core.dependencies import get_current_user
+from models.db_models import User
+
 router = APIRouter(prefix="/vendors", tags=["Vendors"])
 
 @router.post("/add", response_model=dict)
-def add_vendor(payload: VendorCreateRequest, db: Session = Depends(get_db)):
+def add_vendor(
+    payload: VendorCreateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    payload.user_id = current_user.id
     result = add_vendor_service(db, payload)
     return {
         "success": True,
@@ -27,8 +35,13 @@ def add_vendor(payload: VendorCreateRequest, db: Session = Depends(get_db)):
     }
 
 @router.get("/list", response_model=dict)
-def list_vendors(user_id: int = None, db: Session = Depends(get_db)):
-    result = list_vendors_service(db, user_id)
+def list_vendors(
+    user_id: int = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    target_user_id = user_id if user_id is not None else current_user.id
+    result = list_vendors_service(db, target_user_id)
     return {
         "success": True,
         "data": [VendorResponse.model_validate(v) for v in result]
