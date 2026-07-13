@@ -153,8 +153,10 @@ async def validation_exception_handler(
     request: Request,
     exc: RequestValidationError
 ):
+    errors = exc.errors()
+    print("FastAPI Validation Errors:", errors)
     app_logger.warning(
-        f"Validation error on {request.method} {request.url.path}",
+        f"Validation error on {request.method} {request.url.path}: {errors}",
         extra={"method": request.method, "path": str(request.url.path)},
     )
 

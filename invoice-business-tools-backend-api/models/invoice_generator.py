@@ -33,17 +33,21 @@ class PartyDetails(BaseModel):
     @field_validator("state_code")
     @classmethod
     def validate_state_code(cls, value: str | None) -> str | None:
-        if value is not None:
-            if not (len(value) == 2 and value.isdigit()):
-                raise ValueError("state_code must be exactly 2 digits")
+        if not value or not value.strip():
+            return None
+        value = value.strip()
+        if not (len(value) == 2 and value.isdigit()):
+            raise ValueError("state_code must be exactly 2 digits")
         return value
 
     @field_validator("gstin")
     @classmethod
     def validate_gstin(cls, value: str | None) -> str | None:
-        if value is not None:
-            if len(value) != 15 or not value.isalnum():
-                raise ValueError("gstin must be exactly 15 alphanumeric characters")
+        if not value or not value.strip():
+            return None
+        value = value.strip()
+        if len(value) != 15 or not value.isalnum():
+            raise ValueError("gstin must be exactly 15 alphanumeric characters")
         return value
 
 
